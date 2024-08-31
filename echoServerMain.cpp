@@ -4,9 +4,9 @@ int main()
 {
     try
     {
-        unsigned short port_arr[2] = {7,555};
-        echoServer serv(port_arr);
-        serv.startServer(port_arr);
+        short port = 4242;
+        echoServer serv(port);
+        serv.startServer();
     }
     catch(const std::exception& e)
     {

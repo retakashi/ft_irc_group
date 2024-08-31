@@ -14,24 +14,27 @@
 #include <sys/select.h>
 #include <vector>
 
-#define MAX_PENDING 5
-#define RCVBUFSIZE 10
-#define PORT_MAX 2
+//ircのメッセージの長さは、最大で512文字（CR-LFを含む）
+//（つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
+#define RCVBUFSIZE 510
 
 class echoServer{
     private:
-        char buf[RCVBUFSIZE];
+        char buf_[RCVBUFSIZE];
+        short port_;
         echoServer();
-        void initServerSocket(unsigned short ports[], std::vector<int> &serv_sockets, std::vector<struct sockaddr_in> &serv_addr);
+        void initSocket(int &sock, struct sockaddr_in &sockaddr);
+        void initSelectArgs(fd_set &read_fds,fd_set &write_fds,struct timeval &timeout);
+        void setReadfds(int sock, std::vector<int> clients, fd_set &read_fds);
+        int acceptNewClient(int sock,std::vector<int> &clients);
         void ft_recv(int sock);
-        void ft_send(int sock);
+        // void ft_send(int sock);
         void putError(const char *errmsg);
     public:
-        echoServer(unsigned short ports[]);
+        echoServer(short port);
         ~echoServer();
         echoServer(const echoServer &other);
         echoServer &operator=(const echoServer &other);
-        void startServer(unsigned short ports[]);
-        
+        void startServer();      
 };
 #endif

@@ -18,7 +18,8 @@
 //（つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
 #define RCVBUFSIZE 510
 
-class echoServer{
+class echoServer
+{
     private:
         char buf_[RCVBUFSIZE];
         short port_;

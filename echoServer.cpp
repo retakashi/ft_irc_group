@@ -1,11 +1,15 @@
 #include "echoServer.hpp"
 
-echoServer::echoServer() {}
-echoServer::echoServer(short port) : port_(port) {}
-echoServer::~echoServer() {}
-echoServer::echoServer(const echoServer &other) { *this = other; }
-echoServer &echoServer::operator=(const echoServer &other) {
-  if (this != &other) {
+echoServer::echoServer(){}
+echoServer::echoServer(short port):port_(port){}
+echoServer::~echoServer(){}
+echoServer::echoServer(const echoServer &other)
+{ *this = other;}
+
+echoServer &echoServer::operator=(const echoServer &other)
+{
+  if (this != &other)
+  {
     port_ = other.port_;
     size_t i = 0;
     for (i = 0; other.msg_[i] != '\0'; i++)

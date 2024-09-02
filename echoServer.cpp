@@ -1,7 +1,7 @@
 #include "echoServer.hpp"
 
 echoServer::echoServer() {}
-echoServer::echoServer(short port) : port_(port) {}
+echoServer::echoServer(short port) : port_(port) {std::memset(msg_, 0, sizeof(msg_));}
 echoServer::~echoServer() {}
 echoServer::echoServer(const echoServer &other) { *this = other; }
 echoServer &echoServer::operator=(const echoServer &other) {
@@ -52,7 +52,7 @@ void echoServer::setReadfds(int sock, fd_set &read_fds) {
     FD_SET(clients_[i], &read_fds);
 }
 
-int echoServer::acceptNewClient(int sock) {
+void echoServer::acceptNewClient(int sock) {
   struct sockaddr_in client_addr;
   socklen_t addr_len = sizeof(client_addr);
   int new_sock = 0;
@@ -63,7 +63,6 @@ int echoServer::acceptNewClient(int sock) {
     putError("fcntl failed");
     std::cout << "connected sockfd: " << new_sock << std::endl;
   clients_.push_back(new_sock);
-  return (new_sock);
 }
 
 void echoServer::ft_recv(size_t i) {
@@ -120,10 +119,10 @@ void echoServer::disconnectClient(size_t i)
 }
 
 void echoServer::startServer() {
-  int sock;
+  int serv_sock;
   struct sockaddr_in sockaddr;
   // listenできるところまでsocketを設定
-  initSocket(sock, sockaddr);
+  initSocket(serv_sock, sockaddr);
 
   // read_fdsのみ使用。write_fds,except_fdsも必要？
   fd_set read_fds, write_fds;
@@ -132,7 +131,7 @@ void echoServer::startServer() {
   initSelectArgs(read_fds, write_fds, timeout);
   while (g_sig_flg == false) {
     // 後々write_fdsも使用できるようにする？
-    setReadfds(sock, read_fds);
+    setReadfds(serv_sock, read_fds);
     sel_ret = select(FD_SETSIZE, &read_fds, &write_fds, NULL, &timeout);
     if (sel_ret < 0)
       putError("select failed");
@@ -141,8 +140,8 @@ void echoServer::startServer() {
       break;
     }
     // 新しいクライアント接続
-    if (FD_ISSET(sock, &read_fds))
-        acceptNewClient(sock);
+    if (FD_ISSET(serv_sock, &read_fds))
+        acceptNewClient(serv_sock);
     // selectが実行されると,read_fdsの中身が準備完了になったclientのsocketfdだけ残る
     // -> FD_ISSETで準備完了になったfdを探す.
     for (size_t i = 0;i < clients_.size();i++) {

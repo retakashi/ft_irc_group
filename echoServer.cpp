@@ -57,7 +57,7 @@ void echoServer::initSelectArgs(fd_set &read_fds, fd_set &write_fds,
 void echoServer::setReadfds(int sock, fd_set &read_fds) {
   FD_SET(sock, &read_fds);
   for (size_t i = 0;i < clients_.size();i++) 
-    FD_SET(clients_[i], &read_fds);
+    FD_SET(clients_[i]->getSocket(), &read_fds);//fix
 }
 
 int echoServer::acceptNewClient(int sock) {
@@ -70,7 +70,7 @@ int echoServer::acceptNewClient(int sock) {
   if (fcntl(new_sock, F_SETFL, O_NONBLOCK) < 0)
     putError("fcntl failed");
     std::cout << "connected sockfd: " << new_sock << std::endl;
-  clients_.push_back(new_sock);
+  clients_.push_back(new Client(new_sock));//fix
   return (new_sock);
 }
 
@@ -78,7 +78,7 @@ void echoServer::ft_recv(size_t i) {
     int recv_size = 0;
 
   while (g_sig_flg == false) {
-    recv_size = recv(clients_[i], msg_, RCVBUFSIZE, 0);
+    recv_size = recv(clients_[i]->getSocket(), msg_, sizeof(msg_), 0);
     if (recv_size < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
       continue;
     else if (recv_size < 0 && errno == ECONNRESET) 
@@ -98,8 +98,7 @@ void echoServer::ft_recv(size_t i) {
   std::cout << "received: " << msg_ << std::endl;
 
       // クライアントコマンドの処理
-    Client client; // 仮のClientオブジェクト
-    handleClientCommand(&client, msg_);
+    handleClientCommand(clients_[i], msg_);//fix
 
   ft_send(i, recv_size + 1);
 }
@@ -108,7 +107,7 @@ void echoServer::ft_send(size_t i, size_t send_size) {
   int send_ret = 0;
 
   while (g_sig_flg == false) {
-    send_ret = send(clients_[i], msg_, send_size, 0);
+    send_ret = send(clients_[i]->getSocket(), msg_, send_size, 0);//fix
     if (send_ret < 0 && errno == EAGAIN || errno == EWOULDBLOCK)
       continue;
     else if (send_ret < 0 && errno == ECONNRESET)
@@ -125,10 +124,11 @@ void echoServer::ft_send(size_t i, size_t send_size) {
 
 void echoServer::disconnectClient(size_t i)
 {
-    std::cout << "disconnected sockfd : " << clients_[i] << std::endl;
-      if (close(clients_[i]) < 0)
+    std::cout << "disconnected sockfd : " << clients_[i]->getSocket() << std::endl;
+      if (close(clients_[i]->getSocket()) < 0)
         putError("close failed");
-    msg_[0] = '\0';
+    // msg_[0] = '\0';
+    delete clients_[i]; // メモリ解放
     clients_.erase(clients_.begin()+i);
 }
 
@@ -159,8 +159,8 @@ void echoServer::startServer() {
     // selectが実行されると,read_fdsの中身が準備完了になったclientのsocketfdだけ残る
     // -> FD_ISSETで準備完了になったfdを探す.
     for (size_t i = 0;i < clients_.size();i++) {
-        if (FD_ISSET(clients_[i], &read_fds)) {
-            FD_CLR(clients_[i], &read_fds);
+        if (FD_ISSET(clients_[i]->getSocket(), &read_fds)) {//fix
+            FD_CLR(clients_[i]->getSocket(), &read_fds);//fix
             ft_recv(i);
       }
     }
@@ -172,24 +172,60 @@ void echoServer::handleClientCommand(Client* client, const std::string& command)
     std::string cmd;
     iss >> cmd;
 
-    if (cmd == "/join") {
+    if (cmd == "JOIN") {
         std::string channelName;
         iss >> channelName;
         joinChannel(channelName, client);
         client->sendMessage("Joined channel: " + channelName);
-    } else if (cmd == "/leave") {
+    } else if (cmd == "LEAVE") {
         std::string channelName;
         iss >> channelName;
         leaveChannel(channelName, client);
         client->sendMessage("Left channel: " + channelName);
-    } else if (cmd == "/msg") {
+    } else if (cmd == "MSG") {
         std::string channelName, message;
         iss >> channelName;
         std::getline(iss, message);
         sendMessageToChannel(channelName, message, client);
+    } else if (cmd == "KICK") {
+        std::string channelName, targetName;
+        iss >> channelName >> targetName;
+        Client* target = findClientByName(targetName);
+        if (target) {
+            channels[channelName].kickClient(client, target);
+        }
+    } else if (cmd == "INVITE") {
+        std::string channelName, targetName;
+        iss >> channelName >> targetName;
+        Client* target = findClientByName(targetName);
+        if (target) {
+            channels[channelName].inviteClient(client, target);
+        }
+    } else if (cmd == "TOPIC") {
+        std::string channelName, topic;
+        iss >> channelName;
+        std::getline(iss, topic);
+        channels[channelName].setTopic(client, topic);
+    } else if (cmd == "MODE") {
+        std::string channelName;
+        char mode;
+        bool enable;
+        iss >> channelName >> mode >> enable;
+        channels[channelName].setMode(client, mode, enable);
     } else {
         client->sendMessage("Unknown command: " + cmd);
     }
+}
+
+Client* echoServer::findClientByName(const std::string& name) {
+    // クライアント名からClientオブジェクトを検索するロジックを実装
+    // ここでは仮の実装を示します
+    for (size_t i = 0; i < clients_.size(); ++i) {
+        if (clients_[i]->getName() == name) {
+            return clients_[i];
+        }
+    }
+    return nullptr;
 }
 
 void echoServer::createChannel(const std::string& name) {

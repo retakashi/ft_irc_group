@@ -5,8 +5,14 @@
 
 class Client {
 public:
+    Client(int socket);
     void sendMessage(const std::string& message);
-    // その他のメソッドとメンバー変数
+    std::string getName() const;
+    int getSocket() const; //add
+
+private:
+    int socket_;
+    std::string name_;
 };
 
 #endif

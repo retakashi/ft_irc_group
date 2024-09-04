@@ -45,11 +45,12 @@ class echoServer{
         void ft_send(size_t i, size_t send_size);
         void disconnectClient(size_t i);
         void handleClientCommand(Client* client, const std::string& command);
+        Client* findClientByName(const std::string& name); //add
 
         short port_;
         char msg_[RCVBUFSIZE];
         //クライアントのsocket
-        std::vector<int> clients_;
+        std::vector<Client*> clients_;//fix
         std::map<std::string, Channel> channels;//channel
         bool g_sig_flg;//add
 };

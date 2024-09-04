@@ -1,7 +1,7 @@
 NAME = echoServer
 CXX = c++
 CXXFLAGS = -std=c++98 -MMD -MP -pedantic
-SRCS = echoServer.cpp echoServerMain.cpp
+SRCS = echoServer.cpp echoServerMain.cpp Channel.cpp Client.cpp
 DEPFILES = $(OBJS:%.o=%.d)
 OBJS = ${addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o)}
 OBJS_DIR = objs

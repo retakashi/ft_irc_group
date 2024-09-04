@@ -1,4 +1,7 @@
 #include "echoServer.hpp"
+#include "Client.hpp"//”Client.hpp”これが必要
+#include <sstream> // 追加: std::istringstreamを使用するため
+
 
 echoServer::echoServer(){}
 echoServer::echoServer(short port):port_(port){}
@@ -16,6 +19,7 @@ echoServer &echoServer::operator=(const echoServer &other)
         this->msg_[i] = other.msg_[i];
     this->msg_[i] = '\0';
     this->clients_ = other.clients_;
+    this->channels = other.channels;//コピー
   }
   return (*this);
 }
@@ -92,6 +96,11 @@ void echoServer::ft_recv(size_t i) {
   msg_[recv_size] = '\n';
   msg_[recv_size + 1] = '\r';
   std::cout << "received: " << msg_ << std::endl;
+
+      // クライアントコマンドの処理
+    Client client; // 仮のClientオブジェクト
+    handleClientCommand(&client, msg_);
+
   ft_send(i, recv_size + 1);
 }
 
@@ -156,4 +165,45 @@ void echoServer::startServer() {
       }
     }
   }
+}
+
+void echoServer::handleClientCommand(Client* client, const std::string& command) {
+    std::istringstream iss(command);
+    std::string cmd;
+    iss >> cmd;
+
+    if (cmd == "/join") {
+        std::string channelName;
+        iss >> channelName;
+        joinChannel(channelName, client);
+        client->sendMessage("Joined channel: " + channelName);
+    } else if (cmd == "/leave") {
+        std::string channelName;
+        iss >> channelName;
+        leaveChannel(channelName, client);
+        client->sendMessage("Left channel: " + channelName);
+    } else if (cmd == "/msg") {
+        std::string channelName, message;
+        iss >> channelName;
+        std::getline(iss, message);
+        sendMessageToChannel(channelName, message, client);
+    } else {
+        client->sendMessage("Unknown command: " + cmd);
+    }
+}
+
+void echoServer::createChannel(const std::string& name) {
+    channels[name] = Channel(name);
+}
+
+void echoServer::joinChannel(const std::string& channelName, Client* Client) {
+    channels[channelName].addClient(Client);
+}
+
+void echoServer::leaveChannel(const std::string& channelName, Client* Client) {
+    channels[channelName].removeClient(Client);
+}
+
+void echoServer::sendMessageToChannel(const std::string& channelName, const std::string& message, Client* sender) {
+    channels[channelName].broadcastMessage(message, sender);
 }

@@ -8,17 +8,27 @@ OBJS_DIR = objs
 RM = rm -f
 .DEFAULT_GOAL :=$(NAME)
 all: $(NAME)
+
+# YERROW = \033[1;33m
 $(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+	@$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+	@echo ""
+	@echo "███████╗████████╗         ██╗██████╗  ██████╗"
+	@echo "██╔════╝╚══██╔══╝         ██║██╔══██╗██╔════╝"
+	@echo "█████╗     ██║            ██║██████╔╝██║"     
+	@echo "██╔══╝     ██║            ██║██╔══██╗██║"     
+	@echo "██║        ██║   ███████╗ ██║██║  ██║╚██████╗"
+	@echo "╚═╝        ╚═╝   ╚══════╝ ╚═╝╚═╝  ╚═╝ ╚═════╝\n"
+                              
 $(OBJS_DIR)/%.o: %.cpp | $(OBJS_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -I include -o $@
+	@$(CXX) $(CXXFLAGS) -c $< -I include -o $@
 $(OBJS_DIR):
-	mkdir $(OBJS_DIR)
+	@mkdir $(OBJS_DIR)
 clean:
-	$(RM) $(OBJS)
+	@$(RM) $(OBJS)
 
 fclean: clean
-	$(RM) $(NAME)
+	@$(RM) $(NAME)
 
 re: fclean all
 

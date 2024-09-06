@@ -8,6 +8,9 @@ class ClientData
     private:
         std::string nickname_;
         std::string username_;
+        std::string hostname_;
+        std::string servername_;
+        sdt::string realname_;
 
     public:
         ClientData();

@@ -66,7 +66,6 @@ int echoServer::acceptNewClient(int sock) {
   if (fcntl(new_sock, F_SETFL, O_NONBLOCK) < 0)
     putError("fcntl failed");
   
-  // ここで認証のプロセスを入れる。引数が4つで
   std::cout << "connected sockfd: " << new_sock << std::endl;
   clients_.push_back(new_sock);
   return (new_sock);
@@ -141,25 +140,21 @@ bool echoServer::authenticate(int client_sock)
 {
 	char auth_buffer[RCVBUFSIZE];
     int recv_size = recv(client_sock, auth_buffer, RCVBUFSIZE - 1, 0);
-    if (recv_size <= 0) {
-        return false;  // 認証メッセージを受信できなかった
+    if (recv_size <= 0) 
+	{
+		// 認証メッセージを受信できなかった
+        return false;  
     }
-
-    auth_buffer[recv_size] = '\0';
+    auth_buffer[recv_size - 1] = '\0';
     std::string message(auth_buffer);
     
-    std::istringstream iss(message);
-    std::string cmd, host, port, password;
-    
-    iss >> cmd >> host >> port >> password;
-    
-	std::cout << "ここまでまできた5" << std::endl;
-	std::cout << "ここまでまできた5" << cmd << host << port << password << std::endl;
-    if (cmd != "nc" || host != "localhost" || port != std::to_string(port_))
-        return false;
-    
-	std::cout << "authenticate まできた" << std::endl;
-    return (password == server_password_);
+	std::cout << "ここまでまできた5" << message << std::endl;
+	std::cout << "authenticate まできた6" << std::endl;
+	bool answer = false;
+	if (message == server_password_)
+		answer = true;
+	std::cout << "answer = " << answer << std::endl;
+    return (message == server_password_);
 }
 
 
@@ -221,7 +216,7 @@ void echoServer::startServer()
 					std::cout << "Authentication failed for client: " << clients_[i] << std::endl;
 					disconnectClient(i);
 					// disconnectClient()でクライアントが削除されるため、インデックスを調整
-					i--;  
+					i--;
 					continue;
 				}
 			} 

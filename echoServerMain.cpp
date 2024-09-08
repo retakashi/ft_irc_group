@@ -38,9 +38,8 @@ bool is_correct_port(char *str)
     return (true);
 }
 
-int main()
+int main(int argc, char **argv)
 {
-    // char *str_port = "4242";
     short port = 4242;
     try
     {
@@ -51,11 +50,11 @@ int main()
             putError("sigaction failed");
         if (sigaction(SIGQUIT, &sa, NULL) < 0)
             putError("sigaction faild");
-        // if (argc != 3 || !(is_correct_port(str_port)))
-        // {
-        //     throw ("Wrong Arguments. \n");
-        // }
-        echoServer serv(port);
+        if (argc != 3 || !(is_correct_port(argv[1])))
+        {
+            throw ("Wrong Arguments. \n");
+        }
+        echoServer serv(port, argv[2]);
         serv.startServer();
     }
     catch(const std::exception& e)

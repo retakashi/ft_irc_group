@@ -1,7 +1,7 @@
 #include "echoServer.hpp"
 
 echoServer::echoServer(){}
-echoServer::echoServer(short port):port_(port){}
+echoServer::echoServer(short port, const std::string& password): port_(port), server_password_(password) {}
 echoServer::~echoServer(){}
 echoServer::echoServer(const echoServer &other)
 { *this = other;}
@@ -65,10 +65,13 @@ int echoServer::acceptNewClient(int sock) {
     putError("accept failed");
   if (fcntl(new_sock, F_SETFL, O_NONBLOCK) < 0)
     putError("fcntl failed");
-    std::cout << "connected sockfd: " << new_sock << std::endl;
+  
+  // ここで認証のプロセスを入れる。引数が4つで
+  std::cout << "connected sockfd: " << new_sock << std::endl;
   clients_.push_back(new_sock);
   return (new_sock);
 }
+
 
 void echoServer::ft_recv(size_t i) {
     int recv_size = 0;
@@ -114,16 +117,54 @@ void echoServer::ft_send(size_t i, size_t send_size) {
   }
 }
 
-void echoServer::disconnectClient(size_t i)
+// void echoServer::disconnectClient(size_t i)
+// {
+//     std::cout << "disconnected sockfd : " << clients_[i] << std::endl;
+//       if (close(clients_[i]) < 0)
+//         putError("close failed");
+//     msg_[0] = '\0';
+//     clients_.erase(clients_.begin()+i);
+// }
+
+// 認証のための改良版
+void echoServer::disconnectClient(size_t i) 
 {
-    std::cout << "disconnected sockfd : " << clients_[i] << std::endl;
-      if (close(clients_[i]) < 0)
+    std::cout << "Disconnected sockfd : " << clients_[i] << std::endl;
+    if (close(clients_[i]) < 0)
         putError("close failed");
     msg_[0] = '\0';
-    clients_.erase(clients_.begin()+i);
+    authenticated_clients_.erase(clients_[i]);
+    clients_.erase(clients_.begin() + i);
+}
+// 認証のための関数（クライアントのメッセージを解読する）
+bool echoServer::authenticate(int client_sock) 
+{
+	char auth_buffer[RCVBUFSIZE];
+    int recv_size = recv(client_sock, auth_buffer, RCVBUFSIZE - 1, 0);
+    if (recv_size <= 0) {
+        return false;  // 認証メッセージを受信できなかった
+    }
+
+    auth_buffer[recv_size] = '\0';
+    std::string message(auth_buffer);
+    
+    std::istringstream iss(message);
+    std::string cmd, host, port, password;
+    
+    iss >> cmd >> host >> port >> password;
+    
+	std::cout << "ここまでまできた5" << std::endl;
+	std::cout << "ここまでまできた5" << cmd << host << port << password << std::endl;
+    if (cmd != "nc" || host != "localhost" || port != std::to_string(port_))
+        return false;
+    
+	std::cout << "authenticate まできた" << std::endl;
+    return (password == server_password_);
 }
 
-void echoServer::startServer() {
+
+void echoServer::startServer() 
+{
   int sock;
   struct sockaddr_in sockaddr;
   // listenできるところまでsocketを設定
@@ -134,26 +175,62 @@ void echoServer::startServer() {
   struct timeval timeout;
   int sel_ret = 0;
   initSelectArgs(read_fds, write_fds, timeout);
-  while (g_sig_flg == false) {
+  while (g_sig_flg == false) 
+  {
     // 後々write_fdsも使用できるようにする？
     setReadfds(sock, read_fds);
     sel_ret = select(FD_SETSIZE, &read_fds, &write_fds, NULL, &timeout);
     if (sel_ret < 0)
       putError("select failed");
-    if (sel_ret == 0) {
+    if (sel_ret == 0) 
+	{
       std::cout << "Time out" << std::endl;
       break;
     }
     // 新しいクライアント接続
     if (FD_ISSET(sock, &read_fds))
         acceptNewClient(sock);
+
     // selectが実行されると,read_fdsの中身が準備完了になったclientのsocketfdだけ残る
     // -> FD_ISSETで準備完了になったfdを探す.
-    for (size_t i = 0;i < clients_.size();i++) {
-        if (FD_ISSET(clients_[i], &read_fds)) {
-            FD_CLR(clients_[i], &read_fds);
-            ft_recv(i);
-      }
+    // for (size_t i = 0;i < clients_.size();i++) 
+	// {
+    //     if (FD_ISSET(clients_[i], &read_fds)) 
+	// 	{
+    //         FD_CLR(clients_[i], &read_fds);
+    //         ft_recv(i);
+    //   	}
+    // }
+	for (size_t i = 0; i < clients_.size(); i++) 
+	{
+		if (FD_ISSET(clients_[i], &read_fds)) 
+		{
+			std::cout << "ここまでまできた1" << std::endl;
+			if (!authenticated_clients_[clients_[i]]) 
+			{
+				// 未認証クライアントの認証処理
+				if (authenticate(clients_[i])) 
+				{
+					std::cout << "ここまでまできた2" << std::endl;
+					std::cout << "Client authenticated: " << clients_[i] << std::endl;
+					authenticated_clients_[clients_[i]] = true;
+				} 
+				else 
+				{
+					std::cout << "ここまでまできた3" << std::endl;
+					std::cout << "Authentication failed for client: " << clients_[i] << std::endl;
+					disconnectClient(i);
+					// disconnectClient()でクライアントが削除されるため、インデックスを調整
+					i--;  
+					continue;
+				}
+			} 
+			else 
+			{
+				// 認証済みクライアントのメッセージ処理
+				ft_recv(i);
+			}
+		}
     }
   }
 }

@@ -16,7 +16,10 @@
 #include <map>
 #include <sstream>
 #include <cstring>
+#include <cstdlib>
+#include <errno.h>
 #include "Client.hpp"
+#include <stdio.h>
 
 // Client;
 

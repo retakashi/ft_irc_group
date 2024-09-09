@@ -116,14 +116,7 @@ void echoServer::ft_send(size_t i, size_t send_size) {
   }
 }
 
-// void echoServer::disconnectClient(size_t i)
-// {
-//     std::cout << "disconnected sockfd : " << clients_[i] << std::endl;
-//       if (close(clients_[i]) < 0)
-//         putError("close failed");
-//     msg_[0] = '\0';
-//     clients_.erase(clients_.begin()+i);
-// }
+
 
 // 認証のための改良版
 void echoServer::disconnectClient(size_t i) 
@@ -148,13 +141,25 @@ bool echoServer::authenticate(int client_sock)
     auth_buffer[recv_size - 1] = '\0';
     std::string message(auth_buffer);
     
-	std::cout << "ここまでまできた5" << message << std::endl;
-	std::cout << "authenticate まできた6" << std::endl;
+	std::istringstream iss(message);
+  std::string command, password;
+
+  iss >> command >> password;
+  if (iss)
+  {
+    std::cout << "Too many arguments" << std::endl;
+    perror("Too many arguments");
+  }
+  if (iss.fail())
+    perror("Iss failed");
+
+  // std::cout << "ここまでまできた5" << command << ", pass :" << password << std::endl;
+	// std::cout << "authenticate まできた6" << std::endl;
 	bool answer = false;
-	if (message == server_password_)
+	if (password == server_password_)
 		answer = true;
-	std::cout << "answer = " << answer << std::endl;
-    return (message == server_password_);
+	// std::cout << "answer = " << answer << std::endl;
+    return (password == server_password_);
 }
 
 
@@ -186,16 +191,6 @@ void echoServer::startServer()
     if (FD_ISSET(sock, &read_fds))
         acceptNewClient(sock);
 
-    // selectが実行されると,read_fdsの中身が準備完了になったclientのsocketfdだけ残る
-    // -> FD_ISSETで準備完了になったfdを探す.
-    // for (size_t i = 0;i < clients_.size();i++) 
-	// {
-    //     if (FD_ISSET(clients_[i], &read_fds)) 
-	// 	{
-    //         FD_CLR(clients_[i], &read_fds);
-    //         ft_recv(i);
-    //   	}
-    // }
 	for (size_t i = 0; i < clients_.size(); i++) 
 	{
 		if (FD_ISSET(clients_[i], &read_fds)) 
@@ -208,6 +203,7 @@ void echoServer::startServer()
 				{
 					std::cout << "ここまでまできた2" << std::endl;
 					std::cout << "Client authenticated: " << clients_[i] << std::endl;
+          // ここで認証済みのユーザーのNick ,USERNAMEを入れていきたい。
 					authenticated_clients_[clients_[i]] = true;
 				} 
 				else 

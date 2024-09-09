@@ -15,6 +15,7 @@
 #include <vector>
 #include <map>
 #include <sstream>
+#include <cstring>
 #include "Client.hpp"
 
 // Client;

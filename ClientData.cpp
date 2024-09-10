@@ -11,19 +11,6 @@ bool ClientData::isCompleteUserParams() {
   return true;
 }
 
-// nicknameは最大20字まで
-bool ClientData::isValidNickname(const std::string& param) const {
-  if (param.size() > 20 || param.size() < 1) return false;
-  if (!std::isalpha(param[0])) return false;
-  size_t i = 0;
-  std::string special = "-[]\\`^{}";
-  while (param[i] != '\0') {
-    if (!std::isalnum(param[i]) && special.find(param[i]) == std::string::npos) return false;
-    i++;
-  }
-  return true;
-}
-
 /* realname　':'の後に任意のオクテット列（バイト列）で、SPACE、NUL、CR、CF
 を含むことはできない。->エラーにする */
 bool ClientData::isUserParamCountValid(const std::string& params) const {

@@ -36,17 +36,16 @@ void Server::startServer() {
       std::cout << "Time out" << std::endl;
       break;
     }
-    // 新しいクライアント接続
     if (FD_ISSET(socket_, &read_fds)) {
       client_sock = acceptNewClient();
       authenticatedNewClient(client_sock);
     }
-    for (size_t i = 0; i < clients_.size(); i++) {
-      if (FD_ISSET(clients_[i].getSocket(), &read_fds)) {
-        FD_CLR(clients_[i].getSocket(), &read_fds);
-        ft_recv(clients_[i].getSocket());
-      }
-    }
+    //   for (size_t i = 0; i < clients_.size(); i++) {
+    //     if (FD_ISSET(clients_[i].getSocket(), &read_fds)) {
+    //       FD_CLR(clients_[i].getSocket(), &read_fds);
+    //       ft_recv(clients_[i].getSocket());
+    //     }
+    //   }
   }
 }
 
@@ -69,7 +68,7 @@ void Server::initServerSocket(struct sockaddr_in &sockaddr) {
 void Server::initSelectArgs(fd_set &read_fds, int &socket_max, timeval &timeout) {
   FD_ZERO(&read_fds);
   socket_max = getMaxSocket();
-  timeout.tv_sec = 1000;
+  timeout.tv_sec = 5000;
   timeout.tv_usec = 0;
 }
 
@@ -112,11 +111,11 @@ int Server::authenticatedNewClient(int client_sock) {
     ft_recv(client_sock);
     casted_msg = msg_;
     pos = splitCommand(casted_msg, command);
-    if (command != "NICK" && command != "USER") return printCmdResponce(421, new_client);
-    if (pos == std::string::npos) return printCmdResponce(421, new_client);
+    if (command != "NICK" && command != "USER") return printCmdResponce(421, new_client, command);
+    if (pos == std::string::npos) return printCmdResponce(461, new_client, command);
     splitParam(casted_msg, param, pos);
     if (command == "NICK") {
-      if (new_client.isValidNickname(param) == false)
+      if (isValidNickname(param) == false)
         return printCmdResponce(421, new_client);
       else
         new_client.setNickname(param);
@@ -208,24 +207,37 @@ size_t Server::createSendMsg(const std::string &casted_msg) {
   return i + 2;
 }
 
-int Server::printCmdResponce(int code, const ClientData &client) {
+int Server::printWelcomeToIrc(int code, const ClientData &client) {
   std::stringstream ss;
   size_t send_size = 0;
-  switch (code) {
-    case 1:
-      ss << ":001 Welcome to the Internet Relay Network " << client.getNickname() << "!"
-         << client.getUsername() << "@" << client.getHostname();
-      send_size = createSendMsg(ss.str());
-      break;
-    case 421:
-      ss << "hello";
-      send_size = createSendMsg(ss.str());
-      break;
-    default:
-      break;
-  }
+  ss << ":001 Welcome to the Internet Relay Network " << client.getNickname() << "!"
+     << client.getUsername() << "@" << client.getHostname();
+  send_size = createSendMsg(ss.str());
   ft_send(client, send_size);
   return 0;
 }
 
-int Server::printCmdResponce(int code, const ClientData &client, std::string command) { return 0; }
+int Server::printCmdResponce(int code, const ClientData &client, const std::string &str) {
+  std::stringstream ss;
+  size_t send_size = 0;
+  switch (code) {
+    case 421:
+      ss << str << " :Unknown command";
+      break;
+    case 431:
+      ss << ":No nickname given";
+      break;
+    case 432:
+      ss << str << " :Erroneous nickname";
+      break;
+    case 433:
+      ss << str << " :Nickname is already in use";
+      break;
+    case 461:
+      ss << str << " :Not enough parameters";
+      break;
+  }
+  send_size = createSendMsg(ss.str());
+  ft_send(client, send_size);
+  return (0);  // false
+}

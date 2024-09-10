@@ -44,14 +44,15 @@ class Server {
   int getMaxSocket();
   int acceptNewClient();
   int authenticatedNewClient(int client_sock);
+  bool isValidNickname(std::string& param);
   void ft_recv(int socket);
   void disconnectClient(ClientData client);
   std::string::size_type splitCommand(std::string casted_msg, std::string &command);
   void splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
   void ft_send(ClientData client, size_t send_size);
   size_t createSendMsg(const std::string& casted_msg);
-  int printCmdResponce(int code, const ClientData& client);
-  int printCmdResponce(int code, const ClientData& client, std::string command);
+  int printWelcomeToIrc(int code, const ClientData &client);
+  int printCmdResponce(int code, const ClientData& client, const std::string &str);
  public:
   Server(short port);
   ~Server();

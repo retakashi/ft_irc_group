@@ -1,7 +1,7 @@
-NAME = echoServer
+NAME = Server
 CXX = c++
 CXXFLAGS = -std=c++98 -MMD -MP -pedantic
-SRCS = echoServer.cpp echoServerMain.cpp
+SRCS = Server.cpp Main.cpp ClientData.cpp 
 DEPFILES = $(OBJS:%.o=%.d)
 OBJS = ${addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o)}
 OBJS_DIR = objs
@@ -19,7 +19,7 @@ $(NAME): $(OBJS)
 	@echo "██╔══╝     ██║            ██║██╔══██╗██║"     
 	@echo "██║        ██║   ███████╗ ██║██║  ██║╚██████╗"
 	@echo "╚═╝        ╚═╝   ╚══════╝ ╚═╝╚═╝  ╚═╝ ╚═════╝\n"
-                              
+                
 $(OBJS_DIR)/%.o: %.cpp | $(OBJS_DIR)
 	@$(CXX) $(CXXFLAGS) -c $< -I include -o $@
 $(OBJS_DIR):

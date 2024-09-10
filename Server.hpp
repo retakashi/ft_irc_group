@@ -18,6 +18,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
+#include <sstream>
+#include <cstdlib>
+#include <errno.h>
+
 
 #include "ClientData.hpp"
 
@@ -28,36 +32,39 @@ class ClientData;
 #define MAX_BUFSIZE 510
 #define SUCCESS 0
 #define FAILURE -1
+#define ERR_PASSWDMISMATCH 464
 // メンバー変数は最後に_を付けてます
-static bool g_sig_flg;
-class Server {
- private:
-  short port_;
-  int socket_;
-  // クライアントのsocket 後々消して、Clientクラスに入れる？
-  std::vector<ClientData> clients_;
-  char msg_[MAX_BUFSIZE];
-  Server();
-  void initServerSocket(struct sockaddr_in &sockaddr);
-  void initSelectArgs(fd_set &read_fds, int &max_sock, struct timeval &timeout);
-  void setReadfds(fd_set &read_fds);
-  int getMaxSocket();
-  int acceptNewClient();
-  int authenticatedNewClient(int client_sock);
-  void ft_recv(int socket);
-  void disconnectClient(ClientData client);
-  std::string::size_type splitCommand(std::string casted_msg, std::string &command);
-  void splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
-  void ft_send(ClientData client, size_t send_size);
-  size_t createSendMsg(const std::string& casted_msg);
-  int printCmdResponce(int code, const ClientData& client);
-  int printCmdResponce(int code, const ClientData& client, std::string command);
- public:
-  Server(short port);
-  ~Server();
-  Server(const Server &other);
-  Server &operator=(const Server &other);
-  void startServer();
+static bool	g_sig_flg;
+class Server 
+{
+	private:
+		Server();
+  		short					port_;
+		int						socket_;
+		std::string				server_password_;
+		// クライアントのsocket 後々消して、Clientクラスに入れる？
+		std::vector<ClientData>	clients_;
+		char					msg_[MAX_BUFSIZE];
+		void					initServerSocket(struct sockaddr_in &sockaddr);
+		void					initSelectArgs(fd_set &read_fds, int &max_sock, struct timeval &timeout);
+		void					setReadfds(fd_set &read_fds);
+		int						getMaxSocket();
+		int						acceptNewClient();
+		int						authenticateNewClient(int client_sock);
+		void					ft_recv(int socket);
+		void					disconnectClient(ClientData client);
+		std::string::size_type	splitCommand(std::string casted_msg, std::string &command);
+		void					splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
+		void					ft_send(ClientData client, size_t send_size);
+		size_t					createSendMsg(const std::string& casted_msg);
+		int						printCmdResponce(int code, const ClientData& client);
+		int						printCmdResponce(int code, const ClientData& client, std::string command);
+	public:
+		Server(short port, const std::string& password);
+		~Server();
+		Server(const Server &other);
+		Server &operator=(const Server &other);
+		void					startServer();
 };
-void putFunctionError(const char *errmsg);
+void							putFunctionError(const char *errmsg);
 #endif

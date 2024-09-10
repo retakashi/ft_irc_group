@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 Server::Server() {}
-Server::Server(short port) : port_(port) { std::memset(msg_, 0, sizeof(msg_)); }
+Server::Server(short port, const std::string& password) : port_(port), server_password_(password) { std::memset(msg_, 0, sizeof(msg_)); }
 Server::~Server() {}
 Server::Server(const Server &other) { *this = other; }
 Server &Server::operator=(const Server &other) {
@@ -39,7 +39,7 @@ void Server::startServer() {
     // 新しいクライアント接続
     if (FD_ISSET(socket_, &read_fds)) {
       client_sock = acceptNewClient();
-      authenticatedNewClient(client_sock);
+      authenticateNewClient(client_sock);
     }
     for (size_t i = 0; i < clients_.size(); i++) {
       if (FD_ISSET(clients_[i].getSocket(), &read_fds)) {
@@ -101,12 +101,49 @@ int Server::acceptNewClient() {
 
 /* PASSも追加する
 戻り値は特に意味なし */
-int Server::authenticatedNewClient(int client_sock) {
+int Server::authenticateNewClient(int client_sock) {
   std::string command;
   std::string param;
   std::string casted_msg;
   std::string::size_type pos = 0;
   ClientData new_client(client_sock);
+
+  // PASSの部分です
+  char auth_buffer[MAX_BUFSIZE];
+  int recv_size = recv(client_sock, auth_buffer, MAX_BUFSIZE - 1, 0);
+  if (recv_size <= 0) 
+	{
+		// 認証メッセージを受信できなかった
+    return false;  
+  }
+  auth_buffer[recv_size - 1] = '\0';
+  std::string message(auth_buffer);
+    
+	std::istringstream iss(message);
+  std::string command_, password;
+
+  iss >> command_ >> password;
+  if (iss)
+  {
+    std::cout << "Too many arguments" << std::endl;
+    disconnectClient(new_client);
+    return printCmdResponce(498, new_client);
+  }
+  if (iss.fail())
+  {
+    disconnectClient(new_client);
+    return printCmdResponce(497, new_client);
+  }
+  
+  bool answer = false;
+	if (password == server_password_ && command_ == "PASS")
+		answer = true;
+  if (!answer)
+  {
+    disconnectClient(new_client);
+    return printCmdResponce(ERR_PASSWDMISMATCH, new_client);
+  }
+  // PASSの部分です
 
   while (new_client.isCompleteUserParams() == false) {
     ft_recv(client_sock);
@@ -211,7 +248,8 @@ size_t Server::createSendMsg(const std::string &casted_msg) {
 int Server::printCmdResponce(int code, const ClientData &client) {
   std::stringstream ss;
   size_t send_size = 0;
-  switch (code) {
+  switch (code) 
+  {
     case 1:
       ss << ":001 Welcome to the Internet Relay Network " << client.getNickname() << "!"
          << client.getUsername() << "@" << client.getHostname();
@@ -221,6 +259,19 @@ int Server::printCmdResponce(int code, const ClientData &client) {
       ss << "hello";
       send_size = createSendMsg(ss.str());
       break;
+    case 464:
+      ss << ":Password incorrect";
+      send_size = createSendMsg(ss.str());
+      break;
+    case 497:
+      ss << ":iss.failed";
+      send_size = createSendMsg(ss.str());
+      break;
+    case 498:
+      ss << ":Too many arguments";
+      send_size = createSendMsg(ss.str());
+      break;
+
     default:
       break;
   }

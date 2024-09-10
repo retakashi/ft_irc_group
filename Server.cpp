@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 Server::Server() {}
-Server::Server(short port) : port_(port){ std::memset(msg_, 0, sizeof(msg_)); }
+Server::Server(short port) : port_(port) { std::memset(msg_, 0, sizeof(msg_)); }
 Server::~Server() {}
 Server::Server(const Server &other) { *this = other; }
 Server &Server::operator=(const Server &other) {
@@ -14,6 +14,40 @@ Server &Server::operator=(const Server &other) {
     this->clients_ = other.clients_;
   }
   return (*this);
+}
+
+void Server::startServer() {
+  struct sockaddr_in sockaddr;
+  fd_set read_fds;
+  int max_sock = 0;
+  struct timeval timeout;
+  int sel_ret = 0;
+  int client_sock = 0;
+
+  // listenできるところまでsocketを設定
+  initServerSocket(sockaddr);
+  initSelectArgs(read_fds, max_sock, timeout);
+  while (1) {
+    setReadfds(read_fds);
+    max_sock = getMaxSocket();
+    sel_ret = select(max_sock + 1, &read_fds, NULL, NULL, &timeout);
+    if (sel_ret < 0) putFunctionError("select failed");
+    if (sel_ret == 0) {
+      std::cout << "Time out" << std::endl;
+      break;
+    }
+    // 新しいクライアント接続
+    if (FD_ISSET(socket_, &read_fds)) {
+      client_sock = acceptNewClient();
+      authenticatedNewClient(client_sock);
+    }
+    for (size_t i = 0; i < clients_.size(); i++) {
+      if (FD_ISSET(clients_[i].getSocket(), &read_fds)) {
+        FD_CLR(clients_[i].getSocket(), &read_fds);
+        ft_recv(clients_[i].getSocket());
+      }
+    }
+  }
 }
 
 void Server::initServerSocket(struct sockaddr_in &sockaddr) {
@@ -39,6 +73,11 @@ void Server::initSelectArgs(fd_set &read_fds, int &socket_max, timeval &timeout)
   timeout.tv_usec = 0;
 }
 
+void Server::setReadfds(fd_set &read_fds) {
+  FD_SET(socket_, &read_fds);
+  for (size_t i = 0; i < clients_.size(); i++) FD_SET(clients_[i].getSocket(), &read_fds);
+}
+
 int Server::getMaxSocket() {
   int max = 0;
   if (clients_.size() == 0) return socket_;
@@ -48,17 +87,12 @@ int Server::getMaxSocket() {
   return max;
 }
 
-void Server::setReadfds(fd_set &read_fds) {
-  FD_SET(socket_, &read_fds);
-  for (size_t i = 0; i < clients_.size(); i++) FD_SET(clients_[i].getSocket(), &read_fds);
-}
-
-int Server::acceptNewClient(int server_sock) {
+int Server::acceptNewClient() {
   struct sockaddr_in client_addr;
   socklen_t addr_len = sizeof(client_addr);
   int new_client_sock = 0;
 
-  if ((new_client_sock = accept(server_sock, (struct sockaddr *)&client_addr, &addr_len)) < 0)
+  if ((new_client_sock = accept(socket_, (struct sockaddr *)&client_addr, &addr_len)) < 0)
     putFunctionError("accept failed");
   if (fcntl(new_client_sock, F_SETFL, O_NONBLOCK) < 0) putFunctionError("fcntl failed");
   std::cout << "connected sockfd: " << new_client_sock << std::endl;
@@ -94,7 +128,7 @@ int Server::authenticatedNewClient(int client_sock) {
     }
   }
   clients_.push_back(new_client);
-  return printCmdResponce(1, new_client);;
+  return printCmdResponce(1, new_client);
 }
 
 void Server::ft_recv(int socket) {
@@ -118,15 +152,30 @@ void Server::ft_recv(int socket) {
 void Server::disconnectClient(ClientData client) {
   std::vector<ClientData>::iterator it = clients_.begin();
   std::vector<ClientData>::iterator erase_it = it;
-  while (it != clients_.end())
-  {
-    if (it->getSocket() == client.getSocket())
-      break;
+  while (it != clients_.end()) {
+    if (it->getSocket() == client.getSocket()) break;
     it++;
   }
   std::cout << "disconnected sockfd : " << client.getSocket() << std::endl;
   if (close(it->getSocket()) < 0) putFunctionError("close failed");
   clients_.erase(it);
+}
+
+std::string::size_type Server::splitCommand(std::string casted_msg, std::string &command) {
+  std::string::size_type pos = casted_msg.find(" ");
+  if (pos != std::string::npos) {
+    command = casted_msg.substr(0, pos);
+    command[pos] = '\0';
+  }
+  return pos;
+}
+
+void Server::splitParam(std::string casted_msg, std::string &param, std::string::size_type pos) {
+  size_t i = 0;
+
+  casted_msg = casted_msg.substr(pos + 1);
+  while (casted_msg[i] == ' ') i++;
+  param = casted_msg.substr(i);
 }
 
 void Server::ft_send(ClientData client, size_t send_size) {
@@ -147,59 +196,7 @@ void Server::ft_send(ClientData client, size_t send_size) {
   }
 }
 
-std::string::size_type Server::splitCommand(std::string casted_msg, std::string &command) {
-  std::string::size_type pos = casted_msg.find(" ");
-  if (pos != std::string::npos) {
-    command = casted_msg.substr(0, pos);
-    command[pos] = '\0';
-  }
-  return pos;
-}
-
-void Server::splitParam(std::string casted_msg, std::string &param, std::string::size_type pos) {
-  size_t i = 0;
-
-  casted_msg = casted_msg.substr(pos + 1);
-  while (casted_msg[i] == ' ') i++;
-  param = casted_msg.substr(i);
-}
-
-void Server::startServer() {
-  struct sockaddr_in sockaddr;
-  fd_set read_fds;
-  int max_sock = 0;
-  struct timeval timeout;
-  int sel_ret = 0;
-  int client_sock = 0;
-
-  // listenできるところまでsocketを設定
-  initServerSocket(sockaddr);
-  initSelectArgs(read_fds, max_sock, timeout);
-  while (1) {
-    setReadfds(read_fds);
-    max_sock = getMaxSocket();
-    sel_ret = select(max_sock + 1, &read_fds, NULL, NULL, &timeout);
-    if (sel_ret < 0) putFunctionError("select failed");
-    if (sel_ret == 0) {
-      std::cout << "Time out" << std::endl;
-      break;
-    }
-    // 新しいクライアント接続
-    if (FD_ISSET(socket_, &read_fds)) {
-      client_sock = acceptNewClient(socket_);
-      authenticatedNewClient(client_sock);
-      break;
-    }
-    for (size_t i = 0;i < clients_.size();i++) {
-        if (FD_ISSET(clients_[i].getSocket(), &read_fds)) {
-            FD_CLR(clients_[i].getSocket(), &read_fds);
-            ft_recv(clients_[i].getSocket());
-      }
-    }
-  }
-}
-
-size_t Server::createSendMsg(const std::string& casted_msg) {
+size_t Server::createSendMsg(const std::string &casted_msg) {
   std::memset(msg_, 0, sizeof(msg_));
   size_t i = 0;
   while (casted_msg[i] != '\0' && i < MAX_BUFSIZE) {
@@ -211,7 +208,7 @@ size_t Server::createSendMsg(const std::string& casted_msg) {
   return i + 2;
 }
 
-int Server::printCmdResponce(int code, const ClientData& client) {
+int Server::printCmdResponce(int code, const ClientData &client) {
   std::stringstream ss;
   size_t send_size = 0;
   switch (code) {
@@ -224,12 +221,11 @@ int Server::printCmdResponce(int code, const ClientData& client) {
       ss << "hello";
       send_size = createSendMsg(ss.str());
       break;
-    default : break;
+    default:
+      break;
   }
   ft_send(client, send_size);
   return 0;
 }
 
-int Server::printCmdResponce(int code, const ClientData& client, std::string command) {
-  return 0;
-}
+int Server::printCmdResponce(int code, const ClientData &client, std::string command) { return 0; }

@@ -40,15 +40,15 @@ class Server {
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);
   void initSelectArgs(fd_set &read_fds, int &max_sock, struct timeval &timeout);
-  int getMaxSocket();
   void setReadfds(fd_set &read_fds);
-  int acceptNewClient(int server_sock);
+  int getMaxSocket();
+  int acceptNewClient();
   int authenticatedNewClient(int client_sock);
   void ft_recv(int socket);
   void disconnectClient(ClientData client);
-  void ft_send(ClientData client, size_t send_size);
   std::string::size_type splitCommand(std::string casted_msg, std::string &command);
   void splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
+  void ft_send(ClientData client, size_t send_size);
   size_t createSendMsg(const std::string& casted_msg);
   int printCmdResponce(int code, const ClientData& client);
   int printCmdResponce(int code, const ClientData& client, std::string command);

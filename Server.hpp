@@ -59,6 +59,7 @@ class Server {
   Server(const Server &other);
   Server &operator=(const Server &other);
   void startServer();
+  std::string pass_;
 };
 void putFunctionError(const char *errmsg);
 #endif

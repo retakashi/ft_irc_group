@@ -111,9 +111,14 @@ int Server::authenticatedNewClient(int client_sock) {
     ft_recv(client_sock);
     casted_msg = msg_;
     pos = splitCommand(casted_msg, command);
-    if (command != "NICK" && command != "USER") return printCmdResponce(421, new_client, command);
+    if (command != "NICK" && command != "USER"&&command!= "PASS") return printCmdResponce(421, new_client, command);
     if (pos == std::string::npos) return printCmdResponce(461, new_client, command);
     splitParam(casted_msg, param, pos);
+    if (command == "PASS" && param != pass_)
+    {
+      std::cout << param << pass_ << std::endl;
+      return printCmdResponce(461, new_client, command);
+    }
     if (command == "NICK") {
       if (isValidNickname(param) == false)
         return printCmdResponce(421, new_client,param);

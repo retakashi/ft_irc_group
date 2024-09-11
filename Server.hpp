@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "ClientData.hpp"
-
 class ClientData;
 // ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 // （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
@@ -51,7 +50,8 @@ class Server {
   void splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
   void ft_send(ClientData client, size_t send_size);
   size_t createSendMsg(const std::string& casted_msg);
-  int printWelcomeToIrc(int code, const ClientData &client);
+  int printWelcomeToIrc(const ClientData &client);
+  int printCmdResponce(int code, const std::string &str);
   int printCmdResponce(int code, const ClientData& client, const std::string &str);
  public:
   Server(short port);

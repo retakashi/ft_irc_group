@@ -116,18 +116,18 @@ int Server::authenticatedNewClient(int client_sock) {
     splitParam(casted_msg, param, pos);
     if (command == "NICK") {
       if (isValidNickname(param) == false)
-        return printCmdResponce(421, new_client);
+        return printCmdResponce(421, new_client,param);
       else
         new_client.setNickname(param);
     } else if (command == "USER") {
       if (new_client.isUserParamCountValid(param) == false)
-        return printCmdResponce(421, new_client);
+        return printCmdResponce(421, new_client, param);
       else
         new_client.setUserParams(param);
     }
   }
   clients_.push_back(new_client);
-  return printCmdResponce(1, new_client);
+  return printWelcomeToIrc(new_client);
 }
 
 void Server::ft_recv(int socket) {
@@ -207,7 +207,7 @@ size_t Server::createSendMsg(const std::string &casted_msg) {
   return i + 2;
 }
 
-int Server::printWelcomeToIrc(int code, const ClientData &client) {
+int Server::printWelcomeToIrc(const ClientData &client) {
   std::stringstream ss;
   size_t send_size = 0;
   ss << ":001 Welcome to the Internet Relay Network " << client.getNickname() << "!"
@@ -215,6 +215,12 @@ int Server::printWelcomeToIrc(int code, const ClientData &client) {
   send_size = createSendMsg(ss.str());
   ft_send(client, send_size);
   return 0;
+}
+
+int Server::printCmdResponce(int code, const std::string &str) {
+  std::cout << code << str << std::endl;
+  
+  return (0);  // false
 }
 
 int Server::printCmdResponce(int code, const ClientData &client, const std::string &str) {

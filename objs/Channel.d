@@ -1,5 +1,7 @@
-objs/Channel.o: Channel.cpp Channel.hpp Client.hpp
+objs/Channel.o: Channel.cpp Channel.hpp ClientData.hpp Server.hpp
 
 Channel.hpp:
 
-Client.hpp:
+ClientData.hpp:
+
+Server.hpp:

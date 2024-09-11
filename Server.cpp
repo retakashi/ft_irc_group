@@ -252,3 +252,11 @@ int Server::printCmdResponce(int code, const ClientData &client, const std::stri
   ft_send(client, send_size);
   return (0);  // false
 }
+
+void Server::handleJoinCommand(ClientData* client, const std::string& channelName) {
+    if (channels_.find(channelName) == channels_.end()) {
+        channels_[channelName] = Channel(channelName);
+    }
+    channels_[channelName].addClient(client);
+    channels_[channelName].broadcastMessage(client->getNickname() + " has joined the channel.", client);
+}

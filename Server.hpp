@@ -18,8 +18,10 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include <map>
 #include "ClientData.hpp"
+#include "Channel.hpp"
+
 class ClientData;
 // ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 // （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
@@ -35,6 +37,7 @@ class Server {
   int socket_;
   // クライアントのsocket 後々消して、Clientクラスに入れる？
   std::vector<ClientData> clients_;
+  std::map<std::string, Channel> channels_;//add
   char msg_[MAX_BUFSIZE];
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);
@@ -60,6 +63,8 @@ class Server {
   Server &operator=(const Server &other);
   void startServer();
   std::string pass_;
+  void handleJoinCommand(ClientData* client, const std::string& channelName);
+
 };
 void putFunctionError(const char *errmsg);
 #endif

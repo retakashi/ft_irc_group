@@ -5,8 +5,8 @@ ClientData::ClientData(int socket) : socket_(socket) {}
 ClientData::~ClientData() {}
 
 bool ClientData::isCompleteUserParams() {
-  if (nickname_.empty() || username_.empty() || hostname_.empty() || servername_.empty() ||
-      realname_.empty())
+  if (nickname.empty() || username.empty() || hostname.empty() || servername.empty() ||
+      realname.empty())
     return false;
   return true;
 }
@@ -31,11 +31,11 @@ bool ClientData::isUserParamCountValid(const std::string& params) const {
   return true;
 }
 
-void ClientData::setNickname(const std::string& nickname) { nickname_ = nickname; }
-void ClientData::setUsername(const std::string& username) { username_ = username; }
-void ClientData::setHostname(const std::string& hostname) { hostname_ = hostname; }
-void ClientData::setServername(const std::string& servername) { servername_ = servername; }
-void ClientData::setRealname(const std::string& realname) { realname_ = realname; }
+void ClientData::setNickname(const std::string& nickname) { nickname = nickname; }
+void ClientData::setUsername(const std::string& username) { username = username; }
+void ClientData::setHostname(const std::string& hostname) { hostname = hostname; }
+void ClientData::setServername(const std::string& servername) { servername = servername; }
+void ClientData::setRealname(const std::string& realname) { realname = realname; }
 
 void ClientData::setUserParams(std::string params) {
   std::string user_data[4];
@@ -61,7 +61,28 @@ void ClientData::setUserParams(std::string params) {
   setRealname(user_data[real]);
 }
 
-const std::string& ClientData::getNickname() const { return nickname_; }
-const std::string& ClientData::getUsername() const { return username_; }
-const std::string& ClientData::getHostname() const { return hostname_; }
+const std::string& ClientData::getNickname() const { return nickname; }
+const std::string& ClientData::getUsername() const { return username; }
+const std::string& ClientData::getHostname() const { return hostname; }
 const int ClientData::getSocket() const { return socket_; }
+
+void ClientData::sendMessage(const std::string& message) {
+    ssize_t bytesSent = send(socket_, message.c_str(), message.size(), 0);
+    if (bytesSent == -1) {
+        std::cerr << "Error sending message: " << strerror(errno) << std::endl;
+    }
+}
+// チャネル関連のメソッド
+void ClientData::joinChannel(Channel& channel) {
+  channel.addClient(this);
+  sendMessage("Joined channel: " + channel.getName());
+}
+
+void ClientData::leaveChannel(Channel& channel) {
+  channel.removeClient(this);
+  sendMessage("Left channel: " + channel.getName());
+}
+
+void ClientData::sendChannelMessage(Channel& channel, const std::string& message) {
+  channel.broadcastMessage(message, this);
+}

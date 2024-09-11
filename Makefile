@@ -1,11 +1,7 @@
 NAME = Server
 CXX = c++
 CXXFLAGS = -std=c++98 -MMD -MP -pedantic
-<<<<<<< HEAD
-SRCS = echoServer.cpp echoServerMain.cpp Channel.cpp Client.cpp
-=======
-SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp
->>>>>>> origin/rtakashi
+SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp Channel.cpp
 DEPFILES = $(OBJS:%.o=%.d)
 OBJS = ${addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o)}
 OBJS_DIR = objs

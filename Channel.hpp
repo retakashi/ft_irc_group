@@ -6,26 +6,29 @@
 #include <map>
 #include <set>
 
-class Client;
+class ClientData;
 
 class Channel {
 public:
     Channel();
     Channel(const std::string& name);
-    void addClient(Client* client);
-    void removeClient(Client* client);
-    void broadcastMessage(const std::string& message, Client* sender);
-    void kickClient(Client* client, Client* target);//add↓
-    void inviteClient(Client* client, Client* target);
-    void setTopic(Client* client, const std::string& topic);
-    void setMode(Client* client, char mode, bool enable);
-    bool isOperator(Client* client) const;
+    void addClient(ClientData* client);
+    void removeClient(ClientData* client);
+    void broadcastMessage(const std::string& message, ClientData* sender);
+    void kickClient(ClientData* client, ClientData* target);//add↓
+    void inviteClient(ClientData* client, ClientData* target);
+    void setTopic(ClientData* client, const std::string& topic);
+    void setMode(ClientData* client, char mode, bool enable);
+    bool isOperator(ClientData* client) const;
+    void addOperator(ClientData* client);
+    void removeOperator(ClientData* client);
+    const std::string& getName() const;
 
 private:
     std::string name;
     std::string topic;
-    std::vector<Client*> clients_;
-    std::set<Client*> operators_;
+    std::vector<ClientData*> clients_;
+    std::set<ClientData*> operators_;
     bool inviteOnly;//add↓
     bool topicRestricted;
     std::string password;

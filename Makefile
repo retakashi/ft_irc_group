@@ -1,24 +1,38 @@
-NAME = echoServer
+NAME = Server
 CXX = c++
 CXXFLAGS = -std=c++98 -MMD -MP -pedantic
+<<<<<<< HEAD
 SRCS = echoServer.cpp echoServerMain.cpp Channel.cpp Client.cpp
+=======
+SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp
+>>>>>>> origin/rtakashi
 DEPFILES = $(OBJS:%.o=%.d)
 OBJS = ${addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o)}
 OBJS_DIR = objs
 RM = rm -f
 .DEFAULT_GOAL :=$(NAME)
 all: $(NAME)
+
+# YERROW = \033[1;33m
 $(NAME): $(OBJS)
-	$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+	@$(CXX) $(CXXFLAGS) -o $(NAME) $(OBJS)
+	@echo ""
+	@echo "███████╗████████╗         ██╗██████╗  ██████╗"
+	@echo "██╔════╝╚══██╔══╝         ██║██╔══██╗██╔════╝"
+	@echo "█████╗     ██║            ██║██████╔╝██║"     
+	@echo "██╔══╝     ██║            ██║██╔══██╗██║"     
+	@echo "██║        ██║   ███████╗ ██║██║  ██║╚██████╗"
+	@echo "╚═╝        ╚═╝   ╚══════╝ ╚═╝╚═╝  ╚═╝ ╚═════╝\n"
+                
 $(OBJS_DIR)/%.o: %.cpp | $(OBJS_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -I include -o $@
+	@$(CXX) $(CXXFLAGS) -c $< -I include -o $@
 $(OBJS_DIR):
-	mkdir $(OBJS_DIR)
+	@mkdir $(OBJS_DIR)
 clean:
-	$(RM) $(OBJS)
+	@$(RM) $(OBJS)
 
 fclean: clean
-	$(RM) $(NAME)
+	@$(RM) $(NAME)
 
 re: fclean all
 

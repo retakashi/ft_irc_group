@@ -38,8 +38,6 @@ bool Server::isValidNickname(std::string& param, const ClientData& client) {
   return true;
 }
 
-/* realname　':'の後に任意のオクテット列（バイト列）で、SPACE、NUL、CR、CF
-を含むことはできない。->エラーにする */
 bool Server::isUserParamCountValid(const std::string& params, const ClientData& client) {
   size_t space_cnt = 0;
   size_t i = 0;
@@ -66,13 +64,13 @@ bool Server::isUserParamCountValid(const std::string& params, const ClientData& 
 }
 
 bool Server::isCompleteAuthParams(const ClientData& client) {
-  if (client.getNickname().empty() || client.getUsername().empty() || client.getHostname().empty() || client.getServername().empty() || client.getRealname().empty())
+  if (client.getNickname().empty() || client.getUsername().empty() || client.getRealname().empty())
     return false;
   return true;
 }
 
 bool Server::isCompleteUserParams(const ClientData& client) {
-  if (client.getUsername().empty() || client.getHostname().empty() || client.getServername().empty() || client.getRealname().empty())
+  if (client.getUsername().empty() || client.getRealname().empty())
     return false;
   sendCmdResponce(ERR_ALREADYREGISTRED, client);
   return true; 

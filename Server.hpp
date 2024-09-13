@@ -29,11 +29,20 @@ class ClientData;
 // メンバー変数は最後に_を付けてます
 static bool g_sig_flg;
 
+struct user_data
+{
+  std::string username;
+  char mode;
+  std::string realname;
+};
+
 class Server {
  private:
   static const int MAX_BUFSIZE = 510;
   short port_;
   int socket_;
+  std::string servername_;
+  std::string hostname_;
   std::vector<ClientData> clients_;
   char msg_[MAX_BUFSIZE];
   Server();
@@ -44,7 +53,7 @@ class Server {
   int acceptNewClient();
   void authenticatedNewClient(int client_sock);
   bool isValidNickname(std::string& param, const ClientData& client);
-  bool isUserParamCountValid(const std::string& params, const ClientData& client);
+  bool isUserParamValid(const std::string& params, const ClientData& client);
   bool isCompleteAuthParams(const ClientData& client);
   bool isCompleteUserParams(const ClientData& client);
   void ft_recv(int socket);
@@ -56,14 +65,14 @@ class Server {
   void sendWelcomeToIrc(const ClientData &client);
   void sendCmdResponce(int code, const std::string &str, const ClientData &client);
   void sendCmdResponce(int code, const ClientData &client);
-
+  void NICKcmd(std::string casted_msg, std::string::size_type pos, ClientData &client);
+  void USERcmd(std::string casted_msg, std::string::size_type pos, ClientData &client)
  public:
   Server(short port);
   ~Server();
   Server(const Server &other);
   Server &operator=(const Server &other);
   void startServer();
-  std::string pass_;
 };
 void putFunctionError(const char *errmsg);
 #endif

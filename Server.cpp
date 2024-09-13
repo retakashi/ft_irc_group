@@ -1,13 +1,17 @@
 #include "Server.hpp"
 
 Server::Server() {}
-Server::Server(short port) : port_(port) { std::memset(msg_, 0, sizeof(msg_)); }
+Server::Server(short port) : port_(port), servername_("C-3PO-server"), hostname_("C-3PO.com") {
+  std::memset(msg_, 0, sizeof(msg_));
+}
 Server::~Server() {}
 Server::Server(const Server &other) { *this = other; }
 Server &Server::operator=(const Server &other) {
   if (this != &other) {
     port_ = other.port_;
     socket_ = other.socket_;
+    servername_ = other.servername_;
+    hostname_ = other.hostname_;
     size_t i = 0;
     for (i = 0; other.msg_[i] != '\0'; i++) this->msg_[i] = other.msg_[i];
     this->msg_[i] = '\0';
@@ -98,12 +102,10 @@ int Server::acceptNewClient() {
   return (new_client_sock);
 }
 
-/* PASSも追加する
-戻り値は特に意味なし
-NICK, USERは順不同でPASSは一番最初? */
+/* PASSをループ前に追加
+PASSは一番最初に認証しなければならない(MUST) */
 void Server::authenticatedNewClient(int client_sock) {
   std::string command;
-  std::string param;
   std::string casted_msg;
   std::string::size_type pos = 0;
   ClientData new_client(client_sock);
@@ -114,18 +116,31 @@ void Server::authenticatedNewClient(int client_sock) {
     pos = splitCommand(casted_msg, command);
     if (command != "NICK" && command != "USER") {
       sendCmdResponce(ERR_NOTREGISTERED, new_client);
-      command.clear();
       continue;
     }
-    splitParam(casted_msg, param, pos);
-    if (command == "NICK" && isValidNickname(param, new_client) == true)
-      new_client.setNickname(param);
-    else if (command == "USER" && isCompleteUserParams(new_client) == false &&
-             isUserParamCountValid(param, new_client) == true)
-      new_client.setUserParams(param);
+    if (command == "NICK")
+      NICKcmd(casted_msg, pos, new_client);
+    else if(command == "USER")
+      USERcmd(casted_msg, pos, new_client);
   }
   clients_.push_back(new_client);
   sendWelcomeToIrc(new_client);
+}
+
+// Auth.cppに移動させる
+void Server::NICKcmd(std::string casted_msg, std::string::size_type pos, ClientData &client) {
+  std::string param;
+  splitParam(casted_msg, param, pos);
+  if (isValidNickname(param, client) == true) client.setNickname(param);
+}
+
+void Server::USERcmd(std::string casted_msg, std::string::size_type pos, ClientData &client)
+{
+  std::string param;
+  struct user_data user_data;
+  splitParam(casted_msg, param, pos);
+  if (isUserParamValid(param, client) == true)
+
 }
 
 void Server::ft_recv(int socket) {
@@ -146,21 +161,24 @@ void Server::ft_recv(int socket) {
   msg_[recv_size - 1] = '\0';
 }
 
+// eraseしたイテレーターを参照しないか確認する！！！
 void Server::disconnectClient(ClientData client) {
+  int socket = 0;
   if (clients_.size() == 0) {
-    std::cout << "disconnected sockfd : " << client.getSocket() << std::endl;
+    socket = client.getSocket();
     if (close(client.getSocket()) < 0) putFunctionError("close failed");
-    return;
+  } else {
+    std::vector<ClientData>::iterator it = clients_.begin();
+    std::vector<ClientData>::iterator erase_it = it;
+    while (it != clients_.end()) {
+      if (it->getSocket() == client.getSocket()) break;
+      it++;
+    }
+    socket = it->getSocket();
+    if (close(it->getSocket()) < 0) putFunctionError("close failed");
+    clients_.erase(it);
   }
-  std::vector<ClientData>::iterator it = clients_.begin();
-  std::vector<ClientData>::iterator erase_it = it;
-  while (it != clients_.end()) {
-    if (it->getSocket() == client.getSocket()) break;
-    it++;
-  }
-  std::cout << "disconnected sockfd : " << client.getSocket() << std::endl;
-  if (close(it->getSocket()) < 0) putFunctionError("close failed");
-  clients_.erase(it);
+  std::cout << "disconnected sockfd : " << socket << std::endl;
 }
 
 std::string::size_type Server::splitCommand(std::string casted_msg, std::string &command) {
@@ -168,17 +186,17 @@ std::string::size_type Server::splitCommand(std::string casted_msg, std::string 
   if (pos != std::string::npos) {
     command = casted_msg.substr(0, pos);
     command[pos] = '\0';
-  }
-  else
+  } else
     command = casted_msg;
   return pos;
 }
 
 void Server::splitParam(std::string casted_msg, std::string &param, std::string::size_type pos) {
   size_t i = 0;
-
-  if (pos == std::string::npos)
-    return ;
+  if (pos == std::string::npos) {
+    param.clear();
+    return;
+  }
   casted_msg = casted_msg.substr(pos + 1);
   while (casted_msg[i] == ' ') i++;
   param = casted_msg.substr(i);
@@ -201,7 +219,6 @@ void Server::ft_send(ClientData client, size_t send_size) {
       break;
   }
 }
-
 size_t Server::createSendMsg(const std::string &casted_msg) {
   std::memset(msg_, 0, sizeof(msg_));
   size_t i = 0;

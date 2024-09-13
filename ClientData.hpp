@@ -22,8 +22,6 @@ class ClientData {  // 一応hostname,servernameも入れておく。
  public:
   ClientData(int socket);
   ~ClientData();
-  bool isCompleteUserParams();
-  bool isUserParamCountValid(const std::string& params) const;
   void setNickname(const std::string& nickname);
   void setUsername(const std::string& username);
   void setHostname(const std::string& hostname);
@@ -33,6 +31,8 @@ class ClientData {  // 一応hostname,servernameも入れておく。
   const std::string& getNickname() const;
   const std::string& getUsername() const;
   const std::string& getHostname() const;
+  const std::string& getServername() const;
+  const std::string& getRealname() const;
   const int getSocket() const;
 };
 

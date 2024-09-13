@@ -99,40 +99,33 @@ int Server::acceptNewClient() {
 }
 
 /* PASSも追加する
-戻り値は特に意味なし */
-int Server::authenticatedNewClient(int client_sock) {
+戻り値は特に意味なし
+NICK, USERは順不同でPASSは一番最初? */
+void Server::authenticatedNewClient(int client_sock) {
   std::string command;
   std::string param;
   std::string casted_msg;
   std::string::size_type pos = 0;
   ClientData new_client(client_sock);
 
-  while (new_client.isCompleteUserParams() == false) {
+  while (isCompleteAuthParams(new_client) == false) {
     ft_recv(client_sock);
     casted_msg = msg_;
     pos = splitCommand(casted_msg, command);
-    if (command != "NICK" && command != "USER"&&command!= "PASS") return printCmdResponce(421, new_client, command);
-    if (pos == std::string::npos) return printCmdResponce(461, new_client, command);
+    if (command != "NICK" && command != "USER") {
+      sendCmdResponce(ERR_NOTREGISTERED, new_client);
+      command.clear();
+      continue;
+    }
     splitParam(casted_msg, param, pos);
-    if (command == "PASS" && param != pass_)
-    {
-      std::cout << param << pass_ << std::endl;
-      return printCmdResponce(461, new_client, command);
-    }
-    if (command == "NICK") {
-      if (isValidNickname(param) == false)
-        return printCmdResponce(421, new_client,param);
-      else
-        new_client.setNickname(param);
-    } else if (command == "USER") {
-      if (new_client.isUserParamCountValid(param) == false)
-        return printCmdResponce(421, new_client, param);
-      else
-        new_client.setUserParams(param);
-    }
+    if (command == "NICK" && isValidNickname(param, new_client) == true)
+      new_client.setNickname(param);
+    else if (command == "USER" && isCompleteUserParams(new_client) == false &&
+             isUserParamCountValid(param, new_client) == true)
+      new_client.setUserParams(param);
   }
   clients_.push_back(new_client);
-  return printWelcomeToIrc(new_client);
+  sendWelcomeToIrc(new_client);
 }
 
 void Server::ft_recv(int socket) {
@@ -142,7 +135,7 @@ void Server::ft_recv(int socket) {
     recv_size = recv(socket, msg_, MAX_BUFSIZE, 0);
     if (recv_size < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
       continue;
-    else if (recv_size <= 0 && errno == ECONNRESET) {
+    else if (recv_size == 0) {
       disconnectClient(socket);
       return;
     } else if (recv_size < 0)
@@ -154,6 +147,11 @@ void Server::ft_recv(int socket) {
 }
 
 void Server::disconnectClient(ClientData client) {
+  if (clients_.size() == 0) {
+    std::cout << "disconnected sockfd : " << client.getSocket() << std::endl;
+    if (close(client.getSocket()) < 0) putFunctionError("close failed");
+    return;
+  }
   std::vector<ClientData>::iterator it = clients_.begin();
   std::vector<ClientData>::iterator erase_it = it;
   while (it != clients_.end()) {
@@ -171,12 +169,16 @@ std::string::size_type Server::splitCommand(std::string casted_msg, std::string 
     command = casted_msg.substr(0, pos);
     command[pos] = '\0';
   }
+  else
+    command = casted_msg;
   return pos;
 }
 
 void Server::splitParam(std::string casted_msg, std::string &param, std::string::size_type pos) {
   size_t i = 0;
 
+  if (pos == std::string::npos)
+    return ;
   casted_msg = casted_msg.substr(pos + 1);
   while (casted_msg[i] == ' ') i++;
   param = casted_msg.substr(i);
@@ -189,7 +191,7 @@ void Server::ft_send(ClientData client, size_t send_size) {
     send_ret = send(client.getSocket(), msg_, send_size, 0);
     if (send_ret < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
       continue;
-    else if (send_ret < 0 && errno == ECONNRESET) {
+    else if (send_ret == 0) {
       msg_[0] = '\0';
       disconnectClient(client);
       return;
@@ -212,43 +214,20 @@ size_t Server::createSendMsg(const std::string &casted_msg) {
   return i + 2;
 }
 
-int Server::printWelcomeToIrc(const ClientData &client) {
-  std::stringstream ss;
+void Server::sendCmdResponce(int code, const std::string &str, const ClientData &client) {
+  std::string resp_msg;
   size_t send_size = 0;
-  ss << ":001 Welcome to the Internet Relay Network " << client.getNickname() << "!"
-     << client.getUsername() << "@" << client.getHostname();
-  send_size = createSendMsg(ss.str());
+
+  resp_msg = createCmdRespMsg(code, str);
+  send_size = createSendMsg(resp_msg);
   ft_send(client, send_size);
-  return 0;
 }
 
-int Server::printCmdResponce(int code, const std::string &str) {
-  std::cout << code << str << std::endl;
-  
-  return (0);  // false
-}
-
-int Server::printCmdResponce(int code, const ClientData &client, const std::string &str) {
-  std::stringstream ss;
+void Server::sendCmdResponce(int code, const ClientData &client) {
+  std::string resp_msg;
   size_t send_size = 0;
-  switch (code) {
-    case 421:
-      ss << str << " :Unknown command";
-      break;
-    case 431:
-      ss << ":No nickname given";
-      break;
-    case 432:
-      ss << str << " :Erroneous nickname";
-      break;
-    case 433:
-      ss << str << " :Nickname is already in use";
-      break;
-    case 461:
-      ss << str << " :Not enough parameters";
-      break;
-  }
-  send_size = createSendMsg(ss.str());
+
+  resp_msg = createCmdRespMsg(code);
+  send_size = createSendMsg(resp_msg);
   ft_send(client, send_size);
-  return (0);  // false
 }

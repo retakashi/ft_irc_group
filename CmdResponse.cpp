@@ -1,26 +1,28 @@
 #include "CmdResponse.hpp"
 
-std::string createCmdRespMsg(int code) {
+std::string createCmdRespMsg(const std::string& servername, int code) {
   std::stringstream ss;
+  ss << ":" << servername;
   switch (code) {
     case ERR_NONICKNAMEGIVEN:
-      ss << ":No nickname given";
+      ss << " :No nickname given";
       break;
     case ERR_NOTREGISTERED:
-      ss << ":You have not registered";
+      ss << " :You have not registered";
       break;
     case ERR_ALREADYREGISTRED:
-      ss << ":Unauthorized command (already registered)";
+      ss << " :Unauthorized command (already registered)";
       break;
     case ERR_PASSWDMISMATCH:
-      ss << ":Password incorrect";
+      ss << " :Password incorrect";
       break;
   }
   return ss.str();
 }
 
-std::string createCmdRespMsg(int code, const std::string &str) {
+std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str) {
   std::stringstream ss;
+  ss << ":" << servername << " ";
   switch (code) {
     case ERR_NOSUCHNICK:
       ss << str << " :No such nick/channel";
@@ -52,4 +54,3 @@ std::string createCmdRespMsg(int code, const std::string &str) {
   }
   return ss.str();
 }
-

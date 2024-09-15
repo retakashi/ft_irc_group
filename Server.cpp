@@ -1,7 +1,7 @@
 #include "Server.hpp"
 
 Server::Server() {}
-Server::Server(short port) : port_(port), servername_("C-3PO-server"), hostname_("C-3PO.com") {
+Server::Server(short port) : port_(port), servername_("servername"), hostname_("hostname") {
   std::memset(msg_, 0, sizeof(msg_));
 }
 Server::~Server() {}
@@ -41,6 +41,7 @@ void Server::startServer() {
       break;
     }
     if (FD_ISSET(socket_, &read_fds)) {
+      FD_CLR(socket_, &read_fds);
       client_sock = acceptNewClient();
       authenticatedNewClient(client_sock);
     }
@@ -102,48 +103,7 @@ int Server::acceptNewClient() {
   return (new_client_sock);
 }
 
-/* PASSをループ前に追加
-PASSは一番最初に認証しなければならない(MUST) */
-void Server::authenticatedNewClient(int client_sock) {
-  std::string command;
-  std::string casted_msg;
-  std::string::size_type pos = 0;
-  ClientData new_client(client_sock);
-
-  while (isCompleteAuthParams(new_client) == false) {
-    ft_recv(client_sock);
-    casted_msg = msg_;
-    pos = splitCommand(casted_msg, command);
-    if (command != "NICK" && command != "USER") {
-      sendCmdResponce(ERR_NOTREGISTERED, new_client);
-      continue;
-    }
-    if (command == "NICK")
-      NICKcmd(casted_msg, pos, new_client);
-    else if(command == "USER")
-      USERcmd(casted_msg, pos, new_client);
-  }
-  clients_.push_back(new_client);
-  sendWelcomeToIrc(new_client);
-}
-
-// Auth.cppに移動させる
-void Server::NICKcmd(std::string casted_msg, std::string::size_type pos, ClientData &client) {
-  std::string param;
-  splitParam(casted_msg, param, pos);
-  if (isValidNickname(param, client) == true) client.setNickname(param);
-}
-
-void Server::USERcmd(std::string casted_msg, std::string::size_type pos, ClientData &client)
-{
-  std::string param;
-  struct user_data user_data;
-  splitParam(casted_msg, param, pos);
-  if (isUserParamValid(param, client) == true)
-
-}
-
-void Server::ft_recv(int socket) {
+size_t Server::ft_recv(int socket) {
   int recv_size = 0;
 
   while (1) {
@@ -152,13 +112,14 @@ void Server::ft_recv(int socket) {
       continue;
     else if (recv_size == 0) {
       disconnectClient(socket);
-      return;
+      return 0;
     } else if (recv_size < 0)
       putFunctionError("recv failed");
     else
       break;
   }
   msg_[recv_size - 1] = '\0';
+  return recv_size - 1;  // 改行文字分減らす
 }
 
 // eraseしたイテレーターを参照しないか確認する！！！
@@ -197,9 +158,7 @@ void Server::splitParam(std::string casted_msg, std::string &param, std::string:
     param.clear();
     return;
   }
-  casted_msg = casted_msg.substr(pos + 1);
-  while (casted_msg[i] == ' ') i++;
-  param = casted_msg.substr(i);
+  param = casted_msg.substr(pos + 1);
 }
 
 void Server::ft_send(ClientData client, size_t send_size) {
@@ -219,6 +178,7 @@ void Server::ft_send(ClientData client, size_t send_size) {
       break;
   }
 }
+
 size_t Server::createSendMsg(const std::string &casted_msg) {
   std::memset(msg_, 0, sizeof(msg_));
   size_t i = 0;
@@ -235,7 +195,7 @@ void Server::sendCmdResponce(int code, const std::string &str, const ClientData 
   std::string resp_msg;
   size_t send_size = 0;
 
-  resp_msg = createCmdRespMsg(code, str);
+  resp_msg = createCmdRespMsg(servername_, code, str);
   send_size = createSendMsg(resp_msg);
   ft_send(client, send_size);
 }
@@ -244,7 +204,11 @@ void Server::sendCmdResponce(int code, const ClientData &client) {
   std::string resp_msg;
   size_t send_size = 0;
 
-  resp_msg = createCmdRespMsg(code);
+  resp_msg = createCmdRespMsg(servername_, code);
   send_size = createSendMsg(resp_msg);
   ft_send(client, send_size);
 }
+
+const std::string &Server::getServername() const { return servername_; }
+
+const std::string &Server::getHostname() const { return hostname_; }

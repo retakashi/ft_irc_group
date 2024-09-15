@@ -22,6 +22,6 @@ enum cmd_resp
     ERR_ALREADYREGISTRED = 462,
     ERR_PASSWDMISMATCH = 464
 };
-std::string createCmdRespMsg(int code);
-std::string createCmdRespMsg(int code, const std::string &str);
+std::string createCmdRespMsg(const std::string& servername, int code);
+std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str);
 #endif

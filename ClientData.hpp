@@ -23,7 +23,6 @@ class ClientData {
   void setUsername(const std::string& username);
   void setMode(const char mode);
   void setRealname(const std::string& realname);
-  void setUserParams(const std::string& username,const char mode, const std::string& realname);
   const std::string& getNickname() const;
   const std::string& getUsername() const;
   const std::string& getRealname() const;

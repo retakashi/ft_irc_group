@@ -9,12 +9,6 @@ void ClientData::setUsername(const std::string& username) { username_ = username
 void ClientData::setMode(const char mode) { mode_ = mode; }
 void ClientData::setRealname(const std::string& realname) { realname_ = realname; }
 
-void ClientData::setUserParams(const std::string& username,const char mode, const std::string& realname) {
-  setUsername(username);
-  setMode(mode);
-  setRealname(realname);
-}
-
 const std::string& ClientData::getNickname() const { return nickname_; }
 const std::string& ClientData::getUsername() const { return username_; }
 const std::string& ClientData::getRealname() const { return realname_; }

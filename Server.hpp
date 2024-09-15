@@ -33,6 +33,7 @@ struct user_data
 {
   std::string username;
   char mode;
+  std::string unused;
   std::string realname;
 };
 
@@ -51,12 +52,7 @@ class Server {
   void setReadfds(fd_set &read_fds);
   int getMaxSocket();
   int acceptNewClient();
-  void authenticatedNewClient(int client_sock);
-  bool isValidNickname(std::string& param, const ClientData& client);
-  bool isUserParamValid(const std::string& params, const ClientData& client);
-  bool isCompleteAuthParams(const ClientData& client);
-  bool isCompleteUserParams(const ClientData& client);
-  void ft_recv(int socket);
+  size_t ft_recv(int socket);
   void disconnectClient(ClientData client);
   std::string::size_type splitCommand(std::string casted_msg, std::string &command);
   void splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
@@ -65,8 +61,19 @@ class Server {
   void sendWelcomeToIrc(const ClientData &client);
   void sendCmdResponce(int code, const std::string &str, const ClientData &client);
   void sendCmdResponce(int code, const ClientData &client);
+  const std::string& getServername() const;
+  const std::string& getHostname() const;
+  //ClientAuth.cpp USERは認証のみ使用のため
+  void authenticatedNewClient(int client_sock);
+  bool isCompleteAuthParams(const ClientData& client);
+  void USERcmd(std::string casted_msg, std::string::size_type pos, ClientData &client);
+  bool isValidNickname(std::string& param, const ClientData& client);
+  bool isValidUSERcmdParams(std::string& params, struct user_data& user_data,  const ClientData& client);
+  bool isValidUsername(const std::string& params, std::string& username, std::string::size_type pos);
+  bool isValidMiddle(const std::string& params, char& mode, std::string& unused, std::string::size_type pos);
+  bool isValidRealname(const std::string& params, std::string& realname);
+  //Command.cpp
   void NICKcmd(std::string casted_msg, std::string::size_type pos, ClientData &client);
-  void USERcmd(std::string casted_msg, std::string::size_type pos, ClientData &client)
  public:
   Server(short port);
   ~Server();

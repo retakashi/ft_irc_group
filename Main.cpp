@@ -6,8 +6,8 @@ void sigHandler(int sig) {
   throw std::exception();
 }
 
-void putFunctionError(const char *errmsg) {
-  perror(errmsg);
+void putSignalError() {
+  perror("sigaction failed");
   throw std::exception();
 }
 
@@ -17,8 +17,8 @@ int main() {
     struct sigaction sa;
     sa.sa_flags = SA_RESTART;
      sa.sa_handler = sigHandler;
-    if (sigaction(SIGINT, &sa, NULL) < 0) putFunctionError("sigaction failed");
-    if (sigaction(SIGQUIT, &sa, NULL) < 0) putFunctionError("sigaction faild");
+    if (sigaction(SIGINT, &sa, NULL) < 0) putSignalError();
+    if (sigaction(SIGQUIT, &sa, NULL) < 0) putSignalError();
     // ここでコマンドライン引数のエラー処理を入れる。
     short port = 4242;
     Server serv(port);

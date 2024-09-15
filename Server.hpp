@@ -72,6 +72,8 @@ class Server {
   bool isValidUsername(const std::string& params, std::string& username, std::string::size_type pos);
   bool isValidMiddle(const std::string& params, char& mode, std::string& unused, std::string::size_type pos);
   bool isValidRealname(const std::string& params, std::string& realname);
+  void closeAllSocket();
+  void putFunctionError(const char *errmsg);
   //Command.cpp
   void NICKcmd(std::string casted_msg, std::string::size_type pos, ClientData &client);
  public:
@@ -81,5 +83,4 @@ class Server {
   Server &operator=(const Server &other);
   void startServer();
 };
-void putFunctionError(const char *errmsg);
 #endif

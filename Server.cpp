@@ -52,6 +52,7 @@ void Server::startServer() {
     //     }
     //   }
   }
+  closeAllSocket();
 }
 
 void Server::initServerSocket(struct sockaddr_in &sockaddr) {
@@ -207,6 +208,24 @@ void Server::sendCmdResponce(int code, const ClientData &client) {
   resp_msg = createCmdRespMsg(servername_, code);
   send_size = createSendMsg(resp_msg);
   ft_send(client, send_size);
+}
+
+void Server::putFunctionError(const char *errmsg)
+{
+  perror(errmsg);
+  closeAllSocket();
+  throw std::exception();
+}
+
+void Server::closeAllSocket()
+{
+  for(size_t i = 0;i < clients_.size();i++)
+  {
+    if (close(clients_[i].getSocket()) < 0)
+      perror("close failed");
+  }
+  if (close(socket_) < 0)
+    perror("close failed");
 }
 
 const std::string &Server::getServername() const { return servername_; }

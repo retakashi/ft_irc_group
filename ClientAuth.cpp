@@ -17,74 +17,33 @@ void Server::authenticatedNewClient(int client_sock) {
       continue;
     }
     if (command == "NICK")
-      NICKcmd(casted_msg, pos, new_client);
+      handleNICK(casted_msg, pos, new_client);
     else if (command == "USER")
-      USERcmd(casted_msg, pos, new_client);
+      handleUSER(casted_msg, pos, new_client);
   }
   clients_.push_back(new_client);
   sendWelcomeToIrc(new_client);
 }
 
 bool Server::isCompleteAuthParams(const ClientData& client) {
-  if (client.getNickname().empty() || client.getRealname().empty())
-    return false;
+  if (client.getNickname().empty() || client.getRealname().empty()) return false;
   return true;
 }
 
-void Server::USERcmd(std::string casted_msg, std::string::size_type pos, ClientData &client) {
+void Server::handleUSER(std::string casted_msg, std::string::size_type pos, ClientData& client) {
   std::string param;
   struct user_data user_data;
   user_data.mode = '\0';
   splitParam(casted_msg, param, pos);
-  if (isValidUSERcmdParams(param, user_data, client) == true) {
+  if (isValidhandleUSERParams(param, user_data, client) == true) {
     client.setUsername(user_data.username);
     client.setMode(user_data.mode);
     client.setRealname(user_data.realname);
   }
 }
 
-/*
-nicknameは最大20字まで。第一引数以外は無視
-Command: NICK
-Parameters: <nickname> [ <hopcount> ]
-*/
-bool Server::isValidNickname(std::string& param, const ClientData& client) {
-  std::string::size_type pos = 0;
-  if (param.size() <= 0) {
-    sendCmdResponce(ERR_NONICKNAMEGIVEN, client);
-    return false;
-  }
-  pos = param.find(" ");
-  if (pos != std::string::npos) {
-    param = param.substr(0, pos);
-    param[pos] = '\0';
-  }
-  if (param.size() > 20 || param.size() < 1) {
-    sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
-    return false;
-  }
-  for (size_t i = 0; i < clients_.size(); i++) {
-    if (clients_[i].getNickname() == param) {
-      sendCmdResponce(ERR_NICKNAMEINUSE, param, client);
-      return false;
-    }
-  }
-  std::string special = "[]\\`_^{}|";
-  if (!std::isalpha(param[0]) && special.find(param[0]) == std::string::npos) {
-    sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
-    return false;
-  }
-  for (size_t i = 1; param[i] != '\0'; i++) {
-    if (!std::isalnum(param[i]) && special.find(param[i]) == std::string::npos && param[i] != '-') {
-      sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
-      return false;
-    }
-  }
-  return true;
-}
-
-bool Server::isValidUSERcmdParams(std::string& params, struct user_data& user_data,
-                               const ClientData& client) {
+bool Server::isValidhandleUSERParams(std::string& params, struct user_data& user_data,
+                                     const ClientData& client) {
   size_t i = 0;
   std::string::size_type pos = 0;
   if (params.size() == 0) {
@@ -132,7 +91,7 @@ bool Server::isValidUsername(const std::string& params, std::string& username,
   return true;
 }
 
-//mode or unusedの格納も行う。
+// mode or unusedの格納も行う。
 bool Server::isValidMiddle(const std::string& params, char& mode, std::string& unused,
                            std::string::size_type pos) {
   std::string nospcrlfcl("\0\r\n ", 5);
@@ -152,7 +111,7 @@ bool Server::isValidMiddle(const std::string& params, char& mode, std::string& u
   return true;
 }
 
-//realnameの格納も行う。
+// realnameの格納も行う。
 bool Server::isValidRealname(const std::string& params, std::string& realname) {
   std::string nocrlfcl("\0\r\n", 4);
   std::string nospcrlfcl("\0\r\n ", 5);
@@ -171,8 +130,8 @@ bool Server::isValidRealname(const std::string& params, std::string& realname) {
 void Server::sendWelcomeToIrc(const ClientData& client) {
   std::stringstream ss;
   size_t send_size = 0;
-  ss << ":"<< servername_ << " 001 Welcome to the Internet Relay Network " << client.getNickname() << "!"
-     << client.getUsername() << "@" << hostname_;
+  ss << ":" << servername_ << " 001 Welcome to the Internet Relay Network " << client.getNickname()
+     << "!" << client.getUsername() << "@" << hostname_;
   send_size = createSendMsg(ss.str());
   ft_send(client, send_size);
 }

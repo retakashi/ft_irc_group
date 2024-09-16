@@ -59,15 +59,15 @@ class Server {
   void ft_send(ClientData client, size_t send_size);
   size_t createSendMsg(const std::string &casted_msg);
   void sendWelcomeToIrc(const ClientData &client);
-  void sendCmdResponce(int code, const std::string &str, const ClientData &client);
-  void sendCmdResponce(int code, const ClientData &client);
+  int sendCmdResponce(int code, const std::string &str, const ClientData &client);
+  int sendCmdResponce(int code, const ClientData &client);
   const std::string &getServername() const;
   const std::string &getHostname() const;
   // ClientAuth.cpp USERは認証のみ使用のためこっち
   void authenticatedNewClient(int client_sock);
   bool isCompleteAuthParams(const ClientData &client);
   void handleUSER(std::string casted_msg, std::string::size_type pos, ClientData &client);
-  bool isValidhandleUSERParams(std::string &params, struct user_data &user_data,
+  bool isValidUSERparams(std::string &params, struct user_data &user_data,
                                const ClientData &client);
   bool isValidUsername(const std::string &params, std::string &username,
                        std::string::size_type pos);

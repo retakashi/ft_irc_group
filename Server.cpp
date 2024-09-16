@@ -40,17 +40,25 @@ void Server::startServer() {
       std::cout << "Time out" << std::endl;
       break;
     }
-    if (FD_ISSET(socket_, &read_fds)) {
-      FD_CLR(socket_, &read_fds);
-      client_sock = acceptNewClient();
-      authenticatedNewClient(client_sock);
+    for (int i = 0; i < sel_ret; i++) {
+      if (FD_ISSET(socket_, &read_fds)) {
+        // FD_CLR(socket_, &read_fds);
+        client_sock = acceptNewClient();
+        authenticatedNewClient(client_sock);
+        for (size_t i = 0;i < clients_.size();i++)
+        {
+          if (clients_[i].getSocket() == client_sock)
+            break;
+        }
+        if (i == clients_.size())
+         FD_CLR(socket_, &read_fds);
+      }
+      else if (i < clients_.size() && FD_ISSET(clients_[i].getSocket(), &read_fds))
+      {
+        // FD_CLR(clients_[i].getSocket(), &read_fds);
+        ft_recv(clients_[i].getSocket());
+      }
     }
-    //   for (size_t i = 0; i < clients_.size(); i++) {
-    //     if (FD_ISSET(clients_[i].getSocket(), &read_fds)) {
-    //       FD_CLR(clients_[i].getSocket(), &read_fds);
-    //       ft_recv(clients_[i].getSocket());
-    //     }
-    //   }
   }
   closeAllSocket();
 }
@@ -112,6 +120,7 @@ size_t Server::ft_recv(int socket) {
     if (recv_size < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
       continue;
     else if (recv_size == 0) {
+      std::cout << "recv..." << std::endl;
       disconnectClient(socket);
       return 0;
     } else if (recv_size < 0)
@@ -120,24 +129,23 @@ size_t Server::ft_recv(int socket) {
       break;
   }
   msg_[recv_size - 1] = '\0';
+  std::cout << "recieved: " << msg_ << std::endl;
   return recv_size - 1;  // 改行文字分減らす
 }
 
 // eraseしたイテレーターを参照しないか確認する！！！
 void Server::disconnectClient(ClientData client) {
-  int socket = 0;
+  int socket = client.getSocket();
   if (clients_.size() == 0) {
-    socket = client.getSocket();
-    if (close(client.getSocket()) < 0) putFunctionError("close failed");
+    if (close(socket) < 0) putFunctionError("close failed");
   } else {
     std::vector<ClientData>::iterator it = clients_.begin();
     std::vector<ClientData>::iterator erase_it = it;
     while (it != clients_.end()) {
-      if (it->getSocket() == client.getSocket()) break;
+      if (it->getSocket() == socket) break;
       it++;
     }
-    socket = it->getSocket();
-    if (close(it->getSocket()) < 0) putFunctionError("close failed");
+    if (close(socket) < 0) putFunctionError("close failed");
     clients_.erase(it);
   }
   std::cout << "disconnected sockfd : " << socket << std::endl;
@@ -171,6 +179,7 @@ void Server::ft_send(ClientData client, size_t send_size) {
       continue;
     else if (send_ret == 0) {
       msg_[0] = '\0';
+      std::cout << "send..." << std::endl;
       disconnectClient(client);
       return;
     } else if (send_ret < 0)
@@ -192,40 +201,37 @@ size_t Server::createSendMsg(const std::string &casted_msg) {
   return i + 2;
 }
 
-void Server::sendCmdResponce(int code, const std::string &str, const ClientData &client) {
+int Server::sendCmdResponce(int code, const std::string &str, const ClientData &client) {
   std::string resp_msg;
   size_t send_size = 0;
 
   resp_msg = createCmdRespMsg(servername_, code, str);
   send_size = createSendMsg(resp_msg);
   ft_send(client, send_size);
+  return 0;
 }
 
-void Server::sendCmdResponce(int code, const ClientData &client) {
+int Server::sendCmdResponce(int code, const ClientData &client) {
   std::string resp_msg;
   size_t send_size = 0;
 
   resp_msg = createCmdRespMsg(servername_, code);
   send_size = createSendMsg(resp_msg);
   ft_send(client, send_size);
+  return 0;
 }
 
-void Server::putFunctionError(const char *errmsg)
-{
+void Server::putFunctionError(const char *errmsg) {
   perror(errmsg);
   closeAllSocket();
   throw std::exception();
 }
 
-void Server::closeAllSocket()
-{
-  for(size_t i = 0;i < clients_.size();i++)
-  {
-    if (close(clients_[i].getSocket()) < 0)
-      perror("close failed");
+void Server::closeAllSocket() {
+  for (size_t i = 0; i < clients_.size(); i++) {
+    if (close(clients_[i].getSocket()) < 0) perror("close failed");
   }
-  if (close(socket_) < 0)
-    perror("close failed");
+  if (close(socket_) < 0) perror("close failed");
 }
 
 const std::string &Server::getServername() const { return servername_; }

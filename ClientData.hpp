@@ -15,7 +15,6 @@ class ClientData {
   std::string nickname_; //最大20文字
   std::string username_;//最大20文字
   std::string realname_;//最大100文字
-
  public:
   ClientData(int socket);
   ~ClientData();

@@ -253,10 +253,38 @@ int Server::printCmdResponce(int code, const ClientData &client, const std::stri
   return (0);  // false
 }
 
+
 void Server::handleJoinCommand(ClientData* client, const std::string& channelName) {
+    // チャンネルが存在しない場合は作成
     if (channels_.find(channelName) == channels_.end()) {
         channels_[channelName] = Channel(channelName);
     }
+    
+    // クライアントをチャンネルに追加
     channels_[channelName].addClient(client);
-    channels_[channelName].broadcastMessage(client->getNickname() + " has joined the channel.", client);
+
+    // クライアントにJOINメッセージを送信
+    std::string joinMessage = ":" + client->getNickname() + " JOIN :" + channelName + "\r\n";
+    channels_[channelName].broadcastMessage(joinMessage, client);  // チャンネルの全員に通知
+
+    // クライアントにトピックを送信
+    std::string topic = channels_[channelName].getTopic();
+    std::string topicMessage = ":server 332 " + client->getNickname() + " " + channelName + " :" + topic + "\r\n";
+    client->sendMessage(topicMessage);
+
+    // クライアントにユーザーリストを送信 (RPL_NAMREPLY)
+    std::string nameReply = ":server 353 " + client->getNickname() + " = " + channelName + " :";
+    const std::vector<ClientData*>& clients = channels_[channelName].getClients();  // クライアントのリストを取得
+    for (std::vector<ClientData*>::const_iterator it = clients.begin(); it != clients.end(); ++it) {
+        ClientData* member = *it;
+        nameReply += member->getNickname() + " ";
+    }
+
+    nameReply += "\r\n";
+    client->sendMessage(nameReply);
+
+    // ユーザーリストの終了を通知 (RPL_ENDOFNAMES)
+    std::string endOfNames = ":server 366 " + client->getNickname() + " " + channelName + " :End of /NAMES list\r\n";
+    client->sendMessage(endOfNames);
 }
+

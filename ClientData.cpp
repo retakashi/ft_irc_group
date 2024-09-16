@@ -31,11 +31,11 @@ bool ClientData::isUserParamCountValid(const std::string& params) const {
   return true;
 }
 
-void ClientData::setNickname(const std::string& nickname) { nickname = nickname; }
-void ClientData::setUsername(const std::string& username) { username = username; }
-void ClientData::setHostname(const std::string& hostname) { hostname = hostname; }
-void ClientData::setServername(const std::string& servername) { servername = servername; }
-void ClientData::setRealname(const std::string& realname) { realname = realname; }
+void ClientData::setNickname(const std::string& nickname) { this->nickname = nickname; }
+void ClientData::setUsername(const std::string& username) { this->username = username; }
+void ClientData::setHostname(const std::string& hostname) { this->hostname = hostname; }
+void ClientData::setServername(const std::string& servername) { this->servername = servername; }
+void ClientData::setRealname(const std::string& realname) { this->realname = realname; }
 
 void ClientData::setUserParams(std::string params) {
   std::string user_data[4];

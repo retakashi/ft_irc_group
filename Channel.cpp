@@ -7,15 +7,16 @@ Channel::Channel() {}
 Channel::Channel(const std::string& name) : name(name) {}
 
 void Channel::addClient(ClientData* client) {
-    clients_.insert(client);
+    clients_.push_back(client);
 }
 
 void Channel::removeClient(ClientData* client) {
-    clients_.erase(client);
+    clients_.erase(std::remove(clients_.begin(), clients_.end(), client), clients_.end());
 }
 
 void Channel::broadcastMessage(const std::string& message, ClientData* sender) {
-    for (ClientData* client : clients_) {
+    for (std::vector<ClientData*>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
+        ClientData* client = *it;
         if (client != sender) {
             client->sendMessage(message);
         }
@@ -38,9 +39,17 @@ void Channel::inviteClient(ClientData* client, ClientData* target) {
 
 void Channel::setTopic(ClientData* client, const std::string& topic) {
     if (isOperator(client)) {
-        topic = topic;
+        this->topic = topic;
         broadcastMessage("The topic has been changed to: " + topic, client);
     }
+}
+
+const std::string& Channel::getTopic() const {
+    return topic;
+}
+
+const std::vector<ClientData*>& Channel::getClients() {
+    return clients_;
 }
 
 void Channel::setMode(ClientData* client, char mode, bool enable) {

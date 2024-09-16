@@ -23,6 +23,9 @@ public:
     void addOperator(ClientData* client);
     void removeOperator(ClientData* client);
     const std::string& getName() const;
+    const std::string& getTopic() const;  // トピックを取得するメソッド
+    const std::vector<ClientData*>& getClients();  // クライアントリストを取得するメソッド
+
 
 private:
     std::string name;

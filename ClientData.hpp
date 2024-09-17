@@ -18,10 +18,12 @@ class ClientData {
  public:
   ClientData(int socket);
   ~ClientData();
+  bool isCompleteAuthParams();
   void setNickname(const std::string& nickname);
   void setUsername(const std::string& username);
   void setMode(const char mode);
   void setRealname(const std::string& realname);
+  void setSocket(const int socket);
   const std::string& getNickname() const;
   const std::string& getUsername() const;
   const std::string& getRealname() const;

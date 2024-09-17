@@ -30,33 +30,28 @@ void Server::startServer() {
 
   // listenできるところまでsocketを設定
   initServerSocket(sockaddr);
-  initSelectArgs(read_fds, max_sock, timeout);
-  while (1) {
-    setReadfds(read_fds);
-    max_sock = getMaxSocket();
+  timeout.tv_sec = 50;
+  timeout.tv_usec = 0;
+  while (true) {
+    setSelectArgs(read_fds, max_sock);
     sel_ret = select(max_sock + 1, &read_fds, NULL, NULL, &timeout);
     if (sel_ret < 0) putFunctionError("select failed");
     if (sel_ret == 0) {
       std::cout << "Time out" << std::endl;
       break;
     }
-    for (int i = 0; i < sel_ret; i++) {
-      if (FD_ISSET(socket_, &read_fds)) {
-        // FD_CLR(socket_, &read_fds);
-        client_sock = acceptNewClient();
-        authenticatedNewClient(client_sock);
-        for (size_t i = 0;i < clients_.size();i++)
-        {
-          if (clients_[i].getSocket() == client_sock)
-            break;
+    if (FD_ISSET(socket_, &read_fds))
+      client_sock = acceptNewClient();
+    for (size_t i = 0; i < clients_.size(); i++) {
+      if (FD_ISSET(clients_[i].getSocket(), &read_fds)) {
+        if (clients_[i].isCompleteAuthParams() == false)
+          authenticatedNewClient(clients_[i]);
+        else {
+          // チャンネルとか認証以外はここ
+          ssize_t size = ft_recv(clients_[i].getSocket());
+          if (size > 0)
+          ft_send(clients_[i], size);
         }
-        if (i == clients_.size())
-         FD_CLR(socket_, &read_fds);
-      }
-      else if (i < clients_.size() && FD_ISSET(clients_[i].getSocket(), &read_fds))
-      {
-        // FD_CLR(clients_[i].getSocket(), &read_fds);
-        ft_recv(clients_[i].getSocket());
       }
     }
   }
@@ -79,25 +74,16 @@ void Server::initServerSocket(struct sockaddr_in &sockaddr) {
   if (fcntl(socket_, F_SETFL, O_NONBLOCK) < 0) putFunctionError("fcntl failed");
 }
 
-void Server::initSelectArgs(fd_set &read_fds, int &socket_max, timeval &timeout) {
+void Server::setSelectArgs(fd_set &read_fds, int &socket_max) {
   FD_ZERO(&read_fds);
-  socket_max = getMaxSocket();
-  timeout.tv_sec = 5000;
-  timeout.tv_usec = 0;
-}
-
-void Server::setReadfds(fd_set &read_fds) {
   FD_SET(socket_, &read_fds);
-  for (size_t i = 0; i < clients_.size(); i++) FD_SET(clients_[i].getSocket(), &read_fds);
-}
-
-int Server::getMaxSocket() {
-  int max = 0;
-  if (clients_.size() == 0) return socket_;
-  for (size_t i = 0; i < clients_.size(); i++) {
-    if (max < clients_[i].getSocket()) max = clients_[i].getSocket();
+  socket_max = socket_;
+  for (size_t i = 0; i < clients_.size(); i++)
+  {
+    FD_SET(clients_[i].getSocket(), &read_fds);
+    if (socket_max < clients_[i].getSocket())
+        socket_max = clients_[i].getSocket();
   }
-  return max;
 }
 
 int Server::acceptNewClient() {
@@ -109,27 +95,32 @@ int Server::acceptNewClient() {
     putFunctionError("accept failed");
   if (fcntl(new_client_sock, F_SETFL, O_NONBLOCK) < 0) putFunctionError("fcntl failed");
   std::cout << "connected sockfd: " << new_client_sock << std::endl;
+  ClientData new_client(new_client_sock);
+  clients_.push_back(new_client);
   return (new_client_sock);
 }
 
-size_t Server::ft_recv(int socket) {
-  int recv_size = 0;
+ssize_t Server::ft_recv(int socket) {
+  ssize_t recv_size = 0;
 
   while (1) {
     recv_size = recv(socket, msg_, MAX_BUFSIZE, 0);
     if (recv_size < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
       continue;
     else if (recv_size == 0) {
-      std::cout << "recv..." << std::endl;
+      std::cout << "client send EOF..." << std::endl;
       disconnectClient(socket);
       return 0;
     } else if (recv_size < 0)
+    {
       putFunctionError("recv failed");
+      return -1;
+    }
     else
       break;
   }
   msg_[recv_size - 1] = '\0';
-  std::cout << "recieved: " << msg_ << std::endl;
+  // std::cout << "recieved: " << msg_ << std::endl;
   return recv_size - 1;  // 改行文字分減らす
 }
 
@@ -151,41 +142,34 @@ void Server::disconnectClient(ClientData client) {
   std::cout << "disconnected sockfd : " << socket << std::endl;
 }
 
-std::string::size_type Server::splitCommand(std::string casted_msg, std::string &command) {
+void Server::splitCmdAndParam(std::string casted_msg, std::string &command,
+                                  std::string &param) {
   std::string::size_type pos = casted_msg.find(" ");
   if (pos != std::string::npos) {
     command = casted_msg.substr(0, pos);
     command[pos] = '\0';
-  } else
+    param = casted_msg.substr(pos + 1);
+  } else {
     command = casted_msg;
-  return pos;
-}
-
-void Server::splitParam(std::string casted_msg, std::string &param, std::string::size_type pos) {
-  size_t i = 0;
-  if (pos == std::string::npos) {
     param.clear();
-    return;
   }
-  param = casted_msg.substr(pos + 1);
 }
 
-void Server::ft_send(ClientData client, size_t send_size) {
-  int send_ret = 0;
-
+ssize_t Server::ft_send(ClientData client, size_t send_size) {
+  ssize_t send_ret = 0;
   while (1) {
     send_ret = send(client.getSocket(), msg_, send_size, 0);
     if (send_ret < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
       continue;
     else if (send_ret == 0) {
       msg_[0] = '\0';
-      std::cout << "send..." << std::endl;
+      std::cout << "client send EOF..." << std::endl;
       disconnectClient(client);
-      return;
+      return 0;
     } else if (send_ret < 0)
       putFunctionError("send failed");
     else
-      break;
+      return send_size;
   }
 }
 

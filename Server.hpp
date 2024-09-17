@@ -48,15 +48,12 @@ class Server {
   char msg_[MAX_BUFSIZE];
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);
-  void initSelectArgs(fd_set &read_fds, int &max_sock, struct timeval &timeout);
-  void setReadfds(fd_set &read_fds);
-  int getMaxSocket();
+  void setSelectArgs(fd_set &read_fds, int &socket_max);
   int acceptNewClient();
-  size_t ft_recv(int socket);
+  ssize_t ft_recv(int socket);
   void disconnectClient(ClientData client);
-  std::string::size_type splitCommand(std::string casted_msg, std::string &command);
-  void splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
-  void ft_send(ClientData client, size_t send_size);
+  void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
+  ssize_t ft_send(ClientData client, size_t send_size);
   size_t createSendMsg(const std::string &casted_msg);
   void sendWelcomeToIrc(const ClientData &client);
   int sendCmdResponce(int code, const std::string &str, const ClientData &client);
@@ -64,9 +61,9 @@ class Server {
   const std::string &getServername() const;
   const std::string &getHostname() const;
   // ClientAuth.cpp USERは認証のみ使用のためこっち
-  void authenticatedNewClient(int client_sock);
+  void authenticatedNewClient(ClientData &client);
   bool isCompleteAuthParams(const ClientData &client);
-  void handleUSER(std::string casted_msg, std::string::size_type pos, ClientData &client);
+  void handleUSER(std::string param, ClientData &client);
   bool isValidUSERparams(std::string &params, struct user_data &user_data,
                                const ClientData &client);
   bool isValidUsername(const std::string &params, std::string &username,
@@ -77,7 +74,7 @@ class Server {
   void closeAllSocket();
   void putFunctionError(const char *errmsg);
   // Command.cpp
-  void handleNICK(std::string casted_msg, std::string::size_type pos, ClientData &client);
+  void handleNICK(std::string param, ClientData &client);
   bool isValidNickname(std::string &param, const ClientData &client);
  public:
   Server(short port);

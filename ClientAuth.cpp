@@ -1,40 +1,30 @@
 #include "Server.hpp"
 
-/* PASSをループ前に追加
-PASSは一番最初に認証しなければならない(MUST) */
-void Server::authenticatedNewClient(int client_sock) {
+/* PASSは一番最初に認証しなければならない(MUST) */
+void Server::authenticatedNewClient(ClientData& client) {
   std::string command;
-  std::string::size_type pos = 0;
-  ClientData new_client(client_sock);
-
-  while (isCompleteAuthParams(new_client) == false) {
-    size_t recv_size;
-    recv_size = ft_recv(client_sock);
+  std::string param;
+    ssize_t recv_size = ft_recv(client.getSocket());
+    if (recv_size == 0)
+      return ;
     std::string casted_msg(msg_, recv_size);
-    pos = splitCommand(casted_msg, command);
+
+    splitCmdAndParam(casted_msg, command, param);
     if (command != "NICK" && command != "USER") {
-      sendCmdResponce(ERR_NOTREGISTERED, new_client);
-      continue;
+      sendCmdResponce(ERR_NOTREGISTERED, client);
+      return ;
     }
     if (command == "NICK")
-      handleNICK(casted_msg, pos, new_client);
+      handleNICK(param, client);
     else if (command == "USER")
-      handleUSER(casted_msg, pos, new_client);
-  }
-  clients_.push_back(new_client);
-  sendWelcomeToIrc(new_client);
+      handleUSER(param, client);
+  if (client.isCompleteAuthParams() == true)
+  sendWelcomeToIrc(client);
 }
 
-bool Server::isCompleteAuthParams(const ClientData& client) {
-  if (client.getNickname().empty() || client.getRealname().empty()) return false;
-  return true;
-}
-
-void Server::handleUSER(std::string casted_msg, std::string::size_type pos, ClientData& client) {
-  std::string param;
+void Server::handleUSER(std::string param, ClientData& client) {
   struct user_data user_data;
   user_data.mode = '\0';
-  splitParam(casted_msg, param, pos);
   if (isValidUSERparams(param, user_data, client) == true) {
     client.setUsername(user_data.username);
     client.setMode(user_data.mode);

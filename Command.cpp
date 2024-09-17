@@ -1,10 +1,7 @@
 #include "Server.hpp"
 
-void Server::handleNICK(std::string casted_msg, std::string::size_type pos, ClientData& client) {
-  std::string param;
-  splitParam(casted_msg, param, pos);
+void Server::handleNICK(std::string param, ClientData& client) {
   if (isValidNickname(param, client) == true) client.setNickname(param);
-  std::cout << "param: " << client.getNickname() << std::endl;
 }
 
 /*

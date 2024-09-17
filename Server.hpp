@@ -15,56 +15,83 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
-#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <cstdlib>
-#include <errno.h>
-
+#include <map>
 
 #include "ClientData.hpp"
+#include "CmdResponse.hpp"
 
 class ClientData;
-// ircのメッセージの長さは、最大で512文字（CR-LFを含む）
-// （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
-// ->それ以上はぶった斬る
-#define MAX_BUFSIZE 510
-#define SUCCESS 0
-#define FAILURE -1
-#define ERR_PASSWDMISMATCH 464
+/* ircのメッセージの長さは、最大で512文字（CR-LFを含む）
+（つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
+->それ以上はぶった斬る
+*/
+
 // メンバー変数は最後に_を付けてます
 static bool	g_sig_flg;
+
+struct	user_data 
+{
+  std::string	username;
+  char			mode;
+  std::string	unused;
+  std::string	realname;
+};
+
 class Server 
 {
 	private:
+		static const int	MAX_BUFSIZE = 510;
+		short				port_;
+		int					socket_;
+		std::string			servername_;
+		std::string			hostname_;
+		std::vector<ClientData> clients_;
+		char				msg_[MAX_BUFSIZE];
+		std::string			serverpass_;
+
+
+
 		Server();
-  		short					port_;
-		int						socket_;
-		std::string				server_password_;
-		// クライアントのsocket 後々消して、Clientクラスに入れる？
-		std::vector<ClientData>	clients_;
-		char					msg_[MAX_BUFSIZE];
-		void					initServerSocket(struct sockaddr_in &sockaddr);
-		void					initSelectArgs(fd_set &read_fds, int &max_sock, struct timeval &timeout);
-		void					setReadfds(fd_set &read_fds);
-		int						getMaxSocket();
-		int						acceptNewClient();
-		int						authenticateNewClient(int client_sock);
-		void					ft_recv(int socket);
-		void					disconnectClient(ClientData client);
-		std::string::size_type	splitCommand(std::string casted_msg, std::string &command);
-		void					splitParam(std::string casted_msg, std::string &param, std::string::size_type pos);
-		void					ft_send(ClientData client, size_t send_size);
-		size_t					createSendMsg(const std::string& casted_msg);
-		int						printCmdResponce(int code, const ClientData& client);
-		int						printCmdResponce(int code, const ClientData& client, std::string command);
+		void	initServerSocket(struct sockaddr_in &sockaddr);
+		void	setSelectArgs(fd_set &read_fds, int &socket_max);
+		int		acceptNewClient();
+		ssize_t	ft_recv(int socket);
+		void	disconnectClient(ClientData client);
+		void	splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
+		ssize_t	ft_send(ClientData client, size_t send_size);
+		size_t	createSendMsg(const std::string &casted_msg);
+		void	sendWelcomeToIrc(const ClientData &client);
+		int		sendCmdResponce(int code, const std::string &str, const ClientData &client);
+		int		sendCmdResponce(int code, const ClientData &client);
+		const	std::string &getServername() const;
+		const	std::string &getHostname() const;
+		// ClientAuth.cpp USERは認証のみ使用のためこっち
+		void	authenticatedNewClient(ClientData &client);
+		bool	isCompleteAuthParams(const ClientData &client);
+		void	handleUSER(std::string param, ClientData &client);
+		bool	isValidUSERparams(std::string &params, struct user_data &user_data,
+                            	const ClientData &client);
+		bool	isValidUsername(const std::string &params, std::string &username,
+                    			std::string::size_type pos);
+  		bool	isValidMiddle(const std::string &params, char &mode, std::string &unused,
+                    			std::string::size_type pos);
+		bool	isValidRealname(const std::string &params, std::string &realname);
+		void	closeAllSocket();
+		void	putFunctionError(const char *errmsg);
+		// Command.cpp
+		void	handleNICK(std::string param, ClientData &client);
+		bool	isValidNickname(std::string &param, const ClientData &client);
+		void	handle_pass(std::string param, ClientData& client);
+		void	handle_join(const std::string& params, ClientData& client);
+		void	handle_kick(const std::string& params, ClientData& client);
+		void	handle_commands(std::string command, std::string params, ClientData& client);
 	public:
-		Server(short port, const std::string& password);
+		Server(short port, std::string password);
 		~Server();
 		Server(const Server &other);
 		Server &operator=(const Server &other);
-		void					startServer();
+		void	startServer();
 };
-void							putFunctionError(const char *errmsg);
 #endif

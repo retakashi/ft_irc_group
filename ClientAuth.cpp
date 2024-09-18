@@ -2,39 +2,26 @@
 
 /* PASSは一番最初に認証しなければならない(MUST) */
 void Server::authenticatedNewClient(ClientData& client) {
-  std::string command;
-  std::string param;
+    std::string command;
+    std::string param;
     ssize_t recv_size = ft_recv(client.getSocket());
-    if (recv_size == 0)
-      return ;
-    std::string casted_msg_pass(msg_, recv_size);
-
-
-    // PASSの部分
-    splitCmdAndParam(casted_msg_pass, command, param);
-    splitCmdAndParam(casted_msg_pass, command, param);
-    if (command == "PASS") 
-      handle_pass(param, client);
-    else 
-    {
-      sendCmdResponce(ERR_NOTREGISTERED, client);
-      return ;
-    }
-    // PASSの部分
-
-    recv_size = ft_recv(client.getSocket());
     if (recv_size == 0)
       return ;
     std::string casted_msg(msg_, recv_size);
     splitCmdAndParam(casted_msg, command, param);
-    if (command != "NICK" && command != "USER") {
+    if (command != "PASS" && !client.getAuth()) {
       sendCmdResponce(ERR_NOTREGISTERED, client);
       return ;
     }
-    if (command == "NICK")
-      handleNICK(param, client);
-    else if (command == "USER")
-      handleUSER(param, client);
+    if (command == "PASS") 
+      handle_pass(param, client);
+    if (client.getAuth())
+    {
+      if (command == "NICK")
+        handleNICK(param, client);
+      else if (command == "USER")
+        handleUSER(param, client);
+    }
   if (client.isCompleteAuthParams() == true)
   sendWelcomeToIrc(client);
 }
@@ -55,6 +42,7 @@ bool Server::isValidUSERparams(std::string& params, struct user_data& user_data,
   size_t i = 0;
   std::string::size_type pos = 0;
   if (params.size() == 0) return sendCmdResponce(ERR_NEEDMOREPARAMS, "USER", client);
+  std::cout << "ここまできた4" << std::endl;
   while (user_data.realname.empty()) {
     pos = params.find(' ');
     if ((user_data.username.empty() || user_data.mode == '\0' || user_data.unused.empty()) &&

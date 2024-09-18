@@ -66,14 +66,14 @@ void Server::handle_commands(std::string command, std::string params, ClientData
     // ひとまず思いつく限りのコマンドにしましたが、適宜追加して行く。NICK ,USER ,PASSは既存のものに投げています。まだ、使用はしていない。
     if (command == "PASS") 
         handle_pass(params, client); 
-    else if (command == "JOIN") 
-        handle_join(params, client); 
     else if (command == "NICK") 
         handleNICK(params, client); 
     else if (command == "USER") 
         handleUSER(params, client); 
     else if (command == "KICK") 
         handle_kick(params, client); 
+    else if (command == "JOIN") 
+        handle_join(params, client); 
     else 
     {
         std::cout << "Unknown command: " << command << std::endl;

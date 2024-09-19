@@ -1,7 +1,8 @@
 NAME = Server
 CXX = c++
 CXXFLAGS = -std=c++98 -MMD -MP -pedantic
-SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp CmdResponse.cpp Command.cpp
+SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp CmdResponse.cpp Commands.cpp NICK.cpp
+VPATH = ./command
 DEPFILES = $(OBJS:%.o=%.d)
 OBJS = ${addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o)}
 OBJS_DIR = objs

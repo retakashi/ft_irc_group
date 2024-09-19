@@ -1,4 +1,4 @@
-#include "Server.hpp"
+#include "../Server.hpp"
 
 void Server::handleNICK(std::string param, ClientData& client) {
   if (isValidNickname(param, client) == true) client.setNickname(param);
@@ -40,20 +40,4 @@ bool Server::isValidNickname(std::string& param, const ClientData& client) {
       return sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
   }
   return true;
-}
-
-void Server::handle_pass(std::string param, ClientData& client)
-{
-  std::cout << "starting PASS authentication: " << param << std::endl;
-  if (client.getAuth())
-  {
-    sendCmdResponce(ERR_ALREADYREGISTRED,client);
-    return ;
-  }
-  if (this->serverpass_ == param)
-    client.setAuth(true);
-  else if (param.empty())
-    sendCmdResponce(ERR_NEEDMOREPARAMS,"PASS",client);
-  else 
-    sendCmdResponce(ERR_PASSWDMISMATCH, client);
 }

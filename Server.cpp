@@ -89,6 +89,7 @@ void Server::handleClientCommunication(ClientData &client) {
     authenticatedNewClient(client);
   else {
     // チャンネルとか認証以外はここ
+    handleCommands(client);
     ssize_t size = ft_recv(client.getSocket());
     if (size > 0) ft_send(client, size);
   }

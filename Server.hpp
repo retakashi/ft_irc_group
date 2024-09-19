@@ -37,8 +37,7 @@ struct user_data {
   std::string realname;
 };
 
-struct startserv_data 
-{
+struct startserv_data {
   struct sockaddr_in sockaddr;
   fd_set read_fds;
   int max_sock;
@@ -58,7 +57,7 @@ class Server {
   std::vector<ClientData> clients_;
   char msg_[MAX_BUFSIZE];
 
-  //Server.cpp
+  // Server.cpp
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);
   void setSelectArgs(fd_set &read_fds, int &socket_max);
@@ -86,13 +85,14 @@ class Server {
                      std::string::size_type pos);
   bool isValidRealname(const std::string &params, std::string &realname);
   void sendWelcomeToIrc(const ClientData &client);
-  // Command.cpp
+  // Commandディレクトリ
+  void handleCommands(ClientData &client);
   void handleNICK(std::string param, ClientData &client);
   bool isValidNickname(std::string &param, const ClientData &client);
-  void handle_pass(std::string param, ClientData &client);
-  void handle_join(const std::string &params, ClientData &client);
-  void handle_kick(const std::string &params, ClientData &client);
-  void handle_commands(std::string command, std::string params, ClientData &client);
+  void handlePass(std::string param, ClientData &client);
+  void handleJoin(const std::string &params, ClientData &client);
+  void handleKick(const std::string &params, ClientData &client);
+  void handleTopic(const std::string &params, ClientData &client);
 
  public:
   Server(short port, std::string password);

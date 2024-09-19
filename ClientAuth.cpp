@@ -12,8 +12,8 @@ void Server::authenticatedNewClient(ClientData& client) {
     sendCmdResponce(ERR_NOTREGISTERED, client);
     return;
   }
-  if (command == "PASS") handle_pass(param, client);
-  if (client.getAuth()) {
+  if (command == "PASS") handlePass(param, client);
+  else if (client.getAuth()) {
     if (command != "NICK" && command != "USER") {
       sendCmdResponce(ERR_NOTREGISTERED, client);
       return;
@@ -24,6 +24,27 @@ void Server::authenticatedNewClient(ClientData& client) {
       handleUSER(param, client);
   }
   if (client.isCompleteAuthParams() == true) sendWelcomeToIrc(client);
+}
+
+void Server::handlePass(std::string param, ClientData& client)
+{
+  std::cout << "starting PASS authentication: " << param << std::endl;
+  if (client.getAuth())
+  {
+    sendCmdResponce(ERR_ALREADYREGISTRED,client);
+    return ;
+  }
+  if (param.empty())
+  {
+    sendCmdResponce(ERR_NEEDMOREPARAMS,"PASS",client);
+    return ;
+  }
+  if (this->serverpass_ != param)
+  {
+    sendCmdResponce(ERR_PASSWDMISMATCH, client);
+    return ;
+  }
+  client.setAuth(true);
 }
 
 void Server::handleUSER(std::string param, ClientData& client) {

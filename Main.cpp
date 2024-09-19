@@ -21,7 +21,8 @@ int main() {
     if (sigaction(SIGQUIT, &sa, NULL) < 0) putSignalError();
     // ここでコマンドライン引数のエラー処理を入れる。
     short port = 4242;
-    Server serv(port);
+    std::string password = "raza";
+    Server serv(port, password);
     serv.startServer();
   } catch (const std::exception &e) {
   }

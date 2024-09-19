@@ -4,22 +4,26 @@
 void Server::authenticatedNewClient(ClientData& client) {
   std::string command;
   std::string param;
-    ssize_t recv_size = ft_recv(client.getSocket());
-    if (recv_size == 0)
-      return ;
-    std::string casted_msg(msg_, recv_size);
-
-    splitCmdAndParam(casted_msg, command, param);
+  ssize_t recv_size = ft_recv(client.getSocket());
+  if (recv_size == 0) return;
+  std::string casted_msg(msg_, recv_size);
+  splitCmdAndParam(casted_msg, command, param);
+  if (!client.getAuth() && command != "PASS") {
+    sendCmdResponce(ERR_NOTREGISTERED, client);
+    return;
+  }
+  if (command == "PASS") handle_pass(param, client);
+  if (client.getAuth()) {
     if (command != "NICK" && command != "USER") {
       sendCmdResponce(ERR_NOTREGISTERED, client);
-      return ;
+      return;
     }
     if (command == "NICK")
       handleNICK(param, client);
     else if (command == "USER")
       handleUSER(param, client);
-  if (client.isCompleteAuthParams() == true)
-  sendWelcomeToIrc(client);
+  }
+  if (client.isCompleteAuthParams() == true) sendWelcomeToIrc(client);
 }
 
 void Server::handleUSER(std::string param, ClientData& client) {

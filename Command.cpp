@@ -41,3 +41,19 @@ bool Server::isValidNickname(std::string& param, const ClientData& client) {
   }
   return true;
 }
+
+void Server::handle_pass(std::string param, ClientData& client)
+{
+  std::cout << "starting PASS authentication: " << param << std::endl;
+  if (client.getAuth())
+  {
+    sendCmdResponce(ERR_ALREADYREGISTRED,client);
+    return ;
+  }
+  if (this->serverpass_ == param)
+    client.setAuth(true);
+  else if (param.empty())
+    sendCmdResponce(ERR_NEEDMOREPARAMS,"PASS",client);
+  else 
+    sendCmdResponce(ERR_PASSWDMISMATCH, client);
+}

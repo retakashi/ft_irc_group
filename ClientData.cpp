@@ -1,7 +1,7 @@
 #include "ClientData.hpp"
 
 ClientData::ClientData() {}
-ClientData::ClientData(int socket) : socket_(socket),mode_('\0'), is_authenticated(false) {}
+ClientData::ClientData(int socket) : socket_(socket),mode_('\0'),is_authenticated(false) {}
 ClientData::~ClientData() {}
 
 bool ClientData::isCompleteAuthParams() {

@@ -2,28 +2,49 @@
 
 /* PASSは一番最初に認証しなければならない(MUST) */
 void Server::authenticatedNewClient(ClientData& client) {
-    std::string command;
-    std::string param;
-    ssize_t recv_size = ft_recv(client.getSocket());
-    if (recv_size == 0)
-      return ;
-    std::string casted_msg(msg_, recv_size);
-    splitCmdAndParam(casted_msg, command, param);
-    if (command != "PASS" && !client.getAuth()) {
+  std::string command;
+  std::string param;
+  ssize_t recv_size = ft_recv(client.getSocket());
+  if (recv_size == 0) return;
+  std::string casted_msg(msg_, recv_size);
+  splitCmdAndParam(casted_msg, command, param);
+  if (!client.getAuth() && command != "PASS") {
+    sendCmdResponce(ERR_NOTREGISTERED, client);
+    return;
+  }
+  if (command == "PASS") handlePass(param, client);
+  else if (client.getAuth()) {
+    if (command != "NICK" && command != "USER") {
       sendCmdResponce(ERR_NOTREGISTERED, client);
-      return ;
+      return;
     }
-    if (command == "PASS") 
-      handle_pass(param, client);
-    if (client.getAuth())
-    {
-      if (command == "NICK")
-        handleNICK(param, client);
-      else if (command == "USER")
-        handleUSER(param, client);
-    }
-  if (client.isCompleteAuthParams() == true)
-  sendWelcomeToIrc(client);
+    if (command == "NICK")
+      handleNICK(param, client);
+    else if (command == "USER")
+      handleUSER(param, client);
+  }
+  if (client.isCompleteAuthParams() == true) sendWelcomeToIrc(client);
+}
+
+void Server::handlePass(std::string param, ClientData& client)
+{
+  std::cout << "starting PASS authentication: " << param << std::endl;
+  if (client.getAuth())
+  {
+    sendCmdResponce(ERR_ALREADYREGISTRED,client);
+    return ;
+  }
+  if (param.empty())
+  {
+    sendCmdResponce(ERR_NEEDMOREPARAMS,"PASS",client);
+    return ;
+  }
+  if (this->serverpass_ != param)
+  {
+    sendCmdResponce(ERR_PASSWDMISMATCH, client);
+    return ;
+  }
+  client.setAuth(true);
 }
 
 void Server::handleUSER(std::string param, ClientData& client) {
@@ -42,7 +63,6 @@ bool Server::isValidUSERparams(std::string& params, struct user_data& user_data,
   size_t i = 0;
   std::string::size_type pos = 0;
   if (params.size() == 0) return sendCmdResponce(ERR_NEEDMOREPARAMS, "USER", client);
-  std::cout << "ここまできた4" << std::endl;
   while (user_data.realname.empty()) {
     pos = params.find(' ');
     if ((user_data.username.empty() || user_data.mode == '\0' || user_data.unused.empty()) &&

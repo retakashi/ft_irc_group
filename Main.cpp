@@ -11,10 +11,8 @@ void putSignalError() {
   throw std::exception();
 }
 
-int main() 
-{
-  try 
-  {
+int main() {
+  try {
     g_sig_flg = false;
     struct sigaction sa;
     sa.sa_flags = SA_RESTART;
@@ -26,9 +24,7 @@ int main()
     std::string password = "raza";
     Server serv(port, password);
     serv.startServer();
-  } 
-  catch (const std::exception &e) 
-  {
+  } catch (const std::exception &e) {
   }
   return 0;
 }

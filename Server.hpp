@@ -59,40 +59,49 @@ class Server {
 
   // Server.cpp
   Server();
-  void initServerSocket(struct sockaddr_in &sockaddr);
-  void setSelectArgs(fd_set &read_fds, int &socket_max);
-  int acceptNewClient();
-  void handleClientCommunication(ClientData &client);
-  ssize_t ft_recv(int socket);
-  void disconnectClient(ClientData client);
-  void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
-  ssize_t ft_send(ClientData client, size_t send_size);
-  size_t createSendMsg(const std::string &casted_msg);
-  int sendCmdResponce(int code, const std::string &str, const ClientData &client);
-  int sendCmdResponce(int code, const ClientData &client);
+  void  initServerSocket(struct sockaddr_in &sockaddr);
+  void  setSelectArgs(fd_set &read_fds, int &socket_max);
   const std::string &getServername() const;
   const std::string &getHostname() const;
-  void putFunctionError(const char *errmsg);
-  void closeAllSocket();
+  void  closeAllSocket();
+  // Utils.cppに移行
+  void  disconnectClient(ClientData client);
+  void  handleClientCommunication(ClientData &client);
+  void  putFunctionError(const char *errmsg);
+  void  splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
+  // Receive.cpp
+  ssize_t ft_recv(int socket);
+  // Send.cpp
+  ssize_t ft_send(ClientData client, size_t send_size);
+  size_t  createSendMsg(const std::string &casted_msg);
+  int     sendCmdResponce(int code, const std::string &str, const ClientData &client);
+  int     sendCmdResponce(int code, const ClientData &client);
   // ClientAuth.cpp USERは認証のみ使用のためこっち
-  void authenticatedNewClient(ClientData &client);
-  void handleUSER(std::string param, ClientData &client);
-  bool isValidUSERparams(std::string &params, struct user_data &user_data,
+  int   acceptNewClient();
+  void  authenticatedNewClient(ClientData &client);
+  void  sendWelcomeToIrc(const ClientData &client);
+
+  // ->Commandディレクトリ
+  // Commands.cpp
+  void  handleCommands(ClientData &client);
+  // USER.cpp
+  void  handleUSER(std::string param, ClientData &client);
+  bool  isValidUSERparams(std::string &params, struct user_data &user_data,
                          const ClientData &client);
-  bool isValidUsername(const std::string &params, std::string &username,
+  bool  isValidUsername(const std::string &params, std::string &username,
                        std::string::size_type pos);
-  bool isValidMiddle(const std::string &params, char &mode, std::string &unused,
+  bool  isValidMiddle(const std::string &params, char &mode, std::string &unused,
                      std::string::size_type pos);
-  bool isValidRealname(const std::string &params, std::string &realname);
-  void sendWelcomeToIrc(const ClientData &client);
-  // Commandディレクトリ
-  void handleCommands(ClientData &client);
-  void handleNICK(std::string param, ClientData &client);
-  bool isValidNickname(std::string &param, const ClientData &client);
-  void handlePass(std::string param, ClientData &client);
-  void handleJoin(const std::string &params, ClientData &client);
-  void handleKick(const std::string &params, ClientData &client);
-  void handleTopic(const std::string &params, ClientData &client);
+  bool  isValidRealname(const std::string &params, std::string &realname);
+  // NICK.cpp
+  void  handleNICK(std::string param, ClientData &client);
+  bool  isValidNickname(std::string &param, const ClientData &client);
+  // PASS.cpp
+  void  handlePass(std::string param, ClientData &client);
+  // ここから先は各自で追加していく。
+  void  handleJoin(const std::string &params, ClientData &client);
+  void  handleKick(const std::string &params, ClientData &client);
+  void  handleTopic(const std::string &params, ClientData &client);
 
  public:
   Server(short port, std::string password);

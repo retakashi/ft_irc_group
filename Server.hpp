@@ -17,6 +17,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ClientData.hpp"
 #include "CmdResponse.hpp"
@@ -55,6 +56,9 @@ class Server {
   std::string servername_;
   std::string hostname_;
   std::vector<ClientData> clients_;
+
+  //今後ここにチャンネルのmapを用意して運用する。getter, setterも作っておく？
+  // std::map<channel_name ,Channel*> channels_; 
   char msg_[MAX_BUFSIZE];
 
   // Server.cpp

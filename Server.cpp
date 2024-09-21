@@ -215,3 +215,5 @@ void Server::closeAllSocket() {
 const std::string &Server::getServername() const { return servername_; }
 
 const std::string &Server::getHostname() const { return hostname_; }
+
+// これはうまくいっているのか確認しています。

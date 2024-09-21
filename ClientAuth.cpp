@@ -156,3 +156,6 @@ void Server::sendWelcomeToIrc(const ClientData& client) {
   send_size = createSendMsg(ss.str());
   ft_send(client, send_size);
 }
+
+
+//  これってうまくいったのかな？もしかして

@@ -73,6 +73,8 @@ class Server {
   void  handleClientCommunication(ClientData &client);
   void  putFunctionError(const char *errmsg);
   void  splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
+      //このclientsのgetterは後で別に移動させても良いかもしれません。
+      ClientData*   getClientByNickname(const std::string& nickname);
   // Receive.cpp
   ssize_t ft_recv(int socket);
   // Send.cpp
@@ -102,6 +104,10 @@ class Server {
   bool  isValidNickname(std::string &param, const ClientData &client);
   // PASS.cpp
   void  handlePass(std::string param, ClientData &client);
+  // PRIVMSG.cpp
+  void  handlePrivateMessage(const std::string param, ClientData &client);
+  void  handle_privmsg_channel(std::string targets, std::string message, ClientData &client);
+  void  handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
   // ここから先は各自で追加していく。
   void  handleJoin(const std::string &params, ClientData &client);
   void  handleKick(const std::string &params, ClientData &client);

@@ -44,3 +44,13 @@ void Server::putFunctionError(const char *errmsg) {
   closeAllSocket();
   throw std::exception();
 }
+
+ClientData* Server::getClientByNickname(const std::string& nickname) 
+{
+    for (std::vector<ClientData>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
+        if (it->getNickname() == nickname)
+            return &(*it);
+    }
+    return NULL;
+}
+

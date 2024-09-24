@@ -10,12 +10,12 @@ void Server::handleCommands(ClientData &client)
   splitCmdAndParam(casted_msg, command, params);
   if (command == "NICK")
         handleNICK(params, client);
+  else if (command == "PRIVMSG")
+      handlePrivateMessage(params, client);
     // else if (command == "OPER")
     //     handleOper(params, client);
-    else if (command == "MODE")
-        handleMODE(params, client);
-    // else if (command == "PRIVMSG")
-    //     handlePrivmsg(params, client);
+    // else if (command == "MODE")
+    //     handleMode(params, client);
     // else if (command == "NOTICE")
     //     handleNotice(params, client);
     // if (command == "JOIN") 

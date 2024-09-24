@@ -47,7 +47,8 @@ struct startserv_data {
   int client_sock;
 };
 
-class Server {
+class Server 
+{
  private:
   static const int MAX_BUFSIZE = 510;
   short port_;

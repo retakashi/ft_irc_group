@@ -61,9 +61,6 @@ void  Server::handle_privmsg_personal(std::string targets, std::string message, 
     std::istringstream iss(targets);
     std::string target;
 
-    // メッセージ内容の抽出（':'以降のすべて）
-    if (message[0] == ':') 
-        message = message.substr(1);
     while (getline(iss, target, ','))
     {
         ClientData* recipient = getClientByNickname(target);

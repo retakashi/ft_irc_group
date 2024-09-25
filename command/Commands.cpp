@@ -8,14 +8,15 @@ void Server::handleCommands(ClientData &client)
   if (recv_size == 0) return;
   std::string casted_msg(msg_, recv_size);
   splitCmdAndParam(casted_msg, command, params);
+  channel_.insert(std::make_pair("channelname",&clients_[0]));
   if (command == "NICK")
         handleNICK(params, client);
   else if (command == "PRIVMSG")
       handlePrivateMessage(params, client);
     // else if (command == "OPER")
     //     handleOper(params, client);
-    // else if (command == "MODE")
-    //     handleMode(params, client);
+    else if (command == "MODE")
+        handleMODE(params, client);
     // else if (command == "NOTICE")
     //     handleNotice(params, client);
     // if (command == "JOIN") 

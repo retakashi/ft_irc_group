@@ -20,9 +20,11 @@
 #include <map>
 
 #include "ClientData.hpp"
+#include "Channel.hpp"
 #include "CmdResponse.hpp"
 
 class ClientData;
+class Channel;
 /* ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
 ->それ以上はぶった斬る
@@ -58,7 +60,8 @@ class Server {
   std::vector<ClientData> clients_;
 
   //今後ここにチャンネルのmapを用意して運用する。getter, setterも作っておく？
-  // std::map<channel_name ,Channel*> channels_; 
+  std::map<std::string , Channel> channels_;
+
   char msg_[MAX_BUFSIZE];
 
   // Server.cpp

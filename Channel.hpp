@@ -13,8 +13,8 @@ class Channel {
   Channel();
   Channel(const std::string& name);
 
-  void  addClient(ClientData* client);
-  void  removeClient(ClientData* client);
+  void  addClient(ClientData* client);   //INVITE?
+  void  removeClient(ClientData* client);   //KICK
   void  broadcastMessage(const std::string& message, ClientData* sender);
   void  kickClient(ClientData* client, ClientData* target);  // add↓
   void  inviteClient(ClientData* client, ClientData* target);

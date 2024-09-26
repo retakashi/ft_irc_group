@@ -4,15 +4,18 @@ ssize_t Server::ft_send(ClientData client, size_t send_size) {
   ssize_t send_ret = 0;
   while (1) {
     send_ret = send(client.getSocket(), msg_, send_size, 0);
-    if (send_ret < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
-      continue;
-    else if (send_ret == 0) {
+    // if (send_ret < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+    //   continue;
+    if (send_ret == 0) {
       msg_[0] = '\0';
       std::cout << "client send EOF..." << std::endl;
       disconnectClient(client);
       return 0;
-    } else if (send_ret < 0)
-      putFunctionError("send failed");
+    } else if (send_ret < 0){
+      // putFunctionError("send failed");
+      perror("send falied");
+      return -1;
+    }
     else
       return send_size;
   }

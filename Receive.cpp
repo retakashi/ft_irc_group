@@ -5,14 +5,15 @@ ssize_t Server::ft_recv(int socket) {
 
   while (1) {
     recv_size = recv(socket, msg_, MAX_BUFSIZE, 0);
-    if (recv_size < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
-      continue;
-    else if (recv_size == 0) {
+    // if (recv_size < 0 && (errno == EAGAIN || errno == EWOULDBLOCK))
+    //   continue;
+    if (recv_size == 0) {
       std::cout << "client send EOF..." << std::endl;
       disconnectClient(socket);
       return 0;
     } else if (recv_size < 0) {
-      putFunctionError("recv failed");
+      // putFunctionError("recv failed");
+      perror("recieve falied");
       return -1;
     } else
       break;

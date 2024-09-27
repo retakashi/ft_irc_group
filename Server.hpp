@@ -17,11 +17,14 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <map>
 
 #include "ClientData.hpp"
 #include "CmdResponse.hpp"
+#include "Channel.hpp"
 
 class ClientData;
+class Channel;
 /* ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
 ->それ以上はぶった斬る
@@ -54,9 +57,11 @@ class Server {
   int socket_;
   std::string servername_;
   std::string hostname_;
-  std::vector<ClientData> clients_;
   char msg_[MAX_BUFSIZE];
+  std::map<std::string, Channel> channels_;
+  std::vector<ClientData> clients_;
 
+ public:
   // Server.cpp
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);
@@ -93,12 +98,26 @@ class Server {
   void handleJoin(const std::string &params, ClientData &client);
   void handleKick(const std::string &params, ClientData &client);
   void handleTopic(const std::string &params, ClientData &client);
+  void joinCommand(ClientData& client, const std::string& channelName);
 
- public:
+
+
+
+
+
+
   Server(short port, std::string password);
   ~Server();
   Server(const Server &other);
   Server &operator=(const Server &other);
   void startServer();
+  // Channel用
+  Channel* getChannelByName(const std::string& name);
+  void addChannel(const std::string& name, Channel* channel);
+  ClientData* getClientByNickname(const std::string& nickname);
+  void sendMessage(ClientData& client, const std::string& message);
+
+  
+
 };
 #endif

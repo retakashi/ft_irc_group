@@ -1,42 +1,32 @@
 #ifndef CHANNEL_HPP
 #define CHANNEL_HPP
 
-#include <map>
-#include <set>
 #include <string>
 #include <vector>
-
-class ClientData;
+#include "ClientData.hpp"
 
 class Channel {
- public:
-  Channel();
-  Channel(const std::string& name);
+public:
+    Channel(const std::string& name);
+    ~Channel();
 
-  void addClient(ClientData* client);
-  void removeClient(ClientData* client);
-  void broadcastMessage(const std::string& message, ClientData* sender);
-  void kickClient(ClientData* client, ClientData* target);  // add↓
-  void inviteClient(ClientData* client, ClientData* target);
-  void setTopic(ClientData* client, const std::string& topic);
-  void setMode(ClientData* client, char mode, bool enable);
-  bool isOperator(ClientData* client) const;
-  void addOperator(ClientData* client);
-  void removeOperator(ClientData* client);
-  const std::string& getName() const;
-  const std::string& getTopic() const;           // トピックを取得するメソッド
-  const std::vector<ClientData*>& getClients();  // クライアントリストを取得するメソッド
-                                                 // チャネル関連のメソッド
+    void addClient(ClientData* client);
+    void removeClient(ClientData* client);
+    bool isOperator(ClientData* client) const;
+    void broadcastMessage(const std::string& message, ClientData* sender = nullptr);
 
- private:
-  std::string name;
-  std::string topic;
-  std::vector<ClientData*> clients_;
-  std::set<ClientData*> operators_;
-  bool inviteOnly;  // add↓
-  bool topicRestricted;
-  std::string password;
-  size_t userLimit;
+    void kickClient(ClientData* client, ClientData* target, const std::string& reason);
+    void inviteClient(ClientData* client, ClientData* target);
+    void setTopic(ClientData* client, const std::string& topic);
+    const std::string& getTopic() const;
+    const std::vector<ClientData*>& getClients() const;
+    void setMode(ClientData* client, char mode, bool enable);
+
+private:
+    std::string name_;
+    std::string topic_;
+    std::vector<ClientData*> clients_;
+    std::vector<ClientData*> operators_;
 };
 
-#endif  // CHANNEL_HPP
+#endif // CHANNEL_HPP

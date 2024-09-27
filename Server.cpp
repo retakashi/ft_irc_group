@@ -40,6 +40,7 @@ void Server::startServer() {
     for (size_t i = 0; i < clients_.size(); i++) {
       if (FD_ISSET(clients_[i].getSocket(), &data.read_fds)) handleClientCommunication(clients_[i]);
     }
+    
   }
   closeAllSocket();
 }
@@ -209,3 +210,8 @@ void Server::closeAllSocket() {
 const std::string &Server::getServername() const { return servername_; }
 
 const std::string &Server::getHostname() const { return hostname_; }
+
+void Server::sendMessage(ClientData& client, const std::string& message) {
+    std::string formattedMessage = message + "\r\n";
+    ft_send(client, formattedMessage.c_str(), formattedMessage.size());
+}

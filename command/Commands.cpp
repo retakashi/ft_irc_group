@@ -10,24 +10,24 @@ void Server::handleCommands(ClientData &client)
   splitCmdAndParam(casted_msg, command, params);
   if (command == "NICK")
         handleNICK(params, client);
-    // else if (command == "OPER")
-    //     handleOper(params, client);
+    else if (command == "JOIN") 
+        handleJoin(params, client); 
     // else if (command == "MODE")
     //     handleMode(params, client);
     // else if (command == "PRIVMSG")
     //     handlePrivmsg(params, client);
     // else if (command == "NOTICE")
     //     handleNotice(params, client);
-    // if (command == "JOIN") 
-    //     handleJoin(params, client); 
     // else if (command == "TOPIC")
     //     handleTopic(params, client);
     // else if (command == "KICK") 
     //     handleKick(params, client); 
-    // else if (command == "PART")
-    //     handlePart(params, client);
     // else if (command == "QUIT")
     //     handleQuit(params, client);
+    // else if (command == "OPER")
+    //     handleOper(params, client);//一旦なし
+    // else if (command == "PART")
+    //     handlePart(params, client);
     else  //無効なコマンドが来た時
       sendCmdResponce(ERR_UNKNOWNCOMMAND,command,client);
 }

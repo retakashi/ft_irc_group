@@ -44,7 +44,7 @@ Channel::Channel(const std::string& name) : name(name) {}
 //   }
 // }
 
-// const std::string& Channel::getTopic() const { return topic; }
+const std::string& Channel::getTopic() const { return topic; }
 
 // const std::vector<ClientData*>& Channel::getClients() { return clients_; }
 
@@ -62,4 +62,4 @@ Channel::Channel(const std::string& name) : name(name) {}
 
 // void Channel::removeOperator(ClientData* client) { operators_.erase(client); }
 
-// const std::string& Channel::getName() const { return name; }
+const std::string& Channel::getName() const { return name; }

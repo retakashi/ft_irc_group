@@ -54,3 +54,15 @@ std::string createCmdRespMsg(const std::string& servername, int code, const std:
   }
   return ss.str();
 }
+
+std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str1, const std::string& str2)
+{
+ std::stringstream ss;
+  ss << ":" << servername << " ";
+  switch (code) {
+    case ERR_USERNOTINCHANNEL:
+      ss << str1 << " " << str2 << " ::They aren't on that channel";
+      break;
+  }
+  return ss.str();
+}

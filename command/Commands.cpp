@@ -8,7 +8,9 @@ void Server::handleCommands(ClientData &client)
   if (recv_size == 0) return;
   std::string casted_msg(msg_, recv_size);
   splitCmdAndParam(casted_msg, command, params);
-  channel_.insert(std::make_pair("channelname",&clients_[0]));
+  Channel c("channelname");
+  c.members_.insert(std::make_pair(clients_[0].getNickname(), &clients_[0]));
+  channels_.insert(std::make_pair("channelname",c));
   if (command == "NICK")
         handleNICK(params, client);
   else if (command == "PRIVMSG")

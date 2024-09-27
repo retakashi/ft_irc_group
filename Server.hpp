@@ -49,7 +49,7 @@ struct startserv_data {
 
 class Server {
  private:
-  std::map<std::string, ClientData *> channel_;
+  std::map<std::string, Channel> channels_;
   static const int MAX_BUFSIZE = 510;
   short port_;
   std::string serverpass_;
@@ -80,9 +80,11 @@ class Server {
   ssize_t ft_recv(int socket);
   // Send.cpp
   ssize_t ft_send(ClientData client, size_t send_size);
-  size_t createSendMsg(const std::string &casted_msg);
-  int sendCmdResponce(int code, const std::string &str, const ClientData &client);
+  size_t strToCharArray(const std::string &casted_msg);
   int sendCmdResponce(int code, const ClientData &client);
+  int sendCmdResponce(int code, const std::string &str, const ClientData &client);
+  int sendCmdResponce(int code, const std::string &str1, const std::string &str2,
+                      const ClientData &client);
   // ClientAuth.cpp USERは認証のみ使用のためこっち
   int acceptNewClient();
   void authenticatedNewClient(ClientData &client);
@@ -111,9 +113,11 @@ class Server {
   void handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
   // MODE.cpp
   void handleMODE(std::string param, ClientData &client);
-  std::map<std::string, ClientData*>::iterator searchChannel(std::string &param, ClientData client);
+  std::string searchChannel(std::string &param, ClientData client);
   void setModeData(std::string &param, std::vector<std::string> &mode_data, ClientData client);
   bool isValidMode(const std::string &mode);
+  bool toggleOperatorPrivileges(std::vector<std::string> mode_data, bool is_active,
+                                Channel &channel, ClientData client);
   // ここから先は各自で追加していく。
   // void handleJoin(const std::string &params, ClientData &client);
   // void handleKick(const std::string &params, ClientData &client);

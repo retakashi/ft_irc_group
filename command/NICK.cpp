@@ -23,7 +23,7 @@ bool Server::isValidNickname(std::string& param, const ClientData& client) {
   if (param.size() == 0) {
     std::stringstream ss;
     ss << "Your nickname is " << client.getNickname();
-    size_t size = createSendMsg(ss.str());
+    size_t size = strToCharArray(ss.str());
     ft_send(client.getSocket(), size);
     return false;
   }

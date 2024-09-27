@@ -12,7 +12,8 @@ class Channel {
  public:
   Channel();
   Channel(const std::string& name);
-
+  std::map<std::string, ClientData*> member_;
+  std::map<std::string, ClientData*> operators_;
   // void  addClient(ClientData* client);
   // void  removeClient(ClientData* client);
   // void  broadcastMessage(const std::string& message, ClientData* sender);
@@ -23,18 +24,16 @@ class Channel {
   // bool  isOperator(ClientData* client) const;
   // void  addOperator(ClientData* client);
   // void  removeOperator(ClientData* client);
-  // const std::string& getName() const;
-  // const std::string& getTopic() const;           // トピックを取得するメソッド
+  const std::string& getName() const;
+  const std::string& getTopic() const;           // トピックを取得するメソッド
   // const std::vector<ClientData*>& getClients();  // クライアントリストを取得するメソッド
                                                  // チャネル関連のメソッド
 
  private:
   std::string name; // チャンネル名
   std::string topic;
-  std::vector<ClientData*> clients_;
-  std::set<ClientData*> operators_;
-  bool inviteOnly;  // add↓
-  bool topicRestricted;
+  // bool inviteOnly;  // add↓
+  // bool topicRestricted;
   std::string password;
   size_t userLimit;
 };

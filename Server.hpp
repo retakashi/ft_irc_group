@@ -22,6 +22,7 @@
 #include "ClientData.hpp"
 #include "Channel.hpp"
 #include "CmdResponse.hpp"
+#include "Channel.hpp"
 
 class ClientData;
 class Channel;

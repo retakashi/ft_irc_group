@@ -8,31 +8,19 @@ MODE <channel> <option> <param>
 +/-t: TOPICコマンドの権限をオペレータのみ/解除.modeparam不要
 +/-l: ユーザー制限(チャンネルに参加できる人数)/解除
 */
-void Server::handleMODE(std::string param, ClientData& client) {
+int Server::handleMODE(std::string param, ClientData& client) {
   std::vector<std::string> mode_data;
   std::string channelname;
-
-  if (param.empty()) {
-    sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
-    return;
-  }
-  // if (isOperator(client) == false)
-  // {
-  // sendCmdResponce(ERR_CHANOPRIVSNEEDED, channelname, client);
-  // return ;
-  // }
-  channelname = searchChannel(param, client);
-  if (channelname.empty()) {
-    sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
-    return;
-  }
-  setModeData(param, mode_data, client);
-  if (mode_data.size() == 0) {
-    sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
-    return;
-  }
+  Channel* channel;
   bool is_active = false;
   size_t i = 0;
+
+  if (searchChannel(param, channelname, client) == false) return 0;
+  channel = channels_[channelname];
+  //  if (channel.operators_.find(client.getNickname()) == channel.operators_.end())
+  //     return sendCmdResponce(ERR_CHANOPRIVSNEEDED, channelname, client);
+  setModeData(param, mode_data);
+  if (isValidModeData(mode_data, client, *channel) == false) return 0;
   while (mode_data.size() > 0) {
     i = 0;
     while (mode_data[0][i] != '\0') {
@@ -44,99 +32,209 @@ void Server::handleMODE(std::string param, ClientData& client) {
           is_active = false;
           break;
         case 'o':
-          if (toggleOperatorPrivileges(mode_data, is_active, channels_[channelname], client) ==
-              false)
-            return;
+          if (toggleOperatorPrivileges(mode_data, is_active, channel, client) == false) return 0;
           break;
-          // case 'i':
-          //   toggleInviteOnlyChannel(mode_data, is_active);
-          //   break;
-          // case 'k':
-          //   toggleChannelKey(mode_data, is_active);
-          //   break;
-          // case 't':
-          //   toggleTopicPrivileges(mode_data, is_active);
-          //   break;
+        case 'i':
+          toggleInviteOnlyChannel(is_active, channel, client);
+          break;
+        case 'k':
+          if (toggleChannelKey(mode_data, is_active, channel, client) == false) return 0;
+          break;
+        case 't':
+          toggleTopicPrivileges(is_active, channel, client);
+          break;
           // case 'l':
-          //   toggleChannelLimit(mode_data, is_active);
+          //   if (toggleChannelLimit(mode_data, is_active,channel, client) == false) return 0;
           //   break;
           // default:
           //   sendCmdResponce();  // 無効なmode
       }
       i++;
+      std::cout << mode_data.size() << std::endl;
     }
+    if (mode_data.size() > 0) mode_data.erase(mode_data.begin());
   }
+  std::cout << "invite: " << channel->getInviteOnly() << std::endl;
+  return 0;
 }
 
 // paramからmode,modeoptionを切り出すのも行う
-std::string Server::searchChannel(std::string& param, ClientData client) {
-  std::string channelname;
+bool Server::searchChannel(std::string& param, std::string& channelname, ClientData client) {
+  if (param.empty()) return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);  // false返す
   std::string::size_type pos = param.find(' ');
-  if (pos == std::string::npos) return "";
+  if (pos == std::string::npos) return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
   channelname = param.substr(0, pos);
   channelname[pos] = '\0';
-  std::map<std::string, Channel>::iterator it = channels_.find(channelname);
-  if (it == channels_.end()) return "";
-  if (it != channels_.end()) param = param.substr(pos + 1);
-  return channelname;
+  std::map<std::string, Channel*>::iterator it = channels_.find(channelname);
+  if (it == channels_.end()) return sendCmdResponce(ERR_NOSUCHCHANNEL, channelname, client);
+  param = param.substr(pos + 1);
+  return true;
 }
 
-void Server::setModeData(std::string& param, std::vector<std::string>& mode_data,
-                         ClientData client) {
+void Server::setModeData(std::string& param, std::vector<std::string>& mode_data) {
   std::string mode;
 
-  if (isValidMode(param) == false) return;
   std::string::size_type pos = param.find(' ');
-  if (pos == std::string::npos) {
+  if (pos == std::string::npos)
     mode_data.push_back(param);
-    return;
-  }
-  while (param.size() > 0) {
-    pos = param.find(' ');
-    if (pos == std::string::npos) {
-      mode_data.push_back(param);
-      break;
+  else {
+    while (param.size() > 0) {
+      pos = param.find(' ');
+      if (pos == std::string::npos) {
+        mode_data.push_back(param);
+        break;
+      }
+      mode = param.substr(0, pos);
+      mode[pos] = '\0';
+      mode_data.push_back(mode);
+      param = param.substr(pos + 1);
     }
-    mode = param.substr(0, pos);
-    mode[pos] = '\0';
-    mode_data.push_back(mode);
-    param = param.substr(pos + 1);
   }
 }
 
-bool Server::isValidMode(const std::string& mode) {
-  int cnt = 0;
+bool Server::isValidMode(const std::string& mode, int& total_cnt, int& need_cnt, ClientData client,
+                         Channel channel) {
   std::string mode_str = "oiktl";
-  if (mode[0] != '+' && mode[0] != '-') return false;
+  if (mode[0] != '+' && mode[0] != '-')
+    return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);  // false返す
   for (size_t i = 1; mode[i] != '\0' && mode[i] != ' '; i++) {
     if (mode_str.find(mode[i]) != std::string::npos)
-      cnt++;
+      total_cnt++;
     else
-      return false;
+      return sendCmdResponce(ERR_NOCHANMODES, channel.getName(), client);
+    if (mode[i] == 'o' || mode[i] == 'k' || mode[i] == 'l') need_cnt++;
   }
-  if (cnt <= 0 || cnt > 2) return false;
+  if (total_cnt < 1 || total_cnt > 2)
+    return sendCmdResponce(ERR_NOCHANMODES, channel.getName(), client);
+  return true;
+}
+
+bool Server::isValidModeData(const std::vector<std::string>& mode_data, ClientData client,
+                             Channel channel) {
+  int total_cnt = 0;
+  int need_cnt = 0;
+  int start = 0;
+  while (start < mode_data.size()) {
+    need_cnt = 0;
+    if (isValidMode(mode_data[start], total_cnt, need_cnt, client, channel) == false) return false;
+    start += (need_cnt + 1);
+    if (mode_data.size() == start) return true;
+    if (mode_data.size() < start) return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
+  }
   return true;
 }
 
 // 使用したmode's paramがあれば消す
 bool Server::toggleOperatorPrivileges(std::vector<std::string> mode_data, bool is_active,
-                                      Channel& channel, ClientData client) {
-  std::string target_nickname;
-  if (mode_data.size() < 2)  //+o param -> size2
-    return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
-  target_nickname = mode_data[1];
-  if (target_nickname == client.getNickname())
-    return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
+                                      Channel* channel, const ClientData& client) {
+  std::string target_nick;
   std::map<std::string, ClientData*>::iterator member;
   std::map<std::string, ClientData*>::iterator ope;
-  member = channel.members_.find(target_nickname);
-  if (member == channel.members_.end())
-    return sendCmdResponce(ERR_USERNOTINCHANNEL, target_nickname, "MODE", client);
-  ope = channel.operators_.find(target_nickname);
-  if (is_active == true && ope == channel.operators_.end())
-    channel.operators_.insert(std::make_pair(target_nickname, member->second));
-  else if (is_active == false && member != channel.operators_.end())
-    channel.operators_.erase(member);
+  std::stringstream ss;
+
+  target_nick = mode_data[1];
+  member = channel->member_.find(target_nick);
+  if (member == channel->member_.end())
+    return sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", client);
+  ope = channel->operators_.find(target_nick);
+  if (is_active == true) {
+    if (target_nick == client.getNickname())
+      return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
+    if (ope == channel->operators_.end())
+      channel->operators_.insert(std::make_pair(target_nick, member->second));
+    ss << channel->getName() << " +o by " << client.getNickname();
+    sendCmdResponce(RPL_CHANNELMODEIS, ss.str(), *channel->operators_[target_nick]);
+  } else if (is_active == false && ope != channel->operators_.end()) {
+    if (target_nick != client.getNickname()) {
+      ss << channel->getName() << " -o by " << client.getNickname();
+      sendCmdResponce(RPL_CHANNELMODEIS, ss.str(), *channel->operators_[target_nick]);
+    }
+    if (channel->operators_.size() > 0) channel->operators_.erase(member);
+  }
   mode_data.erase(mode_data.begin() + 1);
   return true;
+}
+
+void Server::toggleInviteOnlyChannel(bool is_active, Channel* channel, const ClientData& client) {
+  std::stringstream ss;
+  if (is_active == true) {
+    channel->setInviteOnly(true);
+    ss << channel->getName() << " +i by " << client.getNickname();
+  } else {
+    channel->setInviteOnly(false);
+    ss << channel->getName() << " -i by " << client.getNickname();
+  }
+  sendOtherMember(ss.str(), *channel, client);
+}
+
+bool Server::toggleChannelKey(std::vector<std::string>& mode_data, bool is_active, Channel* channel,
+                              const ClientData& client) {
+  std::stringstream ss;
+  if (is_active == true) {
+    if (!channel->getKey().empty()) return sendCmdResponce(ERR_KEYSET, channel->getName(), client);
+    if (isValidKey(mode_data[1]) == false)
+      return sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);
+    channel->setKey(mode_data[1]);
+    ss << channel->getName() << " +k " << channel->getKey() << " by " << client.getNickname();
+  } else {
+    if (!channel->getKey().empty()) channel->setKey("");
+    ss << channel->getName() << " -k " << " by " << client.getNickname();
+  }
+  sendOtherMember(ss.str(), *channel, client);
+  mode_data.erase(mode_data.begin() + 1);
+  return true;
+}
+
+bool Server::isValidKey(const std::string& key) {
+  if (key.size() < 1 || key.size() > 23) return false;
+  for (size_t i = 0; i < key.size(); i++) {
+    if (std::isspace(key[i])) return false;
+  }
+  return true;
+}
+
+void Server::toggleTopicPrivileges(bool is_active, Channel* channel, const ClientData& client) {
+  std::stringstream ss;
+  if (is_active == true) {
+    channel->setTopicRestricted(true);
+    ss << channel->getName() << " +t by " << client.getNickname();
+  } else {
+    channel->setTopicRestricted(false);
+    ss << channel->getName() << " -t by " << client.getNickname();
+  }
+  sendOtherMember(ss.str(), *channel, client);
+}
+
+// limit -> とりあえずINT_MAXまで
+#define INT_MAX_LEN 10
+bool Server::toggleChannelLimit(std::vector<std::string>& mode_data, bool is_active,
+                                Channel* channel, ClientData client) {
+  size_t limit = 0;
+  std::stringstream ss;
+
+  if (is_active == true) {
+    if (mode_data[1].size() > INT_MAX_LEN) return false;
+    ss << mode_data[1];
+    ss >> limit;
+    if (limit > INT_MAX) return false;
+    channel->setUserLimit(limit);
+    ss.clear();
+    ss << channel->getName() << " " << limit << " +l by " << client.getNickname();
+  } else {
+    if (channel->getUserLimit() > 0) {
+      channel->setUserLimit(0);
+      ss << channel->getName() << " -l by " << client.getNickname();
+    }
+  }
+  sendOtherMember(ss.str(), *channel, client);
+  mode_data.erase(mode_data.begin() + 1);
+}
+
+void Server::sendOtherMember(const std::string str, Channel channel, ClientData me) {
+  std::map<std::string, ClientData*>::iterator member_it = channel.member_.begin();
+  while (member_it != channel.member_.end()) {
+    if (member_it->first != me.getNickname())
+      sendCmdResponce(RPL_CHANNELMODEIS, str, *member_it->second);
+    member_it++;
+  }
 }

@@ -6,7 +6,7 @@
 
 Channel::Channel() {}
 
-Channel::Channel(const std::string& name) : name(name) {}
+Channel::Channel(const std::string& name) : name(name), invite_only(false) {}
 
 // void Channel::addClient(ClientData* client) { clients_.push_back(client); }
 
@@ -63,3 +63,12 @@ const std::string& Channel::getTopic() const { return topic; }
 // void Channel::removeOperator(ClientData* client) { operators_.erase(client); }
 
 const std::string& Channel::getName() const { return name; }
+
+void Channel::setInviteOnly(bool value) { invite_only = value; }
+bool Channel::getInviteOnly() const { return invite_only; }
+void Channel::setKey(const std::string& newkey) { key = newkey; }
+const std::string& Channel::getKey() const { return key; }
+void Channel::setTopicRestricted(bool value) { topic_restricted = value; }
+bool Channel::getTopicRestricted() const { return topic_restricted; }
+void Channel::setUserLimit(size_t limit){user_limit = limit; }
+size_t Channel::getUserLimit() const{return user_limit;}

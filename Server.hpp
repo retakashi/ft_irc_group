@@ -49,7 +49,7 @@ struct startserv_data {
 
 class Server {
  private:
-  std::map<std::string, Channel> channels_;
+  std::map<std::string, Channel*> channels_;
   static const int MAX_BUFSIZE = 510;
   short port_;
   std::string serverpass_;
@@ -112,12 +112,20 @@ class Server {
   void handle_privmsg_channel(std::string targets, std::string message, ClientData &client);
   void handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
   // MODE.cpp
-  void handleMODE(std::string param, ClientData &client);
-  std::string searchChannel(std::string &param, ClientData client);
-  void setModeData(std::string &param, std::vector<std::string> &mode_data, ClientData client);
-  bool isValidMode(const std::string &mode);
+  int handleMODE(std::string param, ClientData &client);
+  bool searchChannel(std::string &param, std::string& channelname, ClientData client);
+  void setModeData(std::string &param, std::vector<std::string> &mode_data);
+  bool isValidMode(const std::string &mode,int &total_cnt, int &need_cnt,ClientData client, Channel channel);
+  bool isValidModeData(const std::vector<std::string>& mode_data,ClientData client, Channel channel);
   bool toggleOperatorPrivileges(std::vector<std::string> mode_data, bool is_active,
-                                Channel &channel, ClientData client);
+                                Channel* channel, const ClientData& client);
+  void toggleInviteOnlyChannel(bool is_active, Channel* channel, const ClientData& client);
+  bool toggleChannelKey(std::vector<std::string>& mode_data, bool is_active, Channel* channel,
+                              const ClientData& client);
+  bool isValidKey(const std::string& key);
+  void toggleTopicPrivileges(bool is_active, Channel* channel, const ClientData& client);
+  bool toggleChannelLimit(std::vector<std::string> &mode_data, bool is_active,Channel *channel,ClientData client);
+  void sendOtherMember(const std::string str, Channel member, ClientData me);
   // ここから先は各自で追加していく。
   // void handleJoin(const std::string &params, ClientData &client);
   // void handleKick(const std::string &params, ClientData &client);

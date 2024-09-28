@@ -7,7 +7,6 @@ void Server::handleClientCommunication(ClientData &client) {
     handleCommands(client);
 }
 
-
 // eraseしたイテレーターを参照しないか確認する！！！
 void Server::disconnectClient(ClientData client) {
   int socket = client.getSocket();

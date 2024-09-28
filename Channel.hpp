@@ -24,18 +24,26 @@ class Channel {
   // bool  isOperator(ClientData* client) const;
   // void  addOperator(ClientData* client);
   // void  removeOperator(ClientData* client);
+  void setInviteOnly(bool value);
+  bool getInviteOnly() const;
   const std::string& getName() const;
-  const std::string& getTopic() const;           // トピックを取得するメソッド
-  // const std::vector<ClientData*>& getClients();  // クライアントリストを取得するメソッド
-                                                 // チャネル関連のメソッド
+  const std::string& getTopic() const;
+  void setKey(const std::string& newkey);
+  const std::string& getKey() const;
+  void setTopicRestricted(bool value);
+  bool getTopicRestricted() const;
+  void setUserLimit(size_t limit);
+  size_t getUserLimit() const;
+  // const std::vector<ClientData*>& getClients();  //
+  // クライアントリストを取得するメソッド チャネル関連のメソッド
 
  private:
-  std::string name; // チャンネル名
+  std::string name;  // チャンネル名
   std::string topic;
-  // bool inviteOnly;  // add↓
-  // bool topicRestricted;
-  std::string password;
-  size_t userLimit;
+  bool invite_only;  // add↓
+  bool topic_restricted;
+  std::string key;
+  size_t user_limit;
 };
 
 #endif  // CHANNEL_HPP

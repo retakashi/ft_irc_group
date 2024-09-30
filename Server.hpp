@@ -66,9 +66,8 @@ class Server {
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);
   void setSelectArgs(fd_set &read_fds, int &socket_max);
-  const std::string &getServername() const;
   const std::string &getHostname() const;
-  // Utils.cppに移行
+  // Utils.cpp
   void handleClientCommunication(ClientData &client);
   void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
   // このclientsのgetterは後で別に移動させても良いかもしれません。
@@ -121,8 +120,9 @@ class Server {
   Server(short port, std::string password);
   ~Server();
   void startServer();
-  static void disconnectClient(ClientData client);
   static void closeAllSocket();
+  //Utils.cpp
+  static void disconnectClient(ClientData client);
   static void putFunctionError(const char *errmsg);
   // Send.cpp
   static void ft_send(std::string msg, ClientData client);

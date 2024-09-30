@@ -211,7 +211,63 @@ const std::string &Server::getServername() const { return servername_; }
 
 const std::string &Server::getHostname() const { return hostname_; }
 
-void Server::sendMessage(ClientData& client, const std::string& message) {
-    std::string formattedMessage = message + "\r\n";
-    ft_send(client, formattedMessage.c_str(), formattedMessage.size());
+// void Server::sendMessage(ClientData& client, const std::string& message) {
+//     std::string formattedMessage = message + "\r\n";
+//     ft_send(client, formattedMessage.c_str(), formattedMessage.size());
+// }
+
+Channel* Server::getChannelByName(const std::string& name) {
+    std::map<std::string, Channel*>::iterator it = channels_.find(name);
+    if (it != channels_.end()) {
+        return it->second;
+    }
+    return nullptr;
+}
+
+void Server::addChannel(const std::string& name, Channel* channel) {
+    channels_.insert(std::make_pair(name, channel));
+}
+
+ClientData* Server::getClientByNickname(const std::string& nickname) {
+    for (std::vector<ClientData>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
+        if (it->getNickname() == nickname) {
+            return &(*it);
+        }
+    }
+    return nullptr;
+}
+
+void Server::addClient(const ClientData& client) {
+    clients_.push_back(client);
+}
+
+void Server::removeClient(const std::string& nickname) {
+    clients_.erase(std::remove_if(clients_.begin(), clients_.end(),
+                                  [&nickname](const ClientData& client) {
+                                      return client.getNickname() == nickname;
+                                  }),
+                   clients_.end());
+}
+
+void Server::handleJoin(const std::string& channelName, ClientData& client) {
+    Channel* channel = getChannelByName(channelName);
+    if (!channel) {
+        channel = new Channel(channelName);
+        addChannel(channelName, channel);
+    }
+
+    channel->addClient(&client);
+
+    // クライアントにJOINメッセージを送信
+    std::string joinMsg = ":" + getServername() + " JOIN " + channelName + "\r\n";
+    ft_send(client, joinMsg.size());
+
+    // チャンネルのトピックを確認し、適切なレスポンスコードを送信
+    if (channel->getTopic().empty()) {
+        std::string noTopicMsg = ":" + getServername() + " 331 " + client.getNickname() + " " + channelName + " :No topic is set\r\n";
+        ft_send(client, noTopicMsg.size());
+    } else {
+        std::string topicMsg = ":" + getServername() + " 332 " + client.getNickname() + " " + channelName + " :" + channel->getTopic() + "\r\n";
+        ft_send(client, topicMsg.size());
+    }
 }

@@ -3,8 +3,11 @@
 
 #include <string>
 #include <vector>
-#include "ClientData.hpp"
+#include <set>
+#include "ClientData.hpp" // ClientDataクラスを使うためにインクルード
 
+
+class ClientData;
 class Channel {
 public:
     Channel(const std::string& name);
@@ -25,8 +28,8 @@ public:
 private:
     std::string name_;
     std::string topic_;
-    std::vector<ClientData*> clients_;
-    std::vector<ClientData*> operators_;
+    std::vector<ClientData*> clients_;  // ClientData型を使う
+    std::vector<ClientData*> operators_;  // ClientData型を使う
 };
 
 #endif // CHANNEL_HPP

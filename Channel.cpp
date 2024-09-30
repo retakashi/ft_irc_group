@@ -1,10 +1,19 @@
 #include "Channel.hpp"
 #include "Server.hpp"
+#include "CmdResponse.hpp"
 #include <algorithm>
+
+class ClientData;
+class Server;
 
 Channel::Channel(const std::string& name) : name_(name) {}
 
-Channel::~Channel() {}
+Channel::~Channel() {
+  // クライアントのリストをクリア
+  clients_.clear();
+  // オペレータのリストをクリア
+  operators_.clear();
+}
 
 void Channel::addClient(ClientData* client) {
     clients_.push_back(client);

@@ -95,27 +95,24 @@ class Server {
   void handleNICK(std::string param, ClientData &client);
   bool isValidNickname(std::string &param, const ClientData &client);
   void handlePass(std::string param, ClientData &client);
-  void handleJoin(const std::string &params, ClientData &client);
   void handleKick(const std::string &params, ClientData &client);
   void handleTopic(const std::string &params, ClientData &client);
-  void joinCommand(ClientData& client, const std::string& channelName);
-
-
-
-
-
-
 
   Server(short port, std::string password);
   ~Server();
   Server(const Server &other);
   Server &operator=(const Server &other);
   void startServer();
+  
   // Channel用
   Channel* getChannelByName(const std::string& name);
   void addChannel(const std::string& name, Channel* channel);
   ClientData* getClientByNickname(const std::string& nickname);
   void sendMessage(ClientData& client, const std::string& message);
+  void addClient(const ClientData& client);
+  void removeClient(const std::string& nickname);
+  void handleJoin(const std::string& channelName, ClientData& client); // handleJoinメソッドの宣言を追加
+
 
   
 

@@ -73,9 +73,9 @@ void  Server::handle_privmsg_personal(std::string targets, std::string message, 
 
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
         std::string recipientMessage = ":" + (&client)->getNickname() + "!" + (&client)->getUsername() + "@" + "localhost" + " PRIVMSG " + target + " :" + message + "\r\n";
-        std::strncpy(msg_, recipientMessage.c_str(), MAX_BUFSIZE - 1);
-        msg_[MAX_BUFSIZE - 1] = '\0';
-        ft_send(*recipient, recipientMessage.length());
+        // std::strncpy(msg_, recipientMessage.c_str(), MAX_BUFSIZE - 1);
+        // msg_[MAX_BUFSIZE - 1] = '\0';
+        ft_send(recipientMessage, *recipient);
     }
     return ;
 }

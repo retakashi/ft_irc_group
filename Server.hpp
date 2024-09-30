@@ -49,46 +49,37 @@ struct startserv_data {
   int client_sock;
 };
 
+struct handle_mode_data {
+  std::vector<std::string> mode_data;
+  ClientData &client;
+  bool is_active;
+  size_t param_i;
+  handle_mode_data(ClientData &c) : client(c), is_active(false), param_i(0) {}
+};
+
 class Server {
  private:
   static const int MAX_BUFSIZE = 510;
   short port_;
   std::string serverpass_;
-  int socket_;
-  std::string servername_;
   std::string hostname_;
-  std::vector<ClientData> clients_;
-
-  //今後ここにチャンネルのmapを用意して運用する。getter, setterも作っておく？
-  std::map<std::string , Channel> channels_;
-
   char msg_[MAX_BUFSIZE];
-
   // Server.cpp
   Server();
-  void  initServerSocket(struct sockaddr_in &sockaddr);
-  void  setSelectArgs(fd_set &read_fds, int &socket_max);
-  const std::string &getServername() const;
+  void initServerSocket(struct sockaddr_in &sockaddr);
+  void setSelectArgs(fd_set &read_fds, int &socket_max);
   const std::string &getHostname() const;
-  void  closeAllSocket();
-  // Utils.cppに移行
-  void  disconnectClient(ClientData client);
-  void  handleClientCommunication(ClientData &client);
-  void  putFunctionError(const char *errmsg);
-  void  splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
-      //このclientsのgetterは後で別に移動させても良いかもしれません。
-      ClientData*   getClientByNickname(const std::string& nickname);
+  // Utils.cpp
+  void handleClientCommunication(ClientData &client);
+  void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
+  // このclientsのgetterは後で別に移動させても良いかもしれません。
+  ClientData *getClientByNickname(const std::string &nickname);
   // Receive.cpp
   ssize_t ft_recv(int socket);
-  // Send.cpp
-  ssize_t ft_send(ClientData client, size_t send_size);
-  size_t  createSendMsg(const std::string &casted_msg);
-  int     sendCmdResponce(int code, const std::string &str, const ClientData &client);
-  int     sendCmdResponce(int code, const ClientData &client);
   // ClientAuth.cpp USERは認証のみ使用のためこっち
-  int   acceptNewClient();
-  void  authenticatedNewClient(ClientData &client);
-  void  sendWelcomeToIrc(const ClientData &client);
+  int acceptNewClient();
+  void authenticatedNewClient(ClientData &client);
+  void sendWelcomeToIrc(ClientData client);
 
   // ->Commandディレクトリ
   // Commands.cpp
@@ -108,19 +99,38 @@ class Server {
   // PASS.cpp
   void  handlePass(std::string param, ClientData &client);
   // PRIVMSG.cpp
-  void  handlePrivateMessage(const std::string param, ClientData &client);
-  void  handle_privmsg_channel(std::string targets, std::string message, ClientData &client);
-  void  handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
+  void handlePrivateMessage(const std::string param, ClientData &client);
+  void handle_privmsg_channel(std::string targets, std::string message, ClientData &client);
+  void handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
+  // MODE.cpp
+  int handleMODE(std::string param, ClientData client);
+  bool setAndSearchChannel(std::string &param, struct handle_mode_data &data);
+  void splitModeParam(std::string &param, std::vector<std::string> &mode_data);
+  bool isValidModeData(struct handle_mode_data &data);
+  bool isValidMode(struct handle_mode_data data, int start, int &total_cnt, int &need_cnt);
   // ここから先は各自で追加していく。
   void  handleJoin(const std::string &params, ClientData &client);
   void  handleKick(const std::string &params, ClientData &client);
   void  handleTopic(const std::string &params, ClientData &client);
 
  public:
+  static int serversock_;
+  static std::string servername_;
+  static std::vector<ClientData> clients_;
+  static std::map<std::string, Channel *> channels_;
+  // Server.cpp
   Server(short port, std::string password);
   ~Server();
-  Server(const Server &other);
-  Server &operator=(const Server &other);
   void startServer();
+  static void closeAllSocket();
+  //Utils.cpp
+  static void disconnectClient(ClientData client);
+  static void putFunctionError(const char *errmsg);
+  // Send.cpp
+  static void ft_send(std::string msg, ClientData client);
+  static int sendCmdResponce(int code, ClientData client);
+  static int sendCmdResponce(int code, const std::string &str, ClientData client);
+  static int sendCmdResponce(int code, const std::string &str1, const std::string &str2,
+                             ClientData client);
 };
 #endif

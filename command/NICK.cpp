@@ -19,25 +19,24 @@ bool Server::isValidNickname(std::string& param, const ClientData& client) {
     param[pos] = '\0';
   }
   if (client.getNickname().empty() && param.size() == 0)
-    return sendCmdResponce(ERR_NONICKNAMEGIVEN, client);
+    return Server::sendCmdResponce(ERR_NONICKNAMEGIVEN, client);
   if (param.size() == 0) {
     std::stringstream ss;
     ss << "Your nickname is " << client.getNickname();
-    size_t size = createSendMsg(ss.str());
-    ft_send(client.getSocket(), size);
+    Server::ft_send(ss.str(),client);
     return false;
   }
-  if (param.size() > 20) return sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
+  if (param.size() > 20) return Server::sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
   for (size_t i = 0; i < clients_.size(); i++) {
     if (clients_[i].getNickname() == param)
-      return sendCmdResponce(ERR_NICKNAMEINUSE, param, client);
+      return Server::sendCmdResponce(ERR_NICKNAMEINUSE, param, client);
   }
   std::string special = "[]\\`_^{}|";
   if (!std::isalpha(param[0]) && special.find(param[0]) == std::string::npos)
-    return sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
+    return Server::sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
   for (size_t i = 1; param[i] != '\0'; i++) {
     if (!std::isalnum(param[i]) && special.find(param[i]) == std::string::npos && param[i] != '-')
-      return sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
+      return Server::sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
   }
   return true;
 }

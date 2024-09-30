@@ -7,8 +7,19 @@ void Server::handleClientCommunication(ClientData &client) {
     handleCommands(client);
 }
 
+void Server::splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param) {
+  std::string::size_type pos = casted_msg.find(" ");
+  if (pos != std::string::npos) {
+    command = casted_msg.substr(0, pos);
+    command[pos] = '\0';
+    param = casted_msg.substr(pos + 1);
+  } else {
+    command = casted_msg;
+    param.clear();
+  }
+}
 
-// eraseしたイテレーターを参照しないか確認する！！！
+// eraseしたイテレーターを参照しないか確認する！！！member,operator確認
 void Server::disconnectClient(ClientData client) {
   int socket = client.getSocket();
   if (clients_.size() == 0) {
@@ -26,19 +37,6 @@ void Server::disconnectClient(ClientData client) {
   std::cout << "disconnected sockfd : " << socket << std::endl;
 }
 
-void Server::splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param) {
-  std::string::size_type pos = casted_msg.find(" ");
-  if (pos != std::string::npos) {
-    command = casted_msg.substr(0, pos);
-    command[pos] = '\0';
-    param = casted_msg.substr(pos + 1);
-  } else {
-    command = casted_msg;
-    param.clear();
-  }
-}
-
-
 void Server::putFunctionError(const char *errmsg) {
   perror(errmsg);
   closeAllSocket();
@@ -53,4 +51,3 @@ ClientData* Server::getClientByNickname(const std::string& nickname)
     }
     return NULL;
 }
-

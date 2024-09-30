@@ -13,8 +13,8 @@ void Server::handleCommands(ClientData& client) {
     handlePrivateMessage(params, client);
   // else if (command == "OPER")
   //     handleOper(params, client);
-  else if (command == "MODE")
-    handleMODE(params, client);
+  // else if (command == "MODE")
+  //   handleMODE(params, client);
   // else if (command == "NOTICE")
   //     handleNotice(params, client);
   // if (command == "JOIN")

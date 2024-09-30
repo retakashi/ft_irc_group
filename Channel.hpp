@@ -12,8 +12,8 @@ class Channel {
  public:
   Channel();
   Channel(const std::string& name);
-  std::map<std::string, ClientData*> member_;
-  std::map<std::string, ClientData*> operators_;
+  std::vector<ClientData*> member_;
+  std::vector<ClientData*> operators_;
   // void  addClient(ClientData* client);
   // void  removeClient(ClientData* client);
   // void  broadcastMessage(const std::string& message, ClientData* sender);
@@ -34,7 +34,15 @@ class Channel {
   bool getTopicRestricted() const;
   void setUserLimit(size_t limit);
   size_t getUserLimit() const;
-  // const std::vector<ClientData*>& getClients();  //
+  bool isMember(ClientData client) const;
+  //MODE.cpp
+  bool toggleOperatorPrivileges(struct handle_mode_data data);
+  void toggleInviteOnlyChannel(struct handle_mode_data data);
+  bool toggleChannelKey(struct handle_mode_data data);
+  bool isValidKey(const std::string &key);
+  void toggleTopicPrivileges(struct handle_mode_data data);
+  bool toggleChannelLimit(struct handle_mode_data data);
+  void sendOtherMember(const std::string& str, ClientData me);
   // クライアントリストを取得するメソッド チャネル関連のメソッド
 
  private:
@@ -46,4 +54,4 @@ class Channel {
   size_t user_limit;
 };
 
-#endif  // CHANNEL_HPP
+#endif 

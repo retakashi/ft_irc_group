@@ -1,4 +1,6 @@
 #include "Server.hpp"
+static void disconnectClient(ClientData client);
+static void putFunctionError(const char *errmsg);
 
 void Server::handleClientCommunication(ClientData &client) {
   if (client.isCompleteAuthParams() == false)
@@ -7,7 +9,7 @@ void Server::handleClientCommunication(ClientData &client) {
     handleCommands(client);
 }
 
-// eraseしたイテレーターを参照しないか確認する！！！
+// eraseしたイテレーターを参照しないか確認する！！！member,operator確認
 void Server::disconnectClient(ClientData client) {
   int socket = client.getSocket();
   if (clients_.size() == 0) {
@@ -37,7 +39,6 @@ void Server::splitCmdAndParam(std::string casted_msg, std::string &command, std:
   }
 }
 
-
 void Server::putFunctionError(const char *errmsg) {
   perror(errmsg);
   closeAllSocket();
@@ -52,4 +53,3 @@ ClientData* Server::getClientByNickname(const std::string& nickname)
     }
     return NULL;
 }
-

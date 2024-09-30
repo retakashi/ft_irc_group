@@ -72,3 +72,6 @@ void Channel::setTopicRestricted(bool value) { topic_restricted = value; }
 bool Channel::getTopicRestricted() const { return topic_restricted; }
 void Channel::setUserLimit(size_t limit){user_limit = limit; }
 size_t Channel::getUserLimit() const{return user_limit;}
+bool Channel::isMember(ClientData client) const {
+    
+}

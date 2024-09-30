@@ -18,6 +18,5 @@ ssize_t Server::ft_recv(int socket) {
       break;
   }
   msg_[recv_size - 1] = '\0';
-  // std::cout << "recieved: " << msg_ << std::endl;
   return recv_size - 1;  // 改行文字分減らす
 }

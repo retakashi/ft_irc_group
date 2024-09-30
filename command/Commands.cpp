@@ -1,20 +1,12 @@
 #include "../Server.hpp"
-static Channel c("channelname");
 
-void Server::handleCommands(ClientData &client) {
+void Server::handleCommands(ClientData& client) {
   std::string command;
   std::string params;
   ssize_t recv_size = ft_recv(client.getSocket());
   if (recv_size == 0) return;
   std::string casted_msg(msg_, recv_size);
   splitCmdAndParam(casted_msg, command, params);
-  c.member_.insert(std::make_pair(clients_[0].getNickname(), &clients_[0]));
-  channels_.insert(std::make_pair("channelname", &c));
-  if (clients_.size() > 1) {
-    c.member_.insert(std::make_pair(clients_[1].getNickname(), &clients_[1]));
-    channels_.insert(std::make_pair("channelname", &c));
-  }
-  std::cout << "hello: " << channels_["channelname"]->getInviteOnly() << std::endl;
   if (command == "NICK")
     handleNICK(params, client);
   else if (command == "PRIVMSG")

@@ -57,7 +57,6 @@ struct handle_mode_data {
 
 class Server {
  private:
-  static int serversock_;
   static const int MAX_BUFSIZE = 510;
   short port_;
   std::string serverpass_;
@@ -71,7 +70,6 @@ class Server {
   const std::string &getHostname() const;
   // Utils.cppに移行
   void handleClientCommunication(ClientData &client);
-  static void putFunctionError(const char *errmsg);
   void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
   // このclientsのgetterは後で別に移動させても良いかもしれません。
   ClientData *getClientByNickname(const std::string &nickname);
@@ -115,6 +113,7 @@ class Server {
   // void handleTopic(const std::string &params, ClientData &client);
 
  public:
+  static int serversock_;
   static std::string servername_;
   static std::vector<ClientData> clients_;
   static std::map<std::string, Channel *> channels_;
@@ -124,8 +123,9 @@ class Server {
   void startServer();
   static void disconnectClient(ClientData client);
   static void closeAllSocket();
+  static void putFunctionError(const char *errmsg);
   // Send.cpp
-  static ssize_t ft_send(std::string msg, ClientData client);
+  static void ft_send(std::string msg, ClientData client);
   static int sendCmdResponce(int code, ClientData client);
   static int sendCmdResponce(int code, const std::string &str, ClientData client);
   static int sendCmdResponce(int code, const std::string &str1, const std::string &str2,

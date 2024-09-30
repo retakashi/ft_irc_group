@@ -1,12 +1,6 @@
 #include "Server.hpp"
 
-static ssize_t ft_send(std::string msg, ClientData client);
-static int sendCmdResponce(int code, ClientData client);
-static int sendCmdResponce(int code, const std::string &str, ClientData client);
-static int sendCmdResponce(int code, const std::string &str1, const std::string &str2,
-                           ClientData client);
-
-ssize_t Server::ft_send(std::string msg, ClientData client) {
+void Server::ft_send(std::string msg, ClientData client) {
   char casted_msg[MAX_BUFSIZE];
   ssize_t send_ret = 0;
   size_t send_size = msg.size();
@@ -21,12 +15,9 @@ ssize_t Server::ft_send(std::string msg, ClientData client) {
   if (send_ret == 0) {
     std::cout << "client send EOF..." << std::endl;
     disconnectClient(client);
-    return 0;
   }
   if (send_ret < 0)
     perror("send failed");
-  else
-    return send_size;
 }
 
 int Server::sendCmdResponce(int code, const ClientData client) {

@@ -1,6 +1,4 @@
 #include "Server.hpp"
-static void disconnectClient(ClientData client);
-static void putFunctionError(const char *errmsg);
 
 void Server::handleClientCommunication(ClientData &client) {
   if (client.isCompleteAuthParams() == false)

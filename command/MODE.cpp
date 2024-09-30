@@ -16,9 +16,9 @@ int Server::handleMODE(std::string param, ClientData client) {
   Channel* ch;
 
   if (setAndSearchChannel(param, data) == false) return 0;
-  if (channels_[data.mode_data[0]]->isOperator(client)== false)
-    return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
-   splitModeParam(param, data.mode_data);
+  // if (channels_[data.mode_data[0]]->isOperator(client)== false)
+  // return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
+  splitModeParam(param, data.mode_data);
   if (isValidModeData(data) == false) return 0;
   ch = channels_[data.mode_data[0]];
   while (start < data.mode_data.size()) {
@@ -137,22 +137,22 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data data) {
   std::stringstream ss;
   std::string target_nick = data.mode_data[data.param_i];
   int is_ope = false;
-  ClientData *target_client;
+  ClientData* target_client;
 
   // target_nickがメンバーかどうか
-  if (isMember(target_nick) == false) //あるいはgetter?
-    return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
+  // if (isMember(target_nick) == false) //あるいはgetter?
+  //   return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
   // target_nickが既にオペレーターかどうか
-  if (isOperator(target_nick) == true) //あるいはgetter?
-    is_ope = true;
+  // if (isOperator(target_nick) == true) //あるいはgetter?
+  is_ope = true;
   if (data.is_active == true && is_ope == false) {
-    if (target_nick == data.client.getNickname()) //target's nickname == clientのnickname
+    if (target_nick == data.client.getNickname())  // target's nickname == clientのnickname
       return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
-      operators_.push_back(target_client);
-    ss << getName() << " +o by " << data.client.getNickname(); //target_nickのclientに送る
+    operators_.push_back(target_client);
+    ss << getName() << " +o by " << data.client.getNickname();  // target_nickのclientに送る
   } else if (data.is_active == false && is_ope == true) {
-      ss << getName() << " -o by " << data.client.getNickname();
-    if (operators_.size() > 0) operators_.erase(target_client);
+    ss << getName() << " -o by " << data.client.getNickname();
+    // if (operators_.size() > 0) operators_.erase(target_client);
   }
   Server::sendCmdResponce(RPL_CHANNELMODEIS, ss.str(), *target_client);
   return true;
@@ -232,8 +232,7 @@ bool Channel::toggleChannelLimit(struct handle_mode_data data) {
 }
 
 void Channel::sendOtherMember(const std::string& str, ClientData me) {
-
-  for(size_t i = 0;i < member_.size();i++){
+  for (size_t i = 0; i < member_.size(); i++) {
     if (member_[i]->getNickname() != me.getNickname())
       Server::sendCmdResponce(RPL_CHANNELMODEIS, str, *member_[i]);
   }

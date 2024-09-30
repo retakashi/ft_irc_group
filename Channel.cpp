@@ -1,7 +1,5 @@
 #include "Channel.hpp"
-
 #include <algorithm>
-
 #include "ClientData.hpp"
 
 Channel::Channel() {}

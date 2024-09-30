@@ -3,7 +3,6 @@
 ClientData::ClientData() {}
 ClientData::ClientData(int socket) : socket_(socket), mode_('\0'), is_authenticated(false) {}
 ClientData::~ClientData() {}
-
 bool ClientData::isCompleteAuthParams() {
   if (!is_authenticated || nickname_.empty() || realname_.empty()) return false;
   return true;

@@ -1,9 +1,9 @@
 #include "Server.hpp"
 
-static std::string servrname_("servername");
-static std::vector<ClientData> clients_;
-static std::map<std::string, Channel *> channels_;
-static void closeAllSocket();
+std::string Server::servername_("servername");
+int Server::serversock_ = 0;
+std::vector<ClientData> Server::clients_;
+std::map<std::string, Channel *> Server::channels_;
 
 Server::Server() {}
 Server::Server(short port, std::string password)
@@ -37,24 +37,24 @@ void Server::startServer() {
 void Server::initServerSocket(struct sockaddr_in &sockaddr) {
   int on = 1;
 
-  if ((serversock_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
+  if ((Server::serversock_ = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0)
     putFunctionError("socket failed");
-  if (setsockopt(serversock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+  if (setsockopt(Server::serversock_, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
     putFunctionError("setsockopt failed");
   std::memset(&sockaddr, 0, sizeof(sockaddr));
   sockaddr.sin_family = AF_INET;
   sockaddr.sin_addr.s_addr = htonl(INADDR_ANY);
   sockaddr.sin_port = htons(port_);
-  if (bind(serversock_, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
+  if (bind(Server::serversock_, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0)
     putFunctionError("bind failed");
-  if (listen(serversock_, SOMAXCONN) < 0) putFunctionError("listen failed");
-  if (fcntl(serversock_, F_SETFL, O_NONBLOCK) < 0) putFunctionError("fcntl failed");
+  if (listen(Server::serversock_, SOMAXCONN) < 0) putFunctionError("listen failed");
+  if (fcntl(Server::serversock_, F_SETFL, O_NONBLOCK) < 0) putFunctionError("fcntl failed");
 }
 
 void Server::setSelectArgs(fd_set &read_fds, int &socket_max) {
   FD_ZERO(&read_fds);
-  FD_SET(serversock_, &read_fds);
-  socket_max = serversock_;
+  FD_SET(Server::serversock_, &read_fds);
+  socket_max = Server::serversock_;
   for (size_t i = 0; i < Server::clients_.size(); i++) {
     FD_SET(Server::clients_[i].getSocket(), &read_fds);
     if (socket_max < Server::clients_[i].getSocket()) socket_max = Server::clients_[i].getSocket();
@@ -65,7 +65,7 @@ void Server::closeAllSocket() {
   for (size_t i = 0; i < clients_.size(); i++) {
     if (close(clients_[i].getSocket()) < 0) perror("close failed");
   }
-  if (close(serversock_) < 0) perror("close failed");
+  if (serversock_ != 0 && close(serversock_) < 0) perror("close failed");
 }
 
 const std::string &Server::getHostname() const { return hostname_; }

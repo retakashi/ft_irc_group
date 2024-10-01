@@ -1,4 +1,4 @@
-objs/Main.o: Main.cpp Server.hpp ClientData.hpp Channel.hpp \
+objs/Receive.o: Receive.cpp Server.hpp ClientData.hpp Channel.hpp \
   CmdResponse.hpp
 
 Server.hpp:

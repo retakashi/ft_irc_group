@@ -1,4 +1,4 @@
-objs/NICK.o: command/NICK.cpp command/../Server.hpp ClientData.hpp \
+objs/PASS.o: command/PASS.cpp command/../Server.hpp ClientData.hpp \
   Server.hpp Channel.hpp CmdResponse.hpp
 
 command/../Server.hpp:

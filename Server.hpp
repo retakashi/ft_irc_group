@@ -110,7 +110,11 @@ class Server {
   bool isValidModeData(struct handle_mode_data &data);
   bool isValidMode(struct handle_mode_data data, int start, int &total_cnt, int &need_cnt);
   // ここから先は各自で追加していく。
-  void  handleJoin(const std::string &params, ClientData &client);
+  // JOIN.cpp
+  Channel* getChannelByName(const std::string& channelName);
+  void addChannel(const std::string& channelName, Channel* channel);
+  void handleJoin(const std::string& channelName, ClientData& client);
+
   void  handleKick(const std::string &params, ClientData &client);
   void  handleTopic(const std::string &params, ClientData &client);
 

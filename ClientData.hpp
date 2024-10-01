@@ -33,5 +33,6 @@ class ClientData {
   const std::string& getUsername() const;
   const std::string& getRealname() const;
   const int getSocket() const;
+  const std::string& getServername() const;
 };
 #endif

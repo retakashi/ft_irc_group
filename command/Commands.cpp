@@ -1,5 +1,7 @@
 #include "../Server.hpp"
 #include "../CmdResponse.hpp"
+#include "../ClientData.hpp"
+#include "../Channel.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -24,12 +26,14 @@ void Server::handleCommands(ClientData& client) {
   //   handleMODE(params, client);
   // else if (command == "NOTICE")
   //     handleNotice(params, client);
-  // if (command == "JOIN")
-  //     handleJoin(params, client);
+  else if (command == "JOIN")
+      handleJoin(params, client);
   // else if (command == "TOPIC")
-  //     handleTopic(params, client);
+  //     setTopic(params, client);
   // else if (command == "KICK")
-  //     handleKick(params, client);
+  //     kickClient(params, client);
+  // else if (command == "INVITE")
+  //     handleInvite(params, client);
   // else if (command == "PART")
   //     handlePart(params, client);
   // else if (command == "QUIT")

@@ -1,10 +1,10 @@
-objs/ClientData.o: ClientData.cpp ClientData.hpp Server.hpp \
-  CmdResponse.hpp Channel.hpp
+objs/ClientData.o: ClientData.cpp ClientData.hpp Server.hpp Channel.hpp \
+  CmdResponse.hpp
 
 ClientData.hpp:
 
 Server.hpp:
 
-CmdResponse.hpp:
-
 Channel.hpp:
+
+CmdResponse.hpp:

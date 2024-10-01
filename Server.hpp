@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <map>
 
 #include "ClientData.hpp"
 #include "Channel.hpp"
@@ -25,6 +26,7 @@
 #include "Channel.hpp"
 
 class ClientData;
+class Channel;
 class Channel;
 /* ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
@@ -139,3 +141,4 @@ class Server {
                              ClientData client);
 };
 #endif
+

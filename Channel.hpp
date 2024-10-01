@@ -57,4 +57,4 @@ class Channel {
   void sendOtherMember(const std::string& str, ClientData me);
 };
 
-#endif  // CHANNEL_HPP
+#endif // CHANNEL_HPP

@@ -101,12 +101,14 @@ void Server::addClient(const ClientData& client) {
 }
 
 void Server::removeClient(const std::string& nickname) {
-    clients_.erase(std::remove_if(clients_.begin(), clients_.end(),
-                                  [&nickname](const ClientData& client) {
-                                      return client.getNickname() == nickname;
-                                  }),
-                   clients_.end());
+    for (std::vector<ClientData>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
+        if (it->getNickname() == nickname) {
+            clients_.erase(it);
+            break;
+        }
+    }
 }
+
 
 void Server::handleJoin(const std::string& channelName, ClientData& client) {
     Channel* channel = getChannelByName(channelName);
@@ -118,15 +120,15 @@ void Server::handleJoin(const std::string& channelName, ClientData& client) {
     channel->addClient(&client);
 
     // クライアントにJOINメッセージを送信
-    std::string joinMsg = ":" + getServername() + " JOIN " + channelName + "\r\n";
-    ft_send(client, joinMsg.size());
+    std::string joinMsg = ":" + servername_ + " JOIN " + channelName + "\r\n";
+    send(client.getSocket(), joinMsg.c_str(), joinMsg.size(), 0);
 
     // チャンネルのトピックを確認し、適切なレスポンスコードを送信
     if (channel->getTopic().empty()) {
-        std::string noTopicMsg = ":" + getServername() + " 331 " + client.getNickname() + " " + channelName + " :No topic is set\r\n";
-        ft_send(client, noTopicMsg.size());
+        std::string noTopicMsg = ":" + servername_ + " 331 " + client.getNickname() + " " + channelName + " :No topic is set\r\n";
+        send(client.getSocket(), noTopicMsg.c_str(), noTopicMsg.size(), 0);
     } else {
-        std::string topicMsg = ":" + getServername() + " 332 " + client.getNickname() + " " + channelName + " :" + channel->getTopic() + "\r\n";
-        ft_send(client, topicMsg.size());
+        std::string topicMsg = ":" + servername_ + " 332 " + client.getNickname() + " " + channelName + " :" + channel->getTopic() + "\r\n";
+        send(client.getSocket(), topicMsg.c_str(), topicMsg.size(), 0);
     }
 }

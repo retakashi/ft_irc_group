@@ -4,6 +4,8 @@
 #include <sstream>
 #include <algorithm>
 
+class Server;
+
 // メッセージを生成
 std::string createCmdRespMsg(const std::string& servername, const std::string& message) {
     std::ostringstream oss;
@@ -12,20 +14,23 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& m
 }
 
 // 送信メッセージを生成
-std::string createSendMsg(const std::string& resp_msg) {
-    return resp_msg + "\r\n";
-}
-
-// メッセージを送信
-void ft_send(ClientData& client, const std::string& message) {
-    send(client.getSocket(), message.c_str(), message.size(), 0);
+size_t Server::createSendMsg(const std::string &casted_msg) {
+  std::memset(msg_, 0, sizeof(msg_));
+  size_t i = 0;
+  while (casted_msg[i] != '\0' && i < MAX_BUFSIZE) {
+    msg_[i] = casted_msg[i];
+    i++;
+  }
+  msg_[i] = '\r';
+  msg_[i + 1] = '\n';
+  return i + 2;
 }
 
 // コマンドのレスポンスを送信
 void sendCmdResponse(Server& server, ClientData& client, int code) {
     std::string resp_msg = createCmdRespMsg(server.getServername(), std::to_string(code));
     std::string send_msg = createSendMsg(resp_msg);
-    ft_send(client, send_msg);
+    Server::ft_send(client, send_msg);
 }
 
 void Server::handleJoin(const std::string& channelName, ClientData& client) {
@@ -38,16 +43,15 @@ void Server::handleJoin(const std::string& channelName, ClientData& client) {
     channel->addClient(&client);
 
     // クライアントにJOINメッセージを送信
-    std::string joinMsg = createCmdRespMsg(getServername(), "JOIN " + channelName);
-    std::string sendMsg = createSendMsg(joinMsg);
-    ft_send(client, sendMsg);
+    std::string joinMsg = ":" + getServername() + " JOIN " + channelName + "\r\n";
+    ft_send(client, joinMsg.size());
 
     // チャンネルのトピックを確認し、適切なレスポンスコードを送信
     if (channel->getTopic().empty()) {
-        sendCmdResponse(*this, client, 331); // 331はトピックが設定されていない場合
+        std::string noTopicMsg = ":" + getServername() + " 331 " + client.getNickname() + " " + channelName + " :No topic is set\r\n";
+        ft_send(client, noTopicMsg.size());
     } else {
-        std::string topicMsg = createCmdRespMsg(getServername(), "332 " + client.getNickname() + " " + channelName + " :" + channel->getTopic());
-        std::string sendTopicMsg = createSendMsg(topicMsg);
-        ft_send(client, sendTopicMsg);
+        std::string topicMsg = ":" + getServername() + " 332 " + client.getNickname() + " " + channelName + " :" + channel->getTopic() + "\r\n";
+        ft_send(client, topicMsg.size());
     }
 }

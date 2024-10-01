@@ -1,5 +1,6 @@
 #include "Channel.hpp"
 #include "Server.hpp"
+#include "ClientData.hpp"
 #include "CmdResponse.hpp"
 #include <algorithm>
 
@@ -40,14 +41,14 @@ void Channel::broadcastMessage(const std::string& message, ClientData* sender) {
 void Channel::kickClient(ClientData* client, ClientData* target, const std::string& reason) {
     if (isOperator(client)) {
         removeClient(target);
-        std::string kickMsg = createCmdRespMsg(client->getServerName(), "KICK " + name_ + " " + target->getNickname() + " :" + reason);
+        std::string kickMsg = createCmdRespMsg(client->getServername(), "KICK " + name_ + " " + target->getNickname() + " :" + reason);
         ft_send(*target, createSendMsg(kickMsg));
     }
 }
 
 void Channel::inviteClient(ClientData* client, ClientData* target) {
     if (isOperator(client)) {
-        std::string inviteMsg = createCmdRespMsg(client->getServerName(), "INVITE " + target->getNickname() + " :" + name_);
+        std::string inviteMsg = createCmdRespMsg(client->getServername(), "INVITE " + target->getNickname() + " :" + name_);
         ft_send(*target, createSendMsg(inviteMsg));
         // Add logic to actually add the client to the channel if needed
     }
@@ -56,7 +57,7 @@ void Channel::inviteClient(ClientData* client, ClientData* target) {
 void Channel::setTopic(ClientData* client, const std::string& topic) {
     if (isOperator(client)) {
         topic_ = topic;
-        std::string topicMsg = createCmdRespMsg(client->getServerName(), "TOPIC " + name_ + " :" + topic);
+        std::string topicMsg = createCmdRespMsg(client->getServername(), "TOPIC " + name_ + " :" + topic);
         broadcastMessage(topicMsg, client);
     }
 }

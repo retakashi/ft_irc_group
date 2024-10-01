@@ -15,14 +15,19 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
-#include <map>
 #include <string>
 #include <vector>
+#include <map>
+#include <map>
 
-#include "Channel.hpp"
 #include "ClientData.hpp"
+#include "Channel.hpp"
 #include "CmdResponse.hpp"
+#include "Channel.hpp"
+
 class ClientData;
+class Channel;
+class Channel;
 /* ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
 ->それ以上はぶった斬る
@@ -81,25 +86,25 @@ class Server {
 
   // ->Commandディレクトリ
   // Commands.cpp
-  void handleCommands(ClientData &client);
+  void  handleCommands(ClientData &client);
   // USER.cpp
-  void handleUSER(std::string param, ClientData &client);
-  bool isValidUSERparams(std::string &params, struct user_data &user_data,
+  void  handleUSER(std::string param, ClientData &client);
+  bool  isValidUSERparams(std::string &params, struct user_data &user_data,
                          const ClientData &client);
-  bool isValidUsername(const std::string &params, std::string &username,
+  bool  isValidUsername(const std::string &params, std::string &username,
                        std::string::size_type pos);
-  bool isValidMiddle(const std::string &params, char &mode, std::string &unused,
+  bool  isValidMiddle(const std::string &params, char &mode, std::string &unused,
                      std::string::size_type pos);
-  bool isValidRealname(const std::string &params, std::string &realname);
+  bool  isValidRealname(const std::string &params, std::string &realname);
   // NICK.cpp
-  void handleNICK(std::string param, ClientData &client);
-  bool isValidNickname(std::string &param, const ClientData &client);
+  void  handleNICK(std::string param, ClientData &client);
+  bool  isValidNickname(std::string &param, const ClientData &client);
   // PASS.cpp
-  void handlePass(std::string param, ClientData &client);
-  // PRIVMSG.cpp
-  void handlePrivateMessage(const std::string param, ClientData &client);
-  void handle_privmsg_channel(std::string targets, std::string message, ClientData &client);
-  void handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
+  void  handlePass(std::string param, ClientData &client);
+  // // PRIVMSG.cpp
+  // void handlePrivateMessage(const std::string param, ClientData &client);
+  // void handle_privmsg_channel(std::string targets, std::string message, ClientData &client);
+  // void handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
   // MODE.cpp
   int handleMODE(std::string param, ClientData client);
   bool setAndSearchChannel(std::string &param, struct handle_mode_data &data);
@@ -107,9 +112,7 @@ class Server {
   bool isValidModeData(struct handle_mode_data &data);
   bool isValidMode(struct handle_mode_data data, int start, int &total_cnt, int &need_cnt);
   // ここから先は各自で追加していく。
-  // void handleJoin(const std::string &params, ClientData &client);
-  // void handleKick(const std::string &params, ClientData &client);
-  // void handleTopic(const std::string &params, ClientData &client);
+
 
  public:
   static int serversock_;
@@ -130,5 +133,13 @@ class Server {
   static int sendCmdResponce(int code, const std::string &str, ClientData client);
   static int sendCmdResponce(int code, const std::string &str1, const std::string &str2,
                              ClientData client);
+    // JOIN.cpp
+  Channel* getChannelByName(const std::string& channelName);
+  void addChannel(const std::string& channelName, Channel* channel);
+  void handleJoin(const std::string& channelName, ClientData& client);
+
+  void  handleKick(const std::string &params, ClientData &client);
+  void  handleTopic(const std::string &params, ClientData &client);
 };
 #endif
+

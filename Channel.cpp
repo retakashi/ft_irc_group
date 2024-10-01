@@ -1,54 +1,52 @@
 #include "Channel.hpp"
-#include "Server.hpp"
+#include "ClientData.hpp"
 #include "CmdResponse.hpp"
+#include "Server.hpp"
 #include <algorithm>
 
-class ClientData;
-class Server;
-
-Channel::Channel(const std::string& name) : name_(name) {}
+Channel::Channel(const std::string& name) : ch_name_(name) {}
 
 Channel::~Channel() {
-  // クライアントのリストをクリア
-  clients_.clear();
-  // オペレータのリストをクリア
-  operators_.clear();
+    // クライアントリストをクリア
+    member_.clear();
+    // オペレータリストをクリア
+    operators_.clear();
+}
+
+void Channel::broadcastMessage(const std::string& message, ClientData* sender) {
+    for (std::vector<ClientData*>::iterator it = member_.begin(); it != member_.end(); ++it) {
+        if (*it != sender) {
+            Server::ft_send(message, **it);
+        }
+    }
 }
 
 void Channel::addClient(ClientData* client) {
-    clients_.push_back(client);
-    broadcastMessage(client->getNickname() + " has joined the channel.");
+    member_.push_back(client);
+    // broadcastMessage(client->getNickname() + " has joined the channel.");
 }
 
 void Channel::removeClient(ClientData* client) {
-    clients_.erase(std::remove(clients_.begin(), clients_.end(), client), clients_.end());
-    broadcastMessage(client->getNickname() + " has left the channel.");
+    member_.erase(std::remove(member_.begin(), member_.end(), client), member_.end());
+    // broadcastMessage(client->getNickname() + " has left the channel.");
 }
 
 bool Channel::isOperator(ClientData* client) const {
     return std::find(operators_.begin(), operators_.end(), client) != operators_.end();
 }
 
-void Channel::broadcastMessage(const std::string& message, ClientData* sender) {
-    for (std::vector<ClientData*>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
-        if (*it != sender) {
-             ft_send(**it, createSendMsg(message));
-        }
-    }
-}
-
 void Channel::kickClient(ClientData* client, ClientData* target, const std::string& reason) {
     if (isOperator(client)) {
         removeClient(target);
-        std::string kickMsg = createCmdRespMsg(client->getServerName(), "KICK " + name_ + " " + target->getNickname() + " :" + reason);
-        ft_send(*target, createSendMsg(kickMsg));
+        std::string kickMsg = createCmdRespMsg(Server::servername_, ERR_USERNOTINCHANNEL, "KICK " + ch_name_ + " " + target->getNickname() + " :" + reason);
+        Server::ft_send(kickMsg, *target);
     }
 }
 
 void Channel::inviteClient(ClientData* client, ClientData* target) {
     if (isOperator(client)) {
-        std::string inviteMsg = createCmdRespMsg(client->getServerName(), "INVITE " + target->getNickname() + " :" + name_);
-        ft_send(*target, createSendMsg(inviteMsg));
+        std::string inviteMsg = createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, "INVITE " + target->getNickname() + " :" + ch_name_);
+        Server::ft_send(inviteMsg, *target);
         // Add logic to actually add the client to the channel if needed
     }
 }
@@ -56,14 +54,14 @@ void Channel::inviteClient(ClientData* client, ClientData* target) {
 void Channel::setTopic(ClientData* client, const std::string& topic) {
     if (isOperator(client)) {
         topic_ = topic;
-        std::string topicMsg = createCmdRespMsg(client->getServerName(), "TOPIC " + name_ + " :" + topic);
-        broadcastMessage(topicMsg, client);
+        std::string topicMsg = createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, "TOPIC " + ch_name_ + " :" + topic);
+        // broadcastMessage(topicMsg, client);
     }
 }
 
 const std::string& Channel::getTopic() const { return topic_; }
 
-const std::vector<ClientData*>& Channel::getClients() const { return clients_; }
+const std::vector<ClientData*>& Channel::getClients() const { return member_; }
 
 void Channel::setMode(ClientData* client, char mode, bool enable) {
     if (isOperator(client)) {
@@ -71,6 +69,7 @@ void Channel::setMode(ClientData* client, char mode, bool enable) {
     }
 }
 
+const std::string& Channel::getChannelname() const { return ch_name_; }
 //↓rtakashi追加 MODEでしか使わないものはMODE.cppに移します
 void Channel::setInviteOnly(bool value) { invite_only_ = value; }
 bool Channel::getInviteOnly() const { return invite_only_; }
@@ -80,3 +79,10 @@ void Channel::setTopicRestricted(bool value) { topic_restricted_ = value; }
 bool Channel::getTopicRestricted() const { return topic_restricted_; }
 void Channel::setUserLimit(size_t limit){user_limit_ = limit; }
 size_t Channel::getUserLimit() const{return user_limit_;}
+ClientData* Channel::getMemberByNickname(const std::string& nickname)
+{
+    for (size_t i = 0;i < member_.size();i++)
+        if (member_[i]->getNickname() == nickname)
+            return member_[i];
+    return NULL;
+}

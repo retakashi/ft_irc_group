@@ -8,7 +8,12 @@ std::map<std::string, Channel *> Server::channels_;
 Server::Server() {}
 Server::Server(short port, std::string password)
     : port_(port), hostname_("hostname"), serverpass_(password) {}
-Server::~Server() {}
+Server::~Server() {
+  for (std::map<std::string, Channel *>::iterator it = Server::channels_.begin(); it != Server::channels_.end();it++)
+  {
+    delete it->second;
+  }
+}
 
 void Server::startServer() {
   startserv_data data;

@@ -30,6 +30,7 @@ void Server::startServer() {
       if (FD_ISSET(Server::clients_[i].getSocket(), &data.read_fds))
         handleClientCommunication(Server::clients_[i]);
     }
+    
   }
   Server::closeAllSocket();
 }

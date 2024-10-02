@@ -30,6 +30,7 @@
   bool toggleChannelKey(struct handle_mode_data& data);
   void toggleTopicPrivileges(struct handle_mode_data data);
   bool toggleChannelLimit(struct handle_mode_data& data);
+  size_t convertStringToUserLimit(const std::string& l_param);
 
  private:
   std::string ch_name_;

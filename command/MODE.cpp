@@ -15,15 +15,15 @@ int Server::handleMODE(std::string param, ClientData client) {
   Channel* ch;
 
   if (setAndSearchChannel(param, data) == false) return 0;
-  if (channels_[data.mode_data[0]]->isOperator(&client)== false) //要確認
-  return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
+  // if (channels_[data.mode_data[0]]->isOperator(&client)== false) //要確認
+  // return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
   splitModeParam(param, data.mode_data);
   if (isValidModeData(data) == false) return 0;
   ch = channels_[data.mode_data[0]];
 
   data.param_i = start;
   while (start < data.mode_data.size()) {
-    for(size_t i = 0;data.mode_data[start][i] != '\0';i++) {
+    for (size_t i = 0; data.mode_data[start][i] != '\0'; i++) {
       switch (data.mode_data[start][i]) {
         case '+':
           data.is_active = true;
@@ -46,12 +46,15 @@ int Server::handleMODE(std::string param, ClientData client) {
         case 'l':
           if (ch->toggleChannelLimit(data) == false) return 0;
           break;
+        default:
+          return Server::sendCmdResponce(ERR_NOCHANMODES, data.mode_data[0], data.client);
       }
     }
     if (start >= data.param_i)
       start++;
     else
       start = data.param_i + 1;
+    data.param_i = start;
   }
   return 0;
 }
@@ -106,7 +109,7 @@ bool Server::isValidModeData(struct handle_mode_data& data) {
     start += (need_cnt + 1);
     if (data.mode_data.size() == start) return true;
     if (data.mode_data.size() < start + 1)
-      return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE1", data.client);
+      return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
   }
   return true;
 }
@@ -114,19 +117,20 @@ bool Server::isValidModeData(struct handle_mode_data& data) {
 bool Server::isValidMode(struct handle_mode_data data, int start, int& total_cnt, int& need_cnt) {
   std::string search = "oiktl";
   if (data.mode_data[start][0] != '+' && data.mode_data[start][0] != '-')
-    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE2", data.client);  // false返す
+    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);  // false返す
   for (size_t i = 1; i < data.mode_data[start].size(); i++) {
     if (data.mode_data[start].find(data.mode_data[start][i]) != std::string::npos)
       total_cnt++;
     else
       return Server::sendCmdResponce(ERR_NOCHANMODES, data.mode_data[0],
                                      data.client);  // mode_data[0] == channelname
-    if (data.mode_data[start][0] == '+' && (data.mode_data[start][i] == 'o' || data.mode_data[start][i] == 'k' ||
-        data.mode_data[start][i] == 'l'))
+    if (data.mode_data[start][i] == 'o' ||
+        (data.mode_data[start][0] == '+' &&
+         (data.mode_data[start][i] == 'k' || data.mode_data[start][i] == 'l')))
       need_cnt++;
   }
   if (total_cnt < 1 || total_cnt > 3)
-    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE3", data.client);
+    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
   return true;
 }
 
@@ -137,7 +141,7 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
   ClientData* target_client;
 
   data.param_i++;
-  target_nick = data.mode_data[data.param_i]; 
+  target_nick = data.mode_data[data.param_i];
   // target_nickがメンバーかどうか
   if ((target_client = getMemberByNickname(target_nick)) == NULL)
     return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
@@ -151,10 +155,10 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
   } else if (data.is_active == false && is_ope == true) {
     ss << getChannelname() << " -o by " << data.client.getNickname();
     // あとでoperator erase作る
+    std::cout << "size: " << operators_.size() << std::endl;
     if (operators_.size() > 0) {
       for (size_t i = 0; i < operators_.size(); i++) {
-        if (operators_[i] == target_client)
-          operators_.erase(operators_.begin(), operators_.begin() + i);
+        if (operators_[i] == target_client) operators_.erase(operators_.begin() + i);
       }
     }
   }
@@ -212,22 +216,15 @@ void Channel::toggleTopicPrivileges(struct handle_mode_data data) {
   sendOtherMember(ss.str(), data.client);
 }
 
-// limit -> とりあえずINT_MAXまで
-#define INT_MAX_LEN 10
 bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
   size_t limit = 0;
   std::stringstream ss;
 
   if (data.is_active == true) {
     data.param_i++;
-    if (data.mode_data[data.param_i].size() > INT_MAX_LEN)
+    if ((limit = convertStringToUserLimit(data.mode_data[data.param_i])) == 0)
       return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
-    ss << data.mode_data[data.param_i];
-    ss >> limit;
-    if (limit > INT_MAX || limit < 1) return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
-    setUserLimit(limit);
-    ss.clear();
-    ss << getChannelname() << " " << limit << " +l by " << data.client.getNickname();
+    ss << getChannelname() << " +l " << limit << " by " << data.client.getNickname();
   } else {
     if (getUserLimit() > 0) {
       setUserLimit(0);
@@ -236,6 +233,18 @@ bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
   }
   sendOtherMember(ss.str(), data.client);
   return true;
+}
+
+// limit -> とりあえずINT_MAXまで
+#define INT_MAX_LEN 10
+size_t Channel::convertStringToUserLimit(const std::string& l_param) {
+  size_t limit = 0;
+  std::stringstream ss;
+  if (l_param.size() > INT_MAX_LEN) return 0;
+  ss << l_param;
+  ss >> limit;
+  if (limit > INT_MAX || limit < 1) return 0;
+  return limit;
 }
 
 void Channel::sendOtherMember(const std::string& str, ClientData me) {

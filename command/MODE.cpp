@@ -155,7 +155,6 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
   } else if (data.is_active == false && is_ope == true) {
     ss << getChannelname() << " -o by " << data.client.getNickname();
     // あとでoperator erase作る
-    std::cout << "size: " << operators_.size() << std::endl;
     if (operators_.size() > 0) {
       for (size_t i = 0; i < operators_.size(); i++) {
         if (operators_[i] == target_client) operators_.erase(operators_.begin() + i);
@@ -175,7 +174,8 @@ void Channel::toggleInviteOnlyChannel(struct handle_mode_data data) {
     setInviteOnly(false);
     ss << getChannelname() << " -i by " << data.client.getNickname();
   }
-  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
+  broadcastMessage(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()),
+                   &data.client);
 }
 
 bool Channel::toggleChannelKey(struct handle_mode_data& data) {
@@ -194,7 +194,8 @@ bool Channel::toggleChannelKey(struct handle_mode_data& data) {
     ss << getChannelname() << " -k " << " by " << data.client.getNickname();
   }
 
-  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
+  broadcastMessage(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()),
+                   &data.client);
   return true;
 }
 
@@ -215,7 +216,8 @@ void Channel::toggleTopicPrivileges(struct handle_mode_data data) {
     setTopicRestricted(false);
     ss << getChannelname() << " -t by " << data.client.getNickname();
   }
-  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
+  broadcastMessage(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()),
+                   &data.client);
 }
 
 bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
@@ -233,7 +235,8 @@ bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
       ss << getChannelname() << " -l by " << data.client.getNickname();
     }
   }
-  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
+  broadcastMessage(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()),
+                   &data.client);
   return true;
 }
 
@@ -247,10 +250,4 @@ size_t Channel::convertStringToUserLimit(const std::string& l_param) {
   ss >> limit;
   if (limit > INT_MAX || limit < 1) return 0;
   return limit;
-}
-
-void Channel::sendOtherMember(const std::string& str, ClientData me) {
-  for (size_t i = 1; i < member_.size(); i++) {
-    if (member_[i]->getNickname() != me.getNickname()) Server::ft_send(str, *member_[i]);
-  }
 }

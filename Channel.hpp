@@ -31,7 +31,13 @@
   void toggleTopicPrivileges(struct handle_mode_data data);
   bool toggleChannelLimit(struct handle_mode_data& data);
   size_t convertStringToUserLimit(const std::string& l_param);
-
+  void sendOtherMember(const std::string& str, ClientData me);
+  //Channel.cpp
+  void setInviteOnly(bool value);
+  bool getInviteOnly() const;
+  void setTopicRestricted(bool value);
+  bool getTopicRestricted() const;
+  void setTopic(const std::string& topic);
  private:
   std::string ch_name_;
   std::string topic_;
@@ -43,18 +49,13 @@
   std::vector<ClientData*> operators_;
 
   //↓rtakashi追加
-  void setInviteOnly(bool value);
-  bool getInviteOnly() const;
   const std::string& getChannelname() const;
   // const std::string& getTopic() const;
   void setKey(const std::string& newkey);
   const std::string& getKey() const;
-  void setTopicRestricted(bool value);
-  bool getTopicRestricted() const;
   void setUserLimit(size_t limit);
   size_t getUserLimit() const;
   bool isValidKey(const std::string& key);
-  void sendOtherMember(const std::string& str, ClientData me);
   ClientData* getMemberByNickname(const std::string& nickname);
 };
 

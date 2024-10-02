@@ -19,8 +19,8 @@ void Server::handleCommands(ClientData& client) {
   //     handleNotice(params, client);
   else if (command == "JOIN")
       handleJoin(params, client);
-  // else if (command == "TOPIC")
-  //     handleTopic(params, client);
+  else if (command == "TOPIC")
+      handleTOPIC(params, client);
   // else if (command == "KICK")
   //     handleKick(params, client);
   // else if (command == "PART")

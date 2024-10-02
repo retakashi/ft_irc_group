@@ -9,7 +9,7 @@ MODE <channel> <option> <param>
 +/-t: TOPICコマンドの権限をオペレータのみ/解除.modeparam不要
 +/-l: ユーザー制限(チャンネルに参加できる人数)/解除
 */
-int Server::handleMODE(std::string param, ClientData client) {
+int Server::handleMODE(std::string param, ClientData& client) {
   handle_mode_data data(client);
   size_t start = 1;
   Channel* ch;
@@ -175,11 +175,12 @@ void Channel::toggleInviteOnlyChannel(struct handle_mode_data data) {
     setInviteOnly(false);
     ss << getChannelname() << " -i by " << data.client.getNickname();
   }
-  sendOtherMember(ss.str(), data.client);
+  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
 }
 
 bool Channel::toggleChannelKey(struct handle_mode_data& data) {
   std::stringstream ss;
+  std::string msg;
   if (data.is_active == true) {
     data.param_i++;
     if (!getKey().empty())
@@ -192,7 +193,8 @@ bool Channel::toggleChannelKey(struct handle_mode_data& data) {
     if (!getKey().empty()) setKey("");
     ss << getChannelname() << " -k " << " by " << data.client.getNickname();
   }
-  sendOtherMember(ss.str(), data.client);
+
+  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
   return true;
 }
 
@@ -213,7 +215,7 @@ void Channel::toggleTopicPrivileges(struct handle_mode_data data) {
     setTopicRestricted(false);
     ss << getChannelname() << " -t by " << data.client.getNickname();
   }
-  sendOtherMember(ss.str(), data.client);
+  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
 }
 
 bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
@@ -231,7 +233,7 @@ bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
       ss << getChannelname() << " -l by " << data.client.getNickname();
     }
   }
-  sendOtherMember(ss.str(), data.client);
+  sendOtherMember(createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, ss.str()), data.client);
   return true;
 }
 
@@ -249,7 +251,6 @@ size_t Channel::convertStringToUserLimit(const std::string& l_param) {
 
 void Channel::sendOtherMember(const std::string& str, ClientData me) {
   for (size_t i = 1; i < member_.size(); i++) {
-    if (member_[i]->getNickname() != me.getNickname())
-      Server::sendCmdResponce(RPL_CHANNELMODEIS, str, *member_[i]);
+    if (member_[i]->getNickname() != me.getNickname()) Server::ft_send(str, *member_[i]);
   }
 }

@@ -13,6 +13,7 @@ class Channel {
   Channel(const std::string& ch_name);
   ~Channel();
 
+  // channel.cpp
   void addClient(ClientData* client);
   void removeClient(ClientData* client);
   bool isOperator(ClientData* client) const;
@@ -21,6 +22,7 @@ class Channel {
   void inviteMember(ClientData* client, ClientData* target);
   void setTopic(ClientData* client, const std::string& topic);
   std::string getMemberList() const; //add
+  bool getInviteOnly() const;
 
   const std::string& getTopic() const;
   const std::vector<ClientData*>& getClients() const;
@@ -32,7 +34,6 @@ class Channel {
   void toggleTopicPrivileges(struct handle_mode_data data);
   bool toggleChannelLimit(struct handle_mode_data data);
   bool isMember(ClientData* client) const;
-  bool getInviteOnly() const;
 
  private:
   std::string ch_name_;

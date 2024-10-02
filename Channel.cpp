@@ -85,5 +85,5 @@ bool Channel::isMember(ClientData* client) const {
             return true;
         }
     }
-    return false;  // Client is not a member of the channel
+    return false;  // Client is not a mesmber of the channel
 }

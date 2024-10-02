@@ -31,7 +31,6 @@ class Channel {
   void toggleTopicPrivileges(struct handle_mode_data data);
   bool toggleChannelLimit(struct handle_mode_data& data);
   size_t convertStringToUserLimit(const std::string& l_param);
-  void sendOtherMember(const std::string& str, ClientData me);
   //Channel.cpp
   void setInviteOnly(bool value);
   bool getInviteOnly() const;

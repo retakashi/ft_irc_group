@@ -28,7 +28,7 @@ int Server::handleTOPIC(std::string param, ClientData& client) {
     ch->setTopic(param);
   ss << ":" << servername_ << "  " << client.getNickname() << "!" << client.getUsername() << "@"
      << hostname_ << " TOPIC " << ch_name << ": " << ch->getTopic();
-  ch->sendOtherMember(ss.str(), client);
+  ch->broadcastMessage(ss.str(), &client);
   return 0;
 }
 

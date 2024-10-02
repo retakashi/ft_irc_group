@@ -65,18 +65,15 @@ class Server {
   static const int MAX_BUFSIZE = 510;
   short port_;
   std::string serverpass_;
-  std::string hostname_;
   char msg_[MAX_BUFSIZE];
   // Server.cpp
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);
   void setSelectArgs(fd_set &read_fds, int &socket_max);
-  const std::string &getHostname() const;
+  // const std::string &getHostname() const;
   // Utils.cpp
   void handleClientCommunication(ClientData &client);
   void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
-  // このclientsのgetterは後で別に移動させても良いかもしれません。
-  ClientData *getClientByNickname(const std::string &nickname);
   // Receive.cpp
   ssize_t ft_recv(int socket);
   // ClientAuth.cpp USERは認証のみ使用のためこっち
@@ -84,9 +81,6 @@ class Server {
   void authenticatedNewClient(ClientData &client);
   void sendWelcomeToIrc(ClientData client);
 
-  // ->Commandディレクトリ
-  // Commands.cpp
-  void  handleCommands(ClientData &client);
   // USER.cpp
   void  handleUSER(std::string param, ClientData &client);
   bool  isValidUSERparams(std::string &params, struct user_data &user_data,
@@ -119,11 +113,15 @@ class Server {
   static std::string servername_;
   static std::vector<ClientData> clients_;
   static std::map<std::string, Channel *> channels_;
+  std::string hostname_;
+
   // Server.cpp
   Server(short port, std::string password);
   ~Server();
   void startServer();
   static void closeAllSocket();
+  const std::string &getHostname() const;
+
   //Utils.cpp
   static void disconnectClient(ClientData client);
   static void putFunctionError(const char *errmsg);
@@ -133,13 +131,16 @@ class Server {
   static int sendCmdResponce(int code, const std::string &str, ClientData client);
   static int sendCmdResponce(int code, const std::string &str1, const std::string &str2,
                              ClientData client);
-    // JOIN.cpp
+  
+  // ->Commandディレクトリ
+  // Commands.cpp
+  void  handleCommands(ClientData &client);
+  ClientData* getClientByNickname(const std::string& nickname); 
   Channel* getChannelByName(const std::string& channelName);
-  void addChannel(const std::string& channelName, Channel* channel);
-  void handleJoin(const std::string& channelName, ClientData& client);
-
-  void  handleKick(const std::string &params, ClientData &client);
-  void  handleTopic(const std::string &params, ClientData &client);
+  void  addChannel(const std::string& channelName, Channel* channel);
+  void  handleJoin(const std::string& channelName, ClientData& client);
+  void  handleKick(const std::string& params, ClientData& client);
+  void  handleInvite(const std::string& params, ClientData& client);
 };
 #endif
 

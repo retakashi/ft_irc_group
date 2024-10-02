@@ -35,21 +35,21 @@ bool Channel::isOperator(ClientData* client) const {
     return std::find(operators_.begin(), operators_.end(), client) != operators_.end();
 }
 
-void Channel::kickClient(ClientData* client, ClientData* target, const std::string& reason) {
+void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) {
     if (isOperator(client)) {
-        removeClient(target);
-        std::string kickMsg = createCmdRespMsg(Server::servername_, ERR_USERNOTINCHANNEL, "KICK " + ch_name_ + " " + target->getNickname() + " :" + reason);
-        Server::ft_send(kickMsg, *target);
+        std::vector<ClientData*>::iterator it = std::find(member_.begin(), member_.end(), target);
+        if (it != member_.end()) {
+            removeClient(target);
+            std::string message = target->getNickname() + " has been kicked from the channel. Reason: ";
+            broadcastMessage(message, client);
+        } else {
+            std::cerr << "Target client not found in the channel." << std::endl;
+        }
+    } else {
+        std::cerr << "Client is not an operator." << std::endl;
     }
 }
 
-void Channel::inviteClient(ClientData* client, ClientData* target) {
-    if (isOperator(client)) {
-        std::string inviteMsg = createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, "INVITE " + target->getNickname() + " :" + ch_name_);
-        Server::ft_send(inviteMsg, *target);
-        // Add logic to actually add the client to the channel if needed
-    }
-}
 
 void Channel::setTopic(ClientData* client, const std::string& topic) {
     if (isOperator(client)) {
@@ -77,3 +77,13 @@ void Channel::setTopicRestricted(bool value) { topic_restricted_ = value; }
 bool Channel::getTopicRestricted() const { return topic_restricted_; }
 void Channel::setUserLimit(size_t limit){user_limit_ = limit; }
 size_t Channel::getUserLimit() const{return user_limit_;}
+
+bool Channel::isMember(ClientData* client) const {
+    // Loop through the member list to check if the client is in the channel
+    for (std::vector<ClientData*>::const_iterator it = member_.begin(); it != member_.end(); ++it) {
+        if (*it == client) {
+            return true;
+        }
+    }
+    return false;  // Client is not a member of the channel
+}

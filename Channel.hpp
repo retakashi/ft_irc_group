@@ -17,10 +17,11 @@ class Channel {
   void removeClient(ClientData* client);
   bool isOperator(ClientData* client) const;
   void broadcastMessage(const std::string& message, ClientData* sender = nullptr);
-
-  void kickClient(ClientData* client, ClientData* target, const std::string& reason);
-  void inviteClient(ClientData* client, ClientData* target);
+  void kickMember(ClientData* client, ClientData* target, const std::string& reason);
+  void inviteMember(ClientData* client, ClientData* target);
   void setTopic(ClientData* client, const std::string& topic);
+  std::string getMemberList() const; //add
+
   const std::string& getTopic() const;
   const std::vector<ClientData*>& getClients() const;
   void setMode(ClientData* client, char mode, bool enable);
@@ -30,6 +31,8 @@ class Channel {
   bool toggleChannelKey(struct handle_mode_data data);
   void toggleTopicPrivileges(struct handle_mode_data data);
   bool toggleChannelLimit(struct handle_mode_data data);
+  bool isMember(ClientData* client) const;
+  bool getInviteOnly() const;
 
  private:
   std::string ch_name_;
@@ -43,7 +46,6 @@ class Channel {
 
   //↓rtakashi追加
   void setInviteOnly(bool value);
-  bool getInviteOnly() const;
   const std::string& getName() const;
   // const std::string& getTopic() const;
   void setKey(const std::string& newkey);
@@ -52,7 +54,6 @@ class Channel {
   bool getTopicRestricted() const;
   void setUserLimit(size_t limit);
   size_t getUserLimit() const;
-  bool isMember(ClientData client) const;
   bool isValidKey(const std::string& key);
   void sendOtherMember(const std::string& str, ClientData me);
 };

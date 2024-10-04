@@ -41,15 +41,25 @@ void Server::handlePrivateMessage(const std::string param, ClientData &client)
 
 void  Server::handle_privmsg_channel(std::string targets, std::string message, ClientData &client)
 {
-    // カンマ区切りで何のこのチャンネルに送るのかを確認する処理
+    std::istringstream iss(targets);
+    std::string target;
 
-    // チャンネルを探す処理
+    while (getline(iss, target, ','))
+    {
+        Channel* channel = getChannelByName(target);
+        if (!channel) 
+        {
+            sendCmdResponce(ERR_NORECIPIENT, client);
+            return;
+        }
 
-    // チャンネルを見つけたらそこの中にいる人全員に送る処理
+        // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
+        std::string message_ch = ":" + (&client)->getNickname() + "!" + (&client)->getUsername() + "@" + "localhost" + " PRIVMSG " + target + " :" + message + "\r\n";
+        std::cout << "ここまで6"<< std::endl;
+        std::cout << "channel members :: " << channel->getMemberList() << std::endl;
+        (channel)->broadcastMessage(message_ch, &client);
 
-    // whileかforで繰り返す。
-
-    // 個人のやつができたからそれをベースにチャンネル送信もできるようにする。
+    }
     return ;
 }
 
@@ -66,15 +76,12 @@ void  Server::handle_privmsg_personal(std::string targets, std::string message, 
         ClientData* recipient = getClientByNickname(target);
         if (target.empty() || !recipient || (recipient == &client)) 
         {
-            // send_error_message rtakashiに確認 ERR_NORECIPIENT
             sendCmdResponce(ERR_NORECIPIENT, client);
             return;
         }
 
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
         std::string recipientMessage = ":" + (&client)->getNickname() + "!" + (&client)->getUsername() + "@" + "localhost" + " PRIVMSG " + target + " :" + message + "\r\n";
-        // std::strncpy(msg_, recipientMessage.c_str(), MAX_BUFSIZE - 1);
-        // msg_[MAX_BUFSIZE - 1] = '\0';
         ft_send(recipientMessage, *recipient);
     }
     return ;

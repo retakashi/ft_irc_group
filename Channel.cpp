@@ -23,12 +23,12 @@ void Channel::broadcastMessage(const std::string& message, ClientData* sender) {
 
 void Channel::addClient(ClientData* client) {
     member_.push_back(client);
-    broadcastMessage(client->getNickname() + " has joined the channel.");
+    broadcastMessage(client->getNickname() + " has joined the channel.", client);
 }
 
 void Channel::removeClient(ClientData* client) {
     member_.erase(std::remove(member_.begin(), member_.end(), client), member_.end());
-    broadcastMessage(client->getNickname() + " has left the channel.");
+    broadcastMessage(client->getNickname() + " has left the channel.", client);
 }
 
 bool Channel::isOperator(ClientData* client) const {

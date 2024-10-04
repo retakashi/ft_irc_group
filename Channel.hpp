@@ -17,7 +17,7 @@ class Channel {
   void addClient(ClientData* client);
   void removeClient(ClientData* client);
   bool isOperator(ClientData* client) const;
-  void broadcastMessage(const std::string& message, ClientData* sender = nullptr);
+  void broadcastMessage(const std::string& message, ClientData* sender);
   void kickMember(ClientData* client, ClientData* target, const std::string& reason);
   void inviteMember(ClientData* client, ClientData* target);
   void setTopic(ClientData* client, const std::string& topic);

@@ -13,7 +13,7 @@ Channel* Server::getChannelByName(const std::string& channelName) {
     if (it != channels_.end()) {
         return it->second;
     }
-    return nullptr;//c+11
+    return NULL;
 }
 
 void Server::addChannel(const std::string& channelName, Channel* channel) {

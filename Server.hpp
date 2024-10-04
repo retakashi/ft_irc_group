@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <list>
 
 #include "Channel.hpp"
 #include "ClientData.hpp"
@@ -117,7 +118,7 @@ class Server {
  public:
   static int serversock_;
   static std::string servername_;
-  static std::vector<ClientData> clients_;
+  static std::list<ClientData> clients_;
   static std::map<std::string, Channel *> channels_;
   // Server.cpp
   Server(short port, std::string password);

@@ -25,14 +25,15 @@ void Server::disconnectClient(ClientData client) {
   if (clients_.size() == 0) {
     if (close(socket) < 0) putFunctionError("close failed");
   } else {
-    std::vector<ClientData>::iterator it = clients_.begin();
-    std::vector<ClientData>::iterator erase_it = it;
+    std::list<ClientData>::iterator it = clients_.begin();
+    std::list<ClientData>::iterator erase_it = it;
     while (it != clients_.end()) {
       if (it->getSocket() == socket) break;
       it++;
     }
     if (close(socket) < 0) putFunctionError("close failed");
-    clients_.erase(it);
+    it->setSocket(-1);
+    // clients_.erase(it);
   }
   std::cout << "disconnected sockfd : " << socket << std::endl;
 }
@@ -45,7 +46,7 @@ void Server::putFunctionError(const char *errmsg) {
 
 ClientData* Server::getClientByNickname(const std::string& nickname) 
 {
-    for (std::vector<ClientData>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
+    for (std::list<ClientData>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
         if (it->getNickname() == nickname)
             return &(*it);
     }

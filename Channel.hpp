@@ -1,13 +1,13 @@
-// #ifndef CHANNEL_HPP
-// #define CHANNEL_HPP
+#ifndef CHANNEL_HPP
+#define CHANNEL_HPP
 
 #include "ClientData.hpp"  // ClientDataクラスを使うためにインクルード
 
-// class ClientData;
-// class Channel {
-//  public:
-//   Channel(const std::string& ch_name);
-//   ~Channel();
+class ClientData;
+class Channel {
+ public:
+  Channel(const std::string& ch_name);
+  ~Channel();
 
   //channel.cpp
   void broadcastMessage(const std::string& message, ClientData* sender);

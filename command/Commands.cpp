@@ -30,8 +30,8 @@ void Server::handleCommands(ClientData& client) {
   //     setTopic(params, client);
   else if (command == "KICK")
 	handleKick(params, client);
-//   else if (command == "INVITE")
-// 	handleInvite(params, client);
+  else if (command == "INVITE")
+	handleInvite(params, client);
   // else if (command == "PART")
   //     handlePart(params, client);
   // else if (command == "QUIT")

@@ -51,23 +51,10 @@ void Channel::kickMember(ClientData* client, ClientData* target, const std::stri
 }
 
 
-void Channel::setTopic(ClientData* client, const std::string& topic) {
-    if (isOperator(client)) {
-        topic_ = topic;
-        std::string topicMsg = createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS, "TOPIC " + ch_name_ + " :" + topic);
-        broadcastMessage(topicMsg, client);
-    }
-}
-
 const std::string& Channel::getTopic() const { return topic_; }
 
 const std::vector<ClientData*>& Channel::getClients() const { return member_; }
 
-void Channel::setMode(ClientData* client, char mode, bool enable) {
-    if (isOperator(client)) {
-        // Implement mode setting logic here
-    }
-}
 //↓rtakashi追加 MODEでしか使わないものはMODE.cppに移します
 void Channel::setInviteOnly(bool value) { invite_only_ = value; }
 bool Channel::getInviteOnly() const { return invite_only_; }

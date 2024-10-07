@@ -2,7 +2,7 @@ NAME = Server
 CXX = c++
 CXXFLAGS = -std=c++98 -MMD -MP -pedantic
 SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp CmdResponse.cpp Send.cpp Receive.cpp Utils.cpp\
-	   Commands.cpp NICK.cpp USER.cpp PASS.cpp PRIVMSG.cpp Channel.cpp JOIN.cpp KICK.cpp INVITE.cpp
+	   Commands.cpp NICK.cpp USER.cpp PASS.cpp PRIVMSG.cpp Channel.cpp JOIN.cpp KICK.cpp INVITE.cpp TOPIC.cpp
 VPATH = ./command
 DEPFILES = $(OBJS:%.o=%.d)
 OBJS = ${addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o)}

@@ -40,8 +40,7 @@ void Server::handleJoin(const std::string& channelName, ClientData& client) {
         channel->addClient(&client);
 
         // チャンネルにJOINメッセージを送信
-        // std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " JOIN :" + channelName + "\r\n";
-        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@localhost" + " JOIN :" + channelName + "\r\n";
+        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() + " JOIN :" + channelName + "\r\n";
         channel->broadcastMessage(joinMsg, &client);  // Notify all clients in the channel, including the new one
         ft_send(joinMsg, client);  // Notify the new client
 

@@ -1,4 +1,4 @@
-#include "Channel.hpp"
+#include "../Channel.hpp"
 
 void Channel::inviteMember(ClientData* client, ClientData* target) { 
     if (isOperator(client)) {

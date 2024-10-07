@@ -1,12 +1,12 @@
-#include "Channel.hpp"
-#include "ClientData.hpp"
-#include "CmdResponse.hpp"
-#include "Server.hpp"
+#include "../ClientData.hpp"
+#include "../CmdResponse.hpp"
+#include "../Channel.hpp"
+#include "../Server.hpp"
 
 // KICK　<channel> *( "," <channel> ) <user> *( "," <user> )
 void Channel::removeClient(ClientData* client) {
     member_.erase(std::remove(member_.begin(), member_.end(), client), member_.end());
-    broadcastMessage(client->getNickname() + " has left the channel.");
+    broadcastMessage(client->getNickname() + " has left the channel.", client);
 }
 
 bool Channel::isOperator(ClientData* client) const {

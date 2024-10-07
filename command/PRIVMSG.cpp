@@ -47,7 +47,7 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
     while (getline(iss, target, ','))
     {
         Channel* channel = getChannelByName(target);
-        if (!channel) 
+        if (!channel || !(channel->isMember(&client))) 
         {
             sendCmdResponce(ERR_NORECIPIENT, client);
             return;
@@ -55,10 +55,7 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
 
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
         std::string message_ch = ":" + (&client)->getNickname() + "!" + (&client)->getUsername() + "@" + "localhost" + " PRIVMSG " + target + " :" + message + "\r\n";
-        std::cout << "ここまで6"<< std::endl;
-        std::cout << "channel members :: " << channel->getMemberList() << std::endl;
         (channel)->broadcastMessage(message_ch, &client);
-
     }
     return ;
 }

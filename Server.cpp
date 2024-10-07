@@ -2,13 +2,19 @@
 
 std::string Server::servername_("servername");
 int Server::serversock_ = 0;
-std::vector<ClientData> Server::clients_;
+std::list<ClientData> Server::clients_;
 std::map<std::string, Channel *> Server::channels_;
 
 Server::Server() {}
 Server::Server(short port, std::string password)
     : port_(port), hostname_("hostname"), serverpass_(password) {}
-Server::~Server() {}
+Server::~Server() {
+  //仮
+  for (std::map<std::string, Channel *>::iterator it = Server::channels_.begin(); it != Server::channels_.end();it++)
+  {
+    delete it->second;
+  }
+}
 
 void Server::startServer() {
   startserv_data data;
@@ -26,11 +32,16 @@ void Server::startServer() {
       break;
     }
     if (FD_ISSET(serversock_, &data.read_fds)) data.client_sock = acceptNewClient();
-    for (size_t i = 0; i < Server::clients_.size(); i++) {
-      if (FD_ISSET(Server::clients_[i].getSocket(), &data.read_fds))
-        handleClientCommunication(Server::clients_[i]);
+    for (std::list<ClientData>::iterator it = Server::clients_.begin(); it != Server::clients_.end();it++) {
+      if (it->getSocket() == -1)
+      {
+        std::list<ClientData>::iterator erase_it = it;
+        it++;
+        clients_.erase(erase_it);
+      }
+      if (it != Server::clients_.end() && FD_ISSET(it->getSocket(), &data.read_fds))
+        handleClientCommunication(*it);
     }
-    
   }
   Server::closeAllSocket();
 }
@@ -56,15 +67,16 @@ void Server::setSelectArgs(fd_set &read_fds, int &socket_max) {
   FD_ZERO(&read_fds);
   FD_SET(Server::serversock_, &read_fds);
   socket_max = Server::serversock_;
-  for (size_t i = 0; i < Server::clients_.size(); i++) {
-    FD_SET(Server::clients_[i].getSocket(), &read_fds);
-    if (socket_max < Server::clients_[i].getSocket()) socket_max = Server::clients_[i].getSocket();
+  for (std::list<ClientData>::iterator it = Server::clients_.begin(); it != Server::clients_.end();it++) {
+    if (it->getSocket() != -1)
+    FD_SET(it->getSocket(), &read_fds);
+    if (socket_max < it->getSocket()) socket_max = it-> getSocket();
   }
 }
 
 void Server::closeAllSocket() {
-  for (size_t i = 0; i < clients_.size(); i++) {
-    if (close(clients_[i].getSocket()) < 0) perror("close failed");
+  for (std::list<ClientData>::iterator it = Server::clients_.begin();it != Server::clients_.end();it++) {
+    if (close(it->getSocket()) < 0) perror("close failed");
   }
   if (serversock_ != 0 && close(serversock_) < 0) perror("close failed");
 }

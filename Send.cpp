@@ -5,7 +5,6 @@ void Server::ft_send(std::string msg, ClientData client) {
   ssize_t send_ret = 0;
   size_t send_size = msg.size();
 
-  std::cout << client.getSocket() << std::endl;
   // msgをsendに使用できる形にする
   if (send_size < MAX_BUFSIZE - 2) msg.resize(MAX_BUFSIZE - 2);
   std::strncpy(casted_msg, msg.c_str(), send_size);

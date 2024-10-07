@@ -13,14 +13,19 @@ Channel* Server::getChannelByName(const std::string& channelName) {
     if (it != channels_.end()) {
         return it->second;
     }
-    return NULL;
+    return nullptr;//c+11
 }
 
 void Server::addChannel(const std::string& channelName, Channel* channel) {
     channels_[channelName] = channel;
 }
 
-void Server::handleJoin(const std::string& channelName, ClientData& client) {
+void Server::handleJoin(const std::string& params, ClientData& client) {
+    std::istringstream iss(params);
+    std::string channelName;
+    std::string key;
+    iss >> channelName >> key;
+
     if (channelName.empty()) {
         sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
         return;
@@ -37,10 +42,16 @@ void Server::handleJoin(const std::string& channelName, ClientData& client) {
             return;
         }
 
+        if (!channel->getKey().empty() && channel->getKey() != key) {
+            std::string errorMsg = createCmdRespMsg(servername_, 475, client.getNickname(), channelName + " :Cannot join channel (+k)");
+            ft_send(errorMsg, client);
+            return;
+        }
+
         channel->addClient(&client);
 
         // チャンネルにJOINメッセージを送信
-        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() + " JOIN :" + channelName + "\r\n";
+        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " JOIN :" + channelName + "\r\n";
         channel->broadcastMessage(joinMsg, &client);  // Notify all clients in the channel, including the new one
         ft_send(joinMsg, client);  // Notify the new client
 
@@ -64,6 +75,7 @@ void Server::handleJoin(const std::string& channelName, ClientData& client) {
         ft_send(errorMsg, client);
     }
 }
+
 std::string Channel::getMemberList() const {
     std::ostringstream oss;
     for (std::vector<ClientData*>::const_iterator it = member_.begin(); it != member_.end(); ++it) {

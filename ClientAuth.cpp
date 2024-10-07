@@ -40,7 +40,9 @@ void Server::authenticatedNewClient(ClientData& client) {
   if (client.isCompleteAuthParams() == true) sendWelcomeToIrc(client);
 }
 
-void Server::sendWelcomeToIrc(ClientData client) {
+void Server::sendWelcomeToIrc(ClientData client) 
+{
+  std::cout << "New Client Connected :" << client.getNickname() << std::endl;
   std::stringstream ss;
   ss << ":" << servername_ << " 001 Welcome to the Internet Relay Network " << client.getNickname()
      << "!" << client.getUsername() << "@" << hostname_;

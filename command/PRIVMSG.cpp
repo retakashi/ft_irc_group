@@ -47,7 +47,7 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
     while (getline(iss, target, ','))
     {
         Channel* channel = getChannelByName(target);
-        if (!channel || !(channel->isMember(&client))) 
+        if (target[0] != '#' || !channel || !(channel->isMember(&client))) 
         {
             sendCmdResponce(ERR_NORECIPIENT, client);
             return;

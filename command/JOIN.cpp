@@ -13,7 +13,7 @@ Channel* Server::getChannelByName(const std::string& channelName) {
     if (it != channels_.end()) {
         return it->second;
     }
-    return nullptr;//c+11
+    return NULL;
 }
 
 void Server::addChannel(const std::string& channelName, Channel* channel) {
@@ -51,7 +51,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
         channel->addClient(&client);
 
         // チャンネルにJOINメッセージを送信
-        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + client.getHostname() + " JOIN :" + channelName + "\r\n";
+        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() + " JOIN :" + channelName + "\r\n";
         channel->broadcastMessage(joinMsg, &client);  // Notify all clients in the channel, including the new one
         ft_send(joinMsg, client);  // Notify the new client
 

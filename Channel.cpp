@@ -25,39 +25,6 @@ void Channel::addClient(ClientData* client) {
   broadcastMessage(client->getNickname() + " has joined the channel.",client);
 }
 
-void Channel::removeClient(ClientData* client) {
-  member_.erase(std::remove(member_.begin(), member_.end(), client), member_.end());
-  broadcastMessage(client->getNickname() + " has left the channel.", client);
-}
-
-bool Channel::isOperator(ClientData* client) const {
-  return std::find(operators_.begin(), operators_.end(), client) != operators_.end();
-}
-
-void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) {
-  if (isOperator(client)) {
-        std::vector<ClientData*>::iterator it = std::find(member_.begin(), member_.end(), target);
-        if (it != member_.end()) {
-            removeClient(target);
-            std::string message = target->getNickname() + " has been kicked from the channel. Reason: ";
-            broadcastMessage(message, client);
-        } else {
-            std::cerr << "Target client not found in the channel." << std::endl;
-        }
-    } else {
-        std::cerr << "Client is not an operator." << std::endl;
-    }
-}
-
-void Channel::inviteMember(ClientData* client, ClientData* target) {
-  if (isOperator(client)) {
-    std::string inviteMsg = createCmdRespMsg(Server::servername_, RPL_CHANNELMODEIS,
-                                             "INVITE " + target->getNickname() + " :" + ch_name_);
-    Server::ft_send(inviteMsg, *target);
-    // Add logic to actually add the client to the channel if needed
-  }
-}
-
 bool Channel::isMember(ClientData* client) const {
     // Loop through the member list to check if the client is in the channel
     for (std::vector<ClientData*>::const_iterator it = member_.begin(); it != member_.end(); ++it) {

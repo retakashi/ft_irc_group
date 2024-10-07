@@ -85,6 +85,8 @@ class Server {
   // ->Commandディレクトリ
   // Commands.cpp
   void handleCommands(ClientData &client);
+  void handleInvite(const std::string& params, ClientData& client);
+  void handleKick(const std::string& params, ClientData& client);
   // USER.cpp
   void handleUSER(std::string param, ClientData &client);
   bool isValidUSERparams(std::string &params, struct user_data &user_data,
@@ -113,6 +115,9 @@ class Server {
   int handleTOPIC(std::string param, ClientData &client);
   bool setAndSearchChannel(std::string &param, std::string &ch_name, ClientData client);
   bool isValidTopic(std::string &params);
+  // .cpp
+
+
   // ここから先は各自で追加していく。
 
  public:
@@ -139,6 +144,5 @@ class Server {
   Channel *getChannelByName(const std::string &channelName);
   void addChannel(const std::string &channelName, Channel *channel);
   void handleJoin(const std::string &channelName, ClientData &client);
-  void handleKick(const std::string &params, ClientData &client);
 };
 #endif

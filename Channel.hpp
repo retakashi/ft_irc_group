@@ -12,10 +12,6 @@ class Channel {
   //channel.cpp
   void broadcastMessage(const std::string& message, ClientData* sender);
   void addClient(ClientData* client);
-  void removeClient(ClientData* client);
-  bool isOperator(ClientData* client) const;
-  void kickMember(ClientData* client, ClientData* target, const std::string& reason);
-  void inviteMember(ClientData* client, ClientData* target);
   bool isMember(ClientData* client) const;
   //getter
   const std::vector<ClientData*>& getClients() const;
@@ -42,6 +38,12 @@ class Channel {
   void toggleTopicPrivileges(struct handle_mode_data data);
   bool toggleChannelLimit(struct handle_mode_data& data);
   size_t convertStringToUserLimit(const std::string& l_param);
+  // INVITE.cpp
+  void  inviteMember(ClientData* client, ClientData* target);
+  // KICK.cpp
+  void removeClient(ClientData* client);
+  bool isOperator(ClientData* client) const;
+  void kickMember(ClientData* client, ClientData* target, const std::string& reason);
 
  private:
   std::string ch_name_;

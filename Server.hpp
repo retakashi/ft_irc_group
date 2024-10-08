@@ -87,6 +87,7 @@ class Server {
   void handleCommands(ClientData &client);
   void handleInvite(const std::string& params, ClientData& client);
   void handleKick(const std::string& params, ClientData& client);
+  void handlePart(const std::string& params, ClientData& client);
   // USER.cpp
   void handleUSER(std::string param, ClientData &client);
   bool isValidUSERparams(std::string &params, struct user_data &user_data,

@@ -69,6 +69,12 @@ std::string createCmdRespMsg(const std::string& servername, int code, const std:
     case ERR_CHANOPRIVSNEEDED:
       ss << ERR_CHANOPRIVSNEEDED << " " << str << " :You're not channel operator";
       break;
+    case ERR_NOTONCHANNEL:
+      ss << ERR_NOTONCHANNEL << " " << str << " :You're not on that channel";
+      break;
+    case ERR_USERONCHANNEL:
+      ss << ERR_USERONCHANNEL << " " << str << " :is already on channel";
+      break;
   }
   return ss.str();
 }

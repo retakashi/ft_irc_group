@@ -27,7 +27,7 @@ $(OBJS_DIR)/%.o: %.cpp | $(OBJS_DIR)
 $(OBJS_DIR):
 	@mkdir $(OBJS_DIR)
 clean:
-	@$(RM) $(OBJS)
+	@$(RM) -rf $(OBJS_DIR)
 
 fclean: clean
 	@$(RM) $(NAME)

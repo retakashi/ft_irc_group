@@ -15,8 +15,8 @@ int Server::handleMODE(std::string param, ClientData& client) {
   Channel* ch;
 
   if (setAndSearchChannel(param, data) == false) return 0;
-  // if (channels_[data.mode_data[0]]->isOperator(&client)== false) //要確認
-  // return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
+  if (channels_[data.mode_data[0]]->isOperator(&client)== false) //要確認
+  return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
   splitModeParam(param, data.mode_data);
   if (isValidModeData(data) == false) return 0;
   ch = channels_[data.mode_data[0]];
@@ -145,11 +145,11 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
   // target_nickがメンバーかどうか
   if ((target_client = getMemberByNickname(target_nick)) == NULL)
     return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
+  if (target_nick == data.client.getNickname()) // target's nickname == clientのnickname
+      return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
   // target_nickが既にオペレーターかどうか
   if (isOperator(target_client) == true) is_ope = true;
   if (data.is_active == true && is_ope == false) {
-    if (target_nick == data.client.getNickname())  // target's nickname == clientのnickname
-      return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
     operators_.push_back(target_client);
     ss << getChannelname() << " +o by " << data.client.getNickname();  // target_nickのclientに送る
   } else if (data.is_active == false && is_ope == true) {
@@ -228,6 +228,7 @@ bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
     data.param_i++;
     if ((limit = convertStringToUserLimit(data.mode_data[data.param_i])) == 0)
       return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
+    setUserLimit(limit); 
     ss << getChannelname() << " +l " << limit << " by " << data.client.getNickname();
   } else {
     if (getUserLimit() > 0) {

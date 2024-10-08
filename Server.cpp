@@ -1,13 +1,13 @@
 #include "Server.hpp"
 
-std::string Server::servername_("servername");
+std::string Server::servername_("ft_irc");
 int Server::serversock_ = 0;
 std::list<ClientData> Server::clients_;
 std::map<std::string, Channel *> Server::channels_;
 
 Server::Server() {}
 Server::Server(short port, std::string password)
-    : port_(port), hostname_("hostname"), serverpass_(password) {}
+    : port_(port), hostname_("localhost"), serverpass_(password) {}
 Server::~Server() {
   //仮
   for (std::map<std::string, Channel *>::iterator it = Server::channels_.begin(); it != Server::channels_.end();it++)

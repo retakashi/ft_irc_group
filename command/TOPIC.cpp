@@ -21,6 +21,8 @@ int Server::handleTOPIC(std::string param, ClientData& client) {
     else
       return sendCmdResponce(RPL_TOPIC, ch_name, ch->getTopic(), client);
   }
+  if (ch->getTopicRestricted() == true && ch->isOperator(&client) == false)
+    return sendCmdResponce(ERR_CHANOPRIVSNEEDED, ch_name, client);
   if (isValidTopic(param) == false) return 0;
   if (param.empty())
     ch->setTopic("");

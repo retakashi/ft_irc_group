@@ -60,11 +60,14 @@ std::string createCmdRespMsg(const std::string& servername, int code, const std:
     case ERR_KEYSET:
       ss << ERR_KEYSET  << " " << str << " :Channel key already set";
       break;
+    case ERR_CHANNELISFULL:
+      ss << ERR_CHANNELISFULL << " " << str << " :Cannot join channel (+l)";
+      break;
     case ERR_NOCHANMODES:
       ss << ERR_NOCHANMODES << " " << str << " :Channel doesn't support modes";
       break;
     case ERR_CHANOPRIVSNEEDED:
-      ss << ERR_CHANOPRIVSNEEDED << " " << str << ":You're not channel operator";
+      ss << ERR_CHANOPRIVSNEEDED << " " << str << " :You're not channel operator";
       break;
   }
   return ss.str();

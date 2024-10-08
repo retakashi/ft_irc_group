@@ -45,4 +45,5 @@ void Server::sendWelcomeToIrc(ClientData client) {
   ss << ":" << servername_ << " 001 Welcome to the Internet Relay Network " << client.getNickname()
      << "!" << client.getUsername() << "@" << hostname_;
   ft_send(ss.str(), client);
+  std::cout << "New client arrived: " << client.getNickname() << "(" << client.getSocket() << ")" << std::endl;
 }

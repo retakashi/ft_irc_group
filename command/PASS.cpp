@@ -2,7 +2,6 @@
 
 void Server::handlePass(std::string param, ClientData& client)
 {
-  std::cout << "starting PASS authentication: " << param << std::endl;
   if (client.getAuth())
   {
     Server::sendCmdResponce(ERR_ALREADYREGISTRED,client);

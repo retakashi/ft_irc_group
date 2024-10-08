@@ -11,7 +11,7 @@ bool ClientData::isCompleteAuthParams() {
 void ClientData::setAuth(bool auth) { is_authenticated = auth; }
 void ClientData::setNickname(const std::string& nickname) {
   std::stringstream ss;
-  ss << "You set nickname " << getNickname();
+  ss << "You set nickname " << nickname;
   Server::ft_send(ss.str(), *this);
   nickname_ = nickname;
 }
@@ -24,4 +24,3 @@ const std::string& ClientData::getNickname() const { return nickname_; }
 const std::string& ClientData::getUsername() const { return username_; }
 const std::string& ClientData::getRealname() const { return realname_; }
 const int ClientData::getSocket() const { return socket_; }
-const std::string& ClientData::getHostname() const { return ClientData::hostname_; }

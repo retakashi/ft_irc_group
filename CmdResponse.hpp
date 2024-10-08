@@ -8,6 +8,9 @@
 enum cmd_resp
 {
     RPL_CHANNELMODEIS = 324,
+    RPL_NOTOPIC = 331,
+    RPL_TOPIC = 332,
+    RPL_INVITING = 341,
     ERR_NOSUCHNICK = 401,
     ERR_NOSUCHSERVER = 402,
     ERR_NOSUCHCHANNEL = 403,
@@ -22,17 +25,16 @@ enum cmd_resp
     ERR_NICKNAMEINUSE = 433,
     ERR_UNAVAILRESOURCE = 437,
     ERR_USERNOTINCHANNEL = 441,
+    ERR_NOTONCHANNEL = 442,
+    ERR_USERONCHANNEL = 443,
     ERR_NOTREGISTERED = 451,
     ERR_NEEDMOREPARAMS = 461,
     ERR_ALREADYREGISTRED = 462,
     ERR_PASSWDMISMATCH = 464,
     ERR_KEYSET = 467,
+    ERR_CHANNELISFULL = 471,
     ERR_NOCHANMODES = 477,
-    ERR_CHANOPRIVSNEEDED = 482,
-    RPL_INVITING = 341,
-    ERR_USERONCHANNEL = 443,
-    ERR_NOTONCHANNEL = 442
-
+    ERR_CHANOPRIVSNEEDED = 482
 };
 std::string createCmdRespMsg(const std::string& servername, int code);
 std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str);

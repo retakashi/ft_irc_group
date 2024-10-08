@@ -27,6 +27,9 @@ std::string createCmdRespMsg(const std::string& servername, int code, const std:
     case RPL_CHANNELMODEIS:
       ss << RPL_CHANNELMODEIS << " " << str;
       break;
+    case RPL_NOTOPIC:
+      ss << RPL_NOTOPIC << " " << str << " :No topic is set";
+      break;
     case ERR_NOSUCHNICK:
       ss << ERR_NOSUCHNICK << " " << str << " :No such nick/channel";
       break;
@@ -57,11 +60,14 @@ std::string createCmdRespMsg(const std::string& servername, int code, const std:
     case ERR_KEYSET:
       ss << ERR_KEYSET  << " " << str << " :Channel key already set";
       break;
+    case ERR_CHANNELISFULL:
+      ss << ERR_CHANNELISFULL << " " << str << " :Cannot join channel (+l)";
+      break;
     case ERR_NOCHANMODES:
       ss << ERR_NOCHANMODES << " " << str << " :Channel doesn't support modes";
       break;
     case ERR_CHANOPRIVSNEEDED:
-      ss << ERR_CHANOPRIVSNEEDED << " " << str << ":You're not channel operator";
+      ss << ERR_CHANOPRIVSNEEDED << " " << str << " :You're not channel operator";
       break;
   }
   return ss.str();
@@ -74,6 +80,9 @@ std::string createCmdRespMsg(const std::string& servername, int code, const std:
   switch (code) {
     case ERR_USERNOTINCHANNEL:
       ss << ERR_USERNOTINCHANNEL << " " << str1 << " " << str2 << " :They aren't on that channel";
+      break;
+    case RPL_TOPIC:
+      ss << RPL_TOPIC << " " << str1 << " " << str2;
       break;
   }
   return ss.str();

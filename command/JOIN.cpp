@@ -25,7 +25,6 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     std::string channelName;
     std::string key;
     iss >> channelName >> key;
-
     if (channelName.empty()) {
         sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
         return;
@@ -42,7 +41,6 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
             sendCmdResponce(ERR_USERONCHANNEL, channelName, client);
             return;
         }
-
         if (!channel->getKey().empty() && channel->getKey() != key) {
             std::string errorMsg = createCmdRespMsg(servername_, 475, client.getNickname(), channelName + " :Cannot join channel (+k)");
             ft_send(errorMsg, client);
@@ -80,7 +78,6 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
         ft_send(errorMsg, client);
     }
 }
-
 std::string Channel::getMemberList() const {
     std::ostringstream oss;
     for (std::vector<ClientData*>::const_iterator it = member_.begin(); it != member_.end(); ++it) {

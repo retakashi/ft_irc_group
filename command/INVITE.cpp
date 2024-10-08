@@ -7,5 +7,4 @@ void Channel::inviteMember(ClientData* client, ClientData* target)
     Server::ft_send(message, *target);
     broadcastMessage(message, client);
     // Server::sendCmdResponce(RPL_INVITING, targetNickname + " " + channelName, client);
-
 }

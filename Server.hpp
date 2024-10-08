@@ -24,8 +24,10 @@
 #include "Channel.hpp"
 #include "ClientData.hpp"
 #include "CmdResponse.hpp"
+#include "Channel.hpp"
 
 class ClientData;
+class Channel;
 class Channel;
 /* ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
@@ -64,7 +66,6 @@ class Server {
   static const int MAX_BUFSIZE = 510;
   short port_;
   std::string serverpass_;
-  std::string hostname_;
   char msg_[MAX_BUFSIZE];
   // Server.cpp
   Server();
@@ -73,8 +74,6 @@ class Server {
   // Utils.cpp
   void handleClientCommunication(ClientData &client);
   void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
-  // このclientsのgetterは後で別に移動させても良いかもしれません。
-  ClientData *getClientByNickname(const std::string &nickname);
   // Receive.cpp
   ssize_t ft_recv(int socket);
   // ClientAuth.cpp USERは認証のみ使用のためこっち
@@ -115,16 +114,14 @@ class Server {
   int handleTOPIC(std::string param, ClientData &client);
   bool setAndSearchChannel(std::string &param, std::string &ch_name, ClientData client);
   bool isValidTopic(std::string &params);
-  // .cpp
-
-
   // ここから先は各自で追加していく。
-
  public:
   static int serversock_;
   static std::string servername_;
   static std::list<ClientData> clients_;
   static std::map<std::string, Channel *> channels_;
+  std::string hostname_;
+
   // Server.cpp
   Server(short port, std::string password);
   ~Server();
@@ -146,3 +143,4 @@ class Server {
   void handleJoin(const std::string &channelName, ClientData &client);
 };
 #endif
+

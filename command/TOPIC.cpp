@@ -36,7 +36,7 @@ int Server::handleTOPIC(std::string param, ClientData& client) {
 
 bool Server::setAndSearchChannel(std::string& param, std::string& ch_name, ClientData client) {
   if (param.empty())
-    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);  // false返す
+    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,client.getNickname(), "MODE", client);  // false返す
   std::string::size_type pos = param.find(' ');
   if (pos == std::string::npos)
     ch_name = param;

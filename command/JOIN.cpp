@@ -27,7 +27,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     iss >> channelName >> key;
 
     if (channelName.empty()) {
-        sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
+        sendCmdResponce(ERR_NEEDMOREPARAMS,client.getNickname(), "JOIN", client);
         return;
     }
     try {
@@ -44,7 +44,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
         }
 
         if (!channel->getKey().empty() && channel->getKey() != key) {
-            std::string errorMsg = createCmdRespMsg(servername_, 475, client.getNickname(), channelName + " :Cannot join channel (+k)");
+            std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 475, channelName + " :Cannot join channel (+k)");
             ft_send(errorMsg, client);
             return;
         }
@@ -70,13 +70,13 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
         }
 
         // メンバーリストを送信
-        std::string nameList = ":" + servername_ + " 353 " + client.getNickname() + " = " + channelName + " :" + channel->getMemberList();
+        std::string nameList = ":ft_irc 353 " + client.getNickname() + " = " + channelName + " :" + channel->getMemberList();
         ft_send(nameList, client);
         std::string endOfNames = ":" + servername_ + " 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.";
         ft_send(endOfNames, client);
     } catch (const std::exception& e) {
         std::cerr << "Exception in handleJoin: " << e.what() << std::endl;
-        std::string errorMsg = createCmdRespMsg(servername_, 451, client.getNickname(), ":Error processing JOIN command");
+        std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 451, ":Error processing JOIN command");
         ft_send(errorMsg, client);
     }
 }

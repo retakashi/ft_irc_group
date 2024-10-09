@@ -4,12 +4,13 @@ void Server::ft_send(std::string msg, ClientData client) {
   char casted_msg[MAX_BUFSIZE];
   ssize_t send_ret = 0;
   size_t send_size = msg.size();
-
+	memset(casted_msg, 0, sizeof(casted_msg));
   // msgをsendに使用できる形にする
-  if (send_size < MAX_BUFSIZE - 2) msg.resize(MAX_BUFSIZE - 2);
+  if (send_size > MAX_BUFSIZE - 2) msg.resize(MAX_BUFSIZE - 2);
   std::strncpy(casted_msg, msg.c_str(), send_size);
   casted_msg[send_size] = '\r';
   casted_msg[send_size + 1] = '\n';
+  casted_msg[send_size + 2] = '\0';
 
   send_ret = send(client.getSocket(), casted_msg, send_size + 2, 0);
   if (send_ret == 0) {
@@ -21,17 +22,17 @@ void Server::ft_send(std::string msg, ClientData client) {
 }
 
 int Server::sendCmdResponce(int code, const ClientData client) {
-  ft_send(createCmdRespMsg(servername_, code), client);
+  ft_send(createCmdRespMsg(servername_, client.getNickname(),code), client);
   return 0;
 }
 
 int Server::sendCmdResponce(int code, const std::string &str, ClientData client) {
-  ft_send(createCmdRespMsg(servername_, code, str), client);
+  ft_send(createCmdRespMsg(servername_, client.getNickname(), code, str), client);
   return 0;
 }
 
 int Server::sendCmdResponce(int code, const std::string &str1, const std::string &str2,
                             ClientData client) {
-  ft_send(createCmdRespMsg(servername_, code, str1, str2), client);
+  ft_send(createCmdRespMsg(servername_, client.getNickname(), code, str1, str2), client);
   return 0;
 }

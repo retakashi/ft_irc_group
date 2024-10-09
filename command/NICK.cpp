@@ -28,7 +28,7 @@ bool Server::isValidNickname(std::string& param, const ClientData& client) {
   }
   if (param.size() > 20) return Server::sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);
   for (std::list<ClientData>::iterator it = Server::clients_.begin();it != Server::clients_.end();it++) {
-    if (it->getNickname() == param)
+    if (&client != &(*it) && it->getNickname() == param)
       return Server::sendCmdResponce(ERR_NICKNAMEINUSE, param, client);
   }
   std::string special = "[]\\`_^{}|";

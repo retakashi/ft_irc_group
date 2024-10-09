@@ -1,89 +1,99 @@
 #include "CmdResponse.hpp"
 
-std::string createCmdRespMsg(const std::string& servername, int code) {
-  std::stringstream ss;
-  ss << ":" << servername << " ";
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code) {
+  std::string pre;
+  std::string msg;
+  pre = ":" + servername;
   switch (code) {
     case ERR_NONICKNAMEGIVEN:
-      ss << ERR_NONICKNAMEGIVEN << " :No nickname given";
-      break;
-    case ERR_NOTREGISTERED:
-      ss << ERR_NOTREGISTERED << " :You have not registered";
+      msg = pre + " 431 " + nick + ": No nickname given";
       break;
     case ERR_ALREADYREGISTRED:
-      ss << ERR_ALREADYREGISTRED << " :Unauthorized command (already registered)";
+      msg = pre + " 462 " + nick + " :Unauthorized command (already registered)";
       break;
     case ERR_PASSWDMISMATCH:
-      ss << ERR_PASSWDMISMATCH << " :Password incorrect";
+      msg = pre + " 464 " + nick + " :Password incorrect";
       break;
   }
-  return ss.str();
+  return msg;
 }
 
-std::string createCmdRespMsg(const std::string& servername, int code, const std::string& str) {
-  std::stringstream ss;
-  ss << ":" << servername << " ";
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code,
+                             const std::string& str) {
+  std::string pre;
+  std::string msg;
+  pre = ":" + servername;
   switch (code) {
     case RPL_CHANNELMODEIS:
-      ss << RPL_CHANNELMODEIS << " " << str;
+      msg = pre + " 324 " + nick + " " + str;
       break;
     case RPL_NOTOPIC:
-      ss << RPL_NOTOPIC << " " << str << " :No topic is set";
+      msg = pre + " 331 " + nick + " " + str + " :No topic is set";
       break;
     case ERR_NOSUCHNICK:
-      ss << ERR_NOSUCHNICK << " " << str << " :No such nick/channel";
+      msg = pre + " 401 " + nick + " " + str + " :No such nick/channel";
       break;
     case ERR_NOSUCHSERVER:
-      ss << ERR_NOSUCHSERVER << " " << str << " :No such server";
+      msg = pre + " 402 " + nick + " " + str + " :No such server";
       break;
     case ERR_NOSUCHCHANNEL:
-      ss << ERR_NOSUCHCHANNEL << " " << str << " :No such channel";
+      msg = pre + " 403 " + nick + " " + str + " :No such channel";
       break;
     case ERR_CANNOTSENDTOCHAN:
-      ss << ERR_CANNOTSENDTOCHAN << " " << str << " :Cannot send to channel";
+      msg = pre + " 404 " + nick + " " + str + " :Cannot send to channel";
       break;
     case ERR_TOOMANYCHANNELS:
-      ss << ERR_TOOMANYCHANNELS << " " << str << " :You have joined too many channels";
+      msg = pre + " 405 " + nick + " " + str + " :You have joined too many channels";
       break;
     case ERR_UNKNOWNCOMMAND:
-      ss << ERR_UNKNOWNCOMMAND << " " << str << " :Unknown command";
+      msg = pre + " 421 " + nick + " " + str + " :Unknown command";
       break;
     case ERR_ERRONEUSNICKNAME:
-      ss << ERR_ERRONEUSNICKNAME << " " << str << " :Erroneous nickname";
+      msg = pre + " 432 " + nick + " " + str + " :Erroneous nickname";
       break;
     case ERR_NICKNAMEINUSE:
-      ss << ERR_NICKNAMEINUSE << " " << str << " :Nickname is already in use";
+      msg = pre + " 433 " + nick + " " + str + " :Nickname is already in use";
+      break;
+    case ERR_NOTONCHANNEL:
+      msg = pre + " 442 " + nick + " " + str + " :You're not on that channel";
+      break;
+    case ERR_USERONCHANNEL:
+      msg = pre + " 443 " + nick + " " + str + " :is already on channel";
+      break;
+    case ERR_NOTREGISTERED:
+      msg = pre + " 451 " + nick + " " + str + " :You have not registered";
       break;
     case ERR_NEEDMOREPARAMS:
-      ss << ERR_NEEDMOREPARAMS << " " << str << " :Not enough parameters";
+      msg = pre + " 461 " + nick + " " + str + " :Not enough parameters";
       break;
     case ERR_KEYSET:
-      ss << ERR_KEYSET  << " " << str << " :Channel key already set";
+      msg = pre + " 467 " + nick + " " + str + " :Channel key already set";
       break;
     case ERR_CHANNELISFULL:
-      ss << ERR_CHANNELISFULL << " " << str << " :Cannot join channel (+l)";
+      msg = pre + " 471 " + nick + " " + str + " :Cannot join channel (+l)";
       break;
     case ERR_NOCHANMODES:
-      ss << ERR_NOCHANMODES << " " << str << " :Channel doesn't support modes";
+      msg = pre + " 477 " + nick + " " + str + " :Channel doesn't support modes";
       break;
     case ERR_CHANOPRIVSNEEDED:
-      ss << ERR_CHANOPRIVSNEEDED << " " << str << " :You're not channel operator";
+      msg = pre + " 482 " + nick + " " + str + " :You're not channel operator";
       break;
   }
-  return ss.str();
+  return msg;
 }
 
-std::string createCmdRespMsg(const std::string& servername, int code, const std::string& str1,
-                             const std::string& str2) {
-  std::stringstream ss;
-  ss << ":" << servername << " ";
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code,
+                             const std::string& str1, const std::string& str2) {
+  std::string pre;
+  std::string msg;
+  pre = ":" + servername;
   switch (code) {
-    case ERR_USERNOTINCHANNEL:
-      ss << ERR_USERNOTINCHANNEL << " " << str1 << " " << str2 << " :They aren't on that channel";
-      break;
     case RPL_TOPIC:
-      ss << RPL_TOPIC << " " << str1 << " " << str2;
+      msg = pre + " 332 " + nick + " " + str1 + " " + str2;
+      break;
+    case ERR_USERNOTINCHANNEL:
+      msg = pre + " 441 " + nick + " " + str1 + " " + str2 + " :They aren't on that channel";
       break;
   }
-  return ss.str();
+  return msg;
 }

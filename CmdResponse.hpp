@@ -36,7 +36,7 @@ enum cmd_resp
     ERR_NOCHANMODES = 477,
     ERR_CHANOPRIVSNEEDED = 482
 };
-std::string createCmdRespMsg(const std::string& servername, int code);
-std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str);
-std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str1, const std::string& str2);
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code);
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code, const std::string &str);
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code, const std::string &str1, const std::string& str2);
 #endif

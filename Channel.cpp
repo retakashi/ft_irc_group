@@ -3,7 +3,7 @@
 #include "CmdResponse.hpp"
 #include "Server.hpp"
 
-Channel::Channel(const std::string& name) : ch_name_(name) {}
+Channel::Channel(const std::string& name) : ch_name_(name),invite_only_(false), topic_restricted_(false),user_limit_(0){}
 
 Channel::~Channel() {
   // クライアントリストをクリア
@@ -25,6 +25,12 @@ void Channel::addClient(ClientData* client) {
   broadcastMessage(client->getNickname() + " has joined the channel.",client);
 }
 
+void Channel::addOperator(ClientData* client)
+{
+ operators_.push_back(client);
+  // broadcastMessage(client->getNickname() + " has joined the channel.",client); 
+}
+
 bool Channel::isMember(ClientData* client) const {
     // Loop through the member list to check if the client is in the channel
     for (std::vector<ClientData*>::const_iterator it = member_.begin(); it != member_.end(); ++it) {
@@ -33,6 +39,11 @@ bool Channel::isMember(ClientData* client) const {
         }
     }
     return false;  // Client is not a mesmber of the channel
+}
+
+size_t Channel::CountMember() const
+{
+  return member_.size();
 }
 
 //gettter

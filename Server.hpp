@@ -73,6 +73,7 @@ class Server {
   // Utils.cpp
   void handleClientCommunication(ClientData &client);
   void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
+  void splitCmds(std::string casted_msg, std::vector<std::string> &cmd_with_p);
   // このclientsのgetterは後で別に移動させても良いかもしれません。
   ClientData *getClientByNickname(const std::string &nickname);
   // Receive.cpp
@@ -87,15 +88,16 @@ class Server {
   void handleCommands(ClientData &client);
   void handleInvite(const std::string& params, ClientData& client);
   void handleKick(const std::string& params, ClientData& client);
+  void handlePart(const std::string& params, ClientData& client);
   // USER.cpp
   void handleUSER(std::string param, ClientData &client);
   bool isValidUSERparams(std::string &params, struct user_data &user_data,
                          const ClientData &client);
-  bool isValidUsername(const std::string &params, std::string &username,
+  bool isValidUsername(const std::string &param, std::string &username,
                        std::string::size_type pos);
-  bool isValidMiddle(const std::string &params, char &mode, std::string &unused,
+  bool isValidMiddle(const std::string &param, char &mode, std::string &unused,
                      std::string::size_type pos);
-  bool isValidRealname(const std::string &params, std::string &realname);
+  bool isValidRealname(const std::string &param, std::string &realname);
   // NICK.cpp
   void handleNICK(std::string param, ClientData &client);
   bool isValidNickname(std::string &param, const ClientData &client);

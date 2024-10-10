@@ -12,7 +12,9 @@ class Channel {
   //channel.cpp
   void broadcastMessage(const std::string& message, ClientData* sender);
   void addClient(ClientData* client);
+  void addOperator(ClientData* client);
   bool isMember(ClientData* client) const;
+  size_t CountMember() const;
   //getter
   const std::vector<ClientData*>& getClients() const;
   const std::string& getChannelname() const;

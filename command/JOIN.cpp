@@ -27,7 +27,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     iss >> channelName >> key;
 
     if (channelName.empty()) {
-        sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
+        sendCmdResponce(ERR_NEEDMOREPARAMS,client.getNickname(), "JOIN", client);
         return;
     }
     try {
@@ -35,6 +35,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
         if (!channel) {
             channel = new Channel(channelName);
             addChannel(channelName, channel);
+            channel->addOperator(&client);
         }
 
         if (channel->isMember(&client)) {
@@ -43,35 +44,39 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
         }
 
         if (!channel->getKey().empty() && channel->getKey() != key) {
-            std::string errorMsg = createCmdRespMsg(servername_, 475, client.getNickname(), channelName + " :Cannot join channel (+k)");
+            std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 475, channelName + " :Cannot join channel (+k)");
             ft_send(errorMsg, client);
             return;
         }
-
+        if (channel->getUserLimit() > 0 && channel->CountMember() >= channel->getUserLimit())
+        {
+            Server::sendCmdResponce(ERR_CHANNELISFULL,channel->getChannelname(),client);
+            return ;
+        }
         channel->addClient(&client);
 
         // チャンネルにJOINメッセージを送信
-        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() + " JOIN :" + channelName + "\r\n";
+        std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() + " JOIN :" + channelName;
         channel->broadcastMessage(joinMsg, &client);  // Notify all clients in the channel, including the new one
         ft_send(joinMsg, client);  // Notify the new client
 
         // チャンネルのトピックを確認し、適切なレスポンスコードを送信
         if (channel->getTopic().empty()) {
-            std::string noTopicMsg = createCmdRespMsg(servername_, 331, client.getNickname(), channelName + " :No topic is set");
-            ft_send(noTopicMsg, client);
+            Server::sendCmdResponce(RPL_NOTOPIC, channel->getChannelname(), client);
         } else {
-            std::string topicMsg = createCmdRespMsg(servername_, 332, client.getNickname(), channelName + " :" + channel->getTopic());
-            ft_send(topicMsg, client);
+            sendCmdResponce(RPL_TOPIC, channel->getChannelname(), channel->getTopic(), client);
+            // std::string topicMsg = createCmdRespMsg(servername_, 332, client.getNickname(), channelName + " :" + channel->getTopic());
+            // ft_send(topicMsg, client);
         }
 
         // メンバーリストを送信
-        std::string nameList = ":" + servername_ + " 353 " + client.getNickname() + " = " + channelName + " :" + channel->getMemberList() + "\r\n";
+        std::string nameList = ":ft_irc 353 " + client.getNickname() + " = " + channelName + " :" + channel->getMemberList();
         ft_send(nameList, client);
-        std::string endOfNames = ":" + servername_ + " 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.\r\n";
+        std::string endOfNames = ":" + servername_ + " 366 " + client.getNickname() + " " + channelName + " :End of /NAMES list.";
         ft_send(endOfNames, client);
     } catch (const std::exception& e) {
         std::cerr << "Exception in handleJoin: " << e.what() << std::endl;
-        std::string errorMsg = createCmdRespMsg(servername_, 451, client.getNickname(), ":Error processing JOIN command");
+        std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 451, ":Error processing JOIN command");
         ft_send(errorMsg, client);
     }
 }

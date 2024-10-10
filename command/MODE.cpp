@@ -13,10 +13,12 @@ int Server::handleMODE(std::string param, ClientData& client) {
   handle_mode_data data(client);
   size_t start = 1;
   Channel* ch;
+  char mode;
+  std::string send_mode;
 
   if (setAndSearchChannel(param, data) == false) return 0;
-  if (channels_[data.mode_data[0]]->isOperator(&client)== false) //要確認
-  return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
+  if (channels_[data.mode_data[0]]->isOperator(&client)== false)
+    return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
   splitModeParam(param, data.mode_data);
   if (isValidModeData(data) == false) return 0;
   ch = channels_[data.mode_data[0]];
@@ -24,7 +26,8 @@ int Server::handleMODE(std::string param, ClientData& client) {
   data.param_i = start;
   while (start < data.mode_data.size()) {
     for (size_t i = 0; data.mode_data[start][i] != '\0'; i++) {
-      switch (data.mode_data[start][i]) {
+      mode = data.mode_data[start][i];
+      switch (mode) {
         case '+':
           data.is_active = true;
           break;
@@ -56,6 +59,10 @@ int Server::handleMODE(std::string param, ClientData& client) {
       start = data.param_i + 1;
     data.param_i = start;
   }
+  std::string msg;
+  msg = ":" + Server::servername_ + " MODE " + ch->getChannelname() + param;
+  std::cout << msg << std::endl;
+  ft_send(msg, client); 
   return 0;
 }
 
@@ -78,7 +85,7 @@ bool Server::setAndSearchChannel(std::string& param, struct handle_mode_data& da
 }
 
 // paramをsplitしてmode_dataに格納
-void Server::splitModeParam(std::string& param, std::vector<std::string>& mode_data) {
+void Server::splitModeParam(std::string param, std::vector<std::string>& mode_data) {
   std::string mode;
 
   std::string::size_type pos = param.find(' ');

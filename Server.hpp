@@ -110,7 +110,7 @@ class Server {
   // MODE.cpp
   int handleMODE(std::string param, ClientData &client);
   bool setAndSearchChannel(std::string &param, struct handle_mode_data &data);
-  void splitModeParam(std::string &param, std::vector<std::string> &mode_data);
+  void splitModeParam(std::string param, std::vector<std::string> &mode_data);
   bool isValidModeData(struct handle_mode_data &data);
   bool isValidMode(struct handle_mode_data data, int start, int &total_cnt, int &need_cnt);
   // TOPIC.cpp

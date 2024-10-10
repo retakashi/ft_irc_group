@@ -1,4 +1,5 @@
 #include "CmdResponse.hpp"
+#include "Server.hpp"
 
 std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code) {
   std::string pre;
@@ -22,13 +23,16 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
                              const std::string& str) {
   std::string pre;
   std::string msg;
-  pre = ":" + servername;
+  pre = ":";
   switch (code) {
     case RPL_CHANNELMODEIS:
       msg = pre + " 324 " + nick + " " + str;
       break;
     case RPL_NOTOPIC:
       msg = pre + " 331 " + nick + " " + str + " :No topic is set";
+      break;
+    case RPL_ENDOFNAMES:
+      msg = pre + " 366 " + nick + " " + str + " :END of /NAMES list";
       break;
     case ERR_NOSUCHNICK:
       msg = pre + " 401 " + nick + " " + str + " :No such nick/channel";
@@ -72,6 +76,9 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
     case ERR_CHANNELISFULL:
       msg = pre + " 471 " + nick + " " + str + " :Cannot join channel (+l)";
       break;
+    case ERR_BADCHANNELKEY:
+      msg = pre + " 475 " + nick + " " + str + " :Cannot join channel (+k)";
+      break;
     case ERR_NOCHANMODES:
       msg = pre + " 477 " + nick + " " + str + " :Channel doesn't support modes";
       break;
@@ -86,10 +93,13 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
                              const std::string& str1, const std::string& str2) {
   std::string pre;
   std::string msg;
-  pre = ":" + servername;
+  pre = ":";
   switch (code) {
     case RPL_TOPIC:
       msg = pre + " 332 " + nick + " " + str1 + " " + str2;
+      break;
+    case RPL_NAMREPLY:
+      msg = pre + " 353 " + nick + " @ " + str1 + " " + str2;
       break;
     case ERR_USERNOTINCHANNEL:
       msg = pre + " 441 " + nick + " " + str1 + " " + str2 + " :They aren't on that channel";

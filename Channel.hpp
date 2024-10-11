@@ -14,9 +14,12 @@ class Channel {
   void addMember(ClientData* client);
   void addOperator(ClientData* client);
   bool isMember(ClientData* client) const;
+  bool isOperator(ClientData* client) const;
+  void removeMember(ClientData* client);
+  void removeOperator(ClientData* client);
   size_t CountMember() const;
   // getter
-  const std::vector<ClientData*>& getClients() const;
+  const std::vector<ClientData*>& getMembers() const;
   const std::string& getChannelname() const;
   const std::string& getTopic() const;
   bool getInviteOnly() const;
@@ -32,7 +35,7 @@ class Channel {
   void setUserLimit(size_t limit);
   void setTopic(const std::string& topic);
   // JOIN.cpp
-  std::string getMemberList() const;  // add
+  std::string getMembersList() const;  // add
   std::string createJoinMsg(const std::string& hostname, const ClientData& client);
   // MODE.cpp
   bool toggleOperatorPrivileges(struct handle_mode_data& data);
@@ -45,8 +48,6 @@ class Channel {
   // INVITE.cpp
   void inviteMember(ClientData* client, ClientData* target);
   // KICK.cpp
-  void removeClient(ClientData* client);
-  bool isOperator(ClientData* client) const;
   void kickMember(ClientData* client, ClientData* target, const std::string& reason);
 
  private:
@@ -56,7 +57,7 @@ class Channel {
   bool topic_restricted_;  // operator権限なのかどうか MODE +/-t
   std::string key_;        // 設定されていたらJOIN時に使用しなければならない
   size_t user_limit_;
-  std::vector<ClientData*> member_;
+  std::vector<ClientData*> members_;
   std::vector<ClientData*> operators_;
 };
 

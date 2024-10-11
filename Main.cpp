@@ -13,7 +13,7 @@ void putSignalError() {
 
 int main(int argc, char **argv) {
   if (argc != 3)
-		{std::cout << "Usage: " << argv[0] << " <port number> <password>" << std::endl; return 1;}
+		{std::cout << "Usage: " << argv[0] << " <port> <password>" << std::endl; return 1;}
   try {
     g_sig_flg = false;
     struct sigaction sa;
@@ -21,7 +21,6 @@ int main(int argc, char **argv) {
      sa.sa_handler = sigHandler;
     if (sigaction(SIGINT, &sa, NULL) < 0) putSignalError();
     if (sigaction(SIGQUIT, &sa, NULL) < 0) putSignalError();
-    // ここでコマンドライン引数のエラー処理を入れる。
     short port = std::atoi(argv[1]);
     std::string password = argv[2];
     Server serv(port, password);

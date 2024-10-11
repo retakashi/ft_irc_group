@@ -18,7 +18,7 @@ Channel* Server::getChannelByName(const std::string& channelName) {
 }
 
 void Server::addChannel(const std::string& channelName, Channel* channel) {
-  channels_[channelName] = channel;
+  channels_.insert(std::make_pair(channelName, channel));
 }
 
 void Server::handleJoin(const std::string& params, ClientData& client) {
@@ -28,13 +28,13 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
   iss >> channelName >> key;
 
   if (channelName.empty()) {
-    sendCmdResponce(ERR_NEEDMOREPARAMS, client.getNickname(), "JOIN", client);
+    sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
     return;
   }
   try {
     Channel* channel = getChannelByName(channelName);
-    if (channel != NULL && (channel->isMember(&client)== true || channel->isOperator(&client) == true))
-    {
+    if (channel != NULL &&
+        (channel->isMember(&client) == true || channel->isOperator(&client) == true)) {
       sendCmdResponce(ERR_USERONCHANNEL, channelName, client);
       return;
     }
@@ -54,11 +54,10 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       return;
     }
     if (channel->isOperator(&client) == false) channel->addMember(&client);
-    std::cout << "list: " << channel->createJoinMsg(getHostname(), client) << std::endl; 
     // チャンネルにJOINメッセージを送信
     ft_send(channel->createJoinMsg(getHostname(), client), client);
     std::string msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + "127.0.0.1" +
-                        " JOIN " + channel->getChannelname()+"\r\n";
+                      " JOIN " + channel->getChannelname() + "\r\n";
     channel->broadcastMessage(msg, &client);
     // あとで確認↓
   } catch (const std::bad_alloc& e) {
@@ -86,15 +85,18 @@ std::string Channel::getMemberList() const {
 }
 
 std::string Channel::createJoinMsg(const std::string& hostname, const ClientData& client) {
-  std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + "127.0.0.1" +
-                        " JOIN " + getChannelname() + "\r\n";
-  joinMsg += createCmdRespMsg(Server::servername_, client.getNickname(), RPL_NAMREPLY,
-                              getChannelname(), getMemberList()) +
-             "\r\n";
-  joinMsg +=
-      createCmdRespMsg(Server::servername_, client.getNickname(), RPL_ENDOFNAMES, getChannelname()) + "\r\n";
+  std::string joinMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + hostname +
+                        " JOIN :" + getChannelname() + "\r\n";
   if (!getTopic().empty())
     joinMsg += createCmdRespMsg(Server::servername_, client.getNickname(), RPL_TOPIC,
                                 getChannelname(), getTopic()) + "\r\n";
+  else
+    joinMsg +=
+        createCmdRespMsg(Server::servername_, client.getNickname(), RPL_NOTOPIC, getChannelname()) + "\r\n";
+  joinMsg += createCmdRespMsg(Server::servername_, client.getNickname(), RPL_NAMREPLY,
+                              getChannelname(), getMemberList()) +
+             "\r\n";
+  joinMsg += createCmdRespMsg(Server::servername_, client.getNickname(), RPL_ENDOFNAMES,
+                              getChannelname());
   return joinMsg;
 }

@@ -57,6 +57,11 @@ ClientData* Channel::getMemberByNickname(const std::string& nickname) {
     if (member_[i]->getNickname() == nickname) return member_[i];
   return NULL;
 }
+ClientData* Channel::getOperatorByNickname(const std::string& nickname) {
+  for (size_t i = 0; i < operators_.size(); i++)
+    if (operators_[i]->getNickname() == nickname) return operators_[i];
+  return NULL;
+}
 
 // ↓rtakashi追加 MODEでしか使わないものはMODE.cppに移します
 void Channel::setInviteOnly(bool value) { invite_only_ = value; }

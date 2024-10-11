@@ -24,6 +24,7 @@ class Channel {
   const std::string& getKey() const;
   size_t getUserLimit() const;
   ClientData* getMemberByNickname(const std::string& nickname);
+  ClientData* getOperatorByNickname(const std::string& nickname);
   // Channel.cpp 他で使用なければMODE.cppに移すかも?
   void setInviteOnly(bool value);
   void setKey(const std::string& newkey);

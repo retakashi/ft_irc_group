@@ -23,16 +23,13 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
                              const std::string& str) {
   std::string pre;
   std::string msg;
-  pre = ":";
+  pre = ":" + servername;
   switch (code) {
-    case RPL_CHANNELMODEIS:
-      msg = pre + " 324 " + nick + " " + str;
-      break;
     case RPL_NOTOPIC:
       msg = pre + " 331 " + nick + " " + str + " :No topic is set";
       break;
     case RPL_ENDOFNAMES:
-      msg = pre + " 366 " + nick + " " + str + " :END of /NAMES list";
+      msg = pre + " 366 " + nick + " " + str + " :End of /NAMES list";
       break;
     case ERR_NOSUCHNICK:
       msg = pre + " 401 " + nick + " " + str + " :No such nick/channel";
@@ -41,7 +38,7 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
       msg = pre + " 402 " + nick + " " + str + " :No such server";
       break;
     case ERR_NOSUCHCHANNEL:
-      msg = pre + " 403 " + nick + " " + str + " :No such channel";
+      msg = pre + " 403 " + str + " :No such channel";
       break;
     case ERR_CANNOTSENDTOCHAN:
       msg = pre + " 404 " + nick + " " + str + " :Cannot send to channel";
@@ -93,13 +90,16 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
                              const std::string& str1, const std::string& str2) {
   std::string pre;
   std::string msg;
-  pre = ":";
+  pre = ":" + servername;
   switch (code) {
+    case RPL_CHANNELMODEIS:
+      msg = pre + " 324 " + nick + " " + str1 + " " + str2;
+      break;
     case RPL_TOPIC:
-      msg = pre + " 332 " + nick + " " + str1 + " " + str2;
+      msg = pre + " 332 " + nick + " " + str1 + " :" + str2;
       break;
     case RPL_NAMREPLY:
-      msg = pre + " 353 " + nick + " @ " + str1 + " " + str2;
+      msg = pre + " 353 " + nick + " = " + str1 + " " + str2;
       break;
     case ERR_USERNOTINCHANNEL:
       msg = pre + " 441 " + nick + " " + str1 + " " + str2 + " :They aren't on that channel";

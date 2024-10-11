@@ -6,6 +6,7 @@ void Server::handleCommands(ClientData& client) {
   ssize_t recv_size = ft_recv(client.getSocket());
   if (recv_size <= 0) return;
   std::string casted_msg(msg_, recv_size);
+  std::cout << "recv: " << casted_msg << std::endl;
   splitCmdAndParam(casted_msg, command, params);
   if (command == "NICK")
     handleNICK(params, client);

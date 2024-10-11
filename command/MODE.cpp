@@ -183,7 +183,7 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
       }
     }
   }
-  Server::sendCmdResponce(RPL_CHANNELMODEIS, ss.str(), *target_client);
+  // Server::sendCmdResponce(RPL_CHANNELMODEIS, ss.str(), *target_client);
   return true;
 }
 

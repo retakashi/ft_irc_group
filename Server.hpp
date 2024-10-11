@@ -135,6 +135,7 @@ class Server {
   const std::string &getHostname() const;
   // Utils.cpp
   static void disconnectClient(ClientData client);
+  std::list<ClientData>::iterator eraseClient(std::list<ClientData>::iterator erase_it);
   static void putFunctionError(const char *errmsg);
   // Send.cpp
   static void ft_send(std::string msg, ClientData client);

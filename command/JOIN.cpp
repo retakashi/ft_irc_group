@@ -69,19 +69,19 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
   }
 }
 
-std::string Channel::getMemberList() const {
-  std::string member_list = ":";
+std::string Channel::getMembersList() const {
+  std::string members_list = ":";
   for (size_t i = 0; i < operators_.size(); i++) {
-    member_list += "@";
-    member_list += operators_[i]->getNickname();
-    if (i != operators_.size() - 1) member_list += " ";
+    members_list += "@";
+    members_list += operators_[i]->getNickname();
+    if (i != operators_.size() - 1) members_list += " ";
   }
-  for (size_t i = 0; i < member_.size(); i++) {
-    if (i == 0) member_list += " ";
-    member_list += member_[i]->getNickname();
-    if (i != member_.size() - 1) member_list += " ";
+  for (size_t i = 0; i < members_.size(); i++) {
+    if (i == 0) members_list += " ";
+    members_list += members_[i]->getNickname();
+    if (i != members_.size() - 1) members_list += " ";
   }
-  return member_list;
+  return members_list;
 }
 
 std::string Channel::createJoinMsg(const std::string& hostname, const ClientData& client) {
@@ -89,14 +89,16 @@ std::string Channel::createJoinMsg(const std::string& hostname, const ClientData
                         " JOIN :" + getChannelname() + "\r\n";
   if (!getTopic().empty())
     joinMsg += createCmdRespMsg(Server::servername_, client.getNickname(), RPL_TOPIC,
-                                getChannelname(), getTopic()) + "\r\n";
+                                getChannelname(), getTopic()) +
+               "\r\n";
   else
     joinMsg +=
-        createCmdRespMsg(Server::servername_, client.getNickname(), RPL_NOTOPIC, getChannelname()) + "\r\n";
+        createCmdRespMsg(Server::servername_, client.getNickname(), RPL_NOTOPIC, getChannelname()) +
+        "\r\n";
   joinMsg += createCmdRespMsg(Server::servername_, client.getNickname(), RPL_NAMREPLY,
-                              getChannelname(), getMemberList()) +
+                              getChannelname(), getMembersList()) +
              "\r\n";
-  joinMsg += createCmdRespMsg(Server::servername_, client.getNickname(), RPL_ENDOFNAMES,
-                              getChannelname());
+  joinMsg +=
+      createCmdRespMsg(Server::servername_, client.getNickname(), RPL_ENDOFNAMES, getChannelname());
   return joinMsg;
 }

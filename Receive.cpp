@@ -13,6 +13,10 @@ ssize_t Server::ft_recv(int socket) {
     perror("recv failed");
     return -1;
   }
+  if (msg_[recv_size - 2] == '\r' && msg_[recv_size - 1] == '\n') {
+    msg_[recv_size - 2] = '\0';
+    return recv_size - 2;
+  }
   msg_[recv_size - 1] = '\0';
-  return recv_size - 2;  // 改行文字分減らす
+  return recv_size - 1;
 }

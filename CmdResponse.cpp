@@ -7,10 +7,10 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
   pre = ":" + servername;
   switch (code) {
     case ERR_NONICKNAMEGIVEN:
-      msg = pre + " 431 " + nick + ": No nickname given";
+      msg = pre + " 431 " + nick + " :No nickname given";
       break;
     case ERR_ALREADYREGISTRED:
-      msg = pre + " 462 " + nick + " :Unauthorized command (already registered)";
+      msg = pre + " 462 " + nick + " :You may not reregister";
       break;
     case ERR_PASSWDMISMATCH:
       msg = pre + " 464 " + nick + " :Password incorrect";
@@ -62,7 +62,7 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
       msg = pre + " 443 " + nick + " " + str + " :is already on channel";
       break;
     case ERR_NOTREGISTERED:
-      msg = pre + " 451 " + nick + " " + str + " :You have not registered";
+      msg = pre + " 451 " + str + " :You have not registered";
       break;
     case ERR_NEEDMOREPARAMS:
       msg = pre + " 461 " + nick + " " + str + " :Not enough parameters";

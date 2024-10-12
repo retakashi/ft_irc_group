@@ -39,10 +39,9 @@ void Server::authenticatedNewClient(ClientData& client) {
     splitCmds(casted_msg, cmd_with_p);
   else
     cmd_with_p.push_back(casted_msg);
-    std::cout << "cmdsize: " << cmd_with_p.size() << std::endl;
   for (size_t i = 0; i < cmd_with_p.size(); i++) {
     splitCmdAndParam(cmd_with_p[i], cmd, param); 
-     if (client.getAuth() == false && cmd == "PASS")
+     if (cmd == "PASS")
       handlePass(param, client);
     else if (client.getAuth() == true && cmd == "NICK")
       handleNICK(param, client);
@@ -52,7 +51,10 @@ void Server::authenticatedNewClient(ClientData& client) {
       sendCmdResponce(ERR_NOTREGISTERED,cmd, client);
   }
   if (client.isCompleteAuthParams() == true)
+  {
     sendWelcomeToIrc(client);
+    return ;
+  }
 }
 
 void Server::sendWelcomeToIrc(ClientData client) {

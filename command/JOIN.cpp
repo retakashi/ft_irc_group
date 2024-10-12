@@ -56,7 +56,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     if (channel->isOperator(&client) == false) channel->addMember(&client);
     // チャンネルにJOINメッセージを送信
     ft_send(channel->createJoinMsg(getHostname(), client), client);
-    std::string msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + "127.0.0.1" +
+    std::string msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() +
                       " JOIN " + channel->getChannelname() + "\r\n";
     channel->broadcastMessage(msg, &client);
     // あとで確認↓

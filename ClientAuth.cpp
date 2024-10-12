@@ -39,7 +39,6 @@ void Server::authenticatedNewClient(ClientData& client) {
     splitCmds(casted_msg, cmd_with_p);
   else
     cmd_with_p.push_back(casted_msg);
-    std::cout << "cmdsize: " << cmd_with_p.size() << std::endl;
   for (size_t i = 0; i < cmd_with_p.size(); i++) {
     splitCmdAndParam(cmd_with_p[i], cmd, param); 
      if (client.getAuth() == false && cmd == "PASS")

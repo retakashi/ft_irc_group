@@ -5,7 +5,10 @@
 #include "../ClientData.hpp"
 #include "../Server.hpp"
 
-// JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
+/*
+ JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
+  チャンネル名は100文字まで。それ以上はリサイズする。
+*/
 
 class Server;
 
@@ -27,7 +30,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
   std::string key;
   iss >> channelName >> key;
 
-  if (channelName.empty()) {
+  if (channelName.empty() || isValidChannelname(channelName) == false) {
     sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
     return;
   }
@@ -39,12 +42,11 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       return;
     }
     if (!channel) {
-      std::cout << "new!" << std::endl;
       channel = new Channel(channelName);
       addChannel(channelName, channel);
       channel->addOperator(&client);
       ft_send(channel->createJoinMsg(getHostname(), client), client);
-      return ;
+      return;
     }
     if (!channel->getKey().empty() && channel->getKey() != key) {
       std::string errorMsg =
@@ -56,15 +58,11 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       Server::sendCmdResponce(ERR_CHANNELISFULL, channel->getChannelname(), client);
       return;
     }
-    //既存のチャンネルに参加
+    // 既存のチャンネルに参加
     if (channel->isOperator(&client) == false) channel->addMember(&client);
-    channel->sendAll(channel->createJoinMsg(getHostname(),client));
-    // あとで確認↓
+    channel->sendAll(channel->createJoinMsg(getHostname(), client));
   } catch (const std::bad_alloc& e) {
-    std::cerr << "Exception in handleJoin: " << e.what() << std::endl;
-    std::string errorMsg =
-        createCmdRespMsg(servername_, client.getNickname(), 451, ":Error processing JOIN command");
-    ft_send(errorMsg, client);
+    std::cerr << "Memory allocation failed: " << e.what() << std::endl;
     throw std::exception();
   }
 }
@@ -82,6 +80,17 @@ std::string Channel::getMembersList() const {
     if (i != members_.size() - 1) members_list += " ";
   }
   return members_list;
+}
+
+bool Server::isValidChannelname(std::string& channelName) {
+  std::string except("\0\a\r\n ,:", 7);
+  if (channelName.size() > 100)
+    channelName.resize(100);
+  if (channelName[0] != '#') return false;
+  for (size_t i = 1; i < channelName.size(); i++) {
+    if (except.find(channelName[i]) != std::string::npos) return false;
+  }
+  return true;
 }
 
 std::string Channel::createJoinMsg(const std::string& hostname, const ClientData& client) {

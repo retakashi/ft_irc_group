@@ -31,14 +31,8 @@ void Server::handleCommands(ClientData& client) {
       handleTOPIC(param, client);
     else if (cmd == "KICK")
       handleKick(param, client);
-    // else if (cmd == "OPER")
-    //     handleOper(params, client);
-    // else if (cmd == "NOTICE")
-    //     handleNotice(params, client);
     else if (cmd == "PART")
       handlePart(param, client);
-    // else if (cmd == "QUIT")
-    //     handleQuit(params, client);
     else  // 無効なコマンドが来た時
       sendCmdResponce(ERR_UNKNOWNCOMMAND, cmd, client);
   }

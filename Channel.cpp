@@ -43,7 +43,7 @@ void Channel::removeOperator(ClientData* client) {
     operators_.erase(std::remove(operators_.begin(), operators_.end(), client), operators_.end());
 }
 
-size_t Channel::CountMember() const { return members_.size(); }
+size_t Channel::CountMember() const { return members_.size() + operators_.size(); }
 
 // gettter
 const std::vector<ClientData*>& Channel::getMembers() const { return members_; }

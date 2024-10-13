@@ -5,20 +5,22 @@
 
 // KICK　<channel> *( "," <channel> ) <user> *( "," <user> )
 
-void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) 
-{
+void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) {
   // 除外されるユーザーの処理
-  if (this->isOperator(target))
-    removeOperator(target);
-  else  
+  if (isMember(target))
     removeMember(target);
-  std::string partMessage = ":" + target->getNickname() + " PART " + this->getChannelname() + " :Kicked by " + client->getNickname() + "\r\n";
+  else if (isOperator(target))
+    removeOperator(target);
+  std::string partMessage = ":" + target->getNickname() + " PART " + this->getChannelname() +
+                            " :Kicked by " + client->getNickname() + "\r\n";
   Server::ft_send(partMessage, *target);
 
+  if (this->CountMember() < 1)
+    return ;
   // その他のユーザの処理
-  std::string message = ":" + client->getNickname() + " KICK " + this->getChannelname() + " " + target->getNickname() + " :" + reason + "\r\n";
+  std::string message = ":" + client->getNickname() + " KICK " + this->getChannelname() + " " +
+                        target->getNickname() + " " + reason + "\r\n";
   sendAll(message);
-  // broadcastMessage(message, client);
 }
 
 void Server::handleKick(const std::string& params, ClientData& client) {
@@ -26,32 +28,41 @@ void Server::handleKick(const std::string& params, ClientData& client) {
   std::string channelName, targetNickname, reason;
   reason = "";
   iss >> channelName >> targetNickname >> reason;
-  if (reason == ":")
-    reason = "No reason provided";
+  if (reason == ":") reason = "No reason provided";
   // ターゲットユーザーの存在確認
   ClientData* target = getClientByNickname(targetNickname);
   if (!target) {
     sendCmdResponce(ERR_NOSUCHNICK, targetNickname, client);
     return;
   }
-
   // チャンネルの存在確認
   Channel* channel = getChannelByName(channelName);
   if (!channel) {
     sendCmdResponce(ERR_NOSUCHCHANNEL, channelName, client);
     return;
   }
-
   // オペレーター確認
   if (!(channel->isOperator(&client))) {
     sendCmdResponce(ERR_CHANOPRIVSNEEDED, channelName, client);
     return;
   }
-
   // ターゲットユーザーのチャンネル参加確認
-  if (!channel->isMember(target)) {
+  if (!channel->isMember(target) && !channel->isOperator(target)) {
     sendCmdResponce(ERR_USERONCHANNEL, targetNickname, client);
     return;
   }
   channel->kickMember(&client, target, reason);
+
+  // メンバーがいなくなった時の処理
+  if (channel->CountMember() == 0)
+  {
+    std::map<std::string, Channel*>::iterator it = channels_.find(channel->getChannelname());
+    if (it->second->CountMember() == 0) 
+    {
+      std::cout << "Channel " << channel->getChannelname() << " has been deleted." << std::endl;
+      std::map<std::string, Channel *>::iterator erase_it = it;
+      delete it->second;
+      channels_.erase(erase_it);
+    }
+  }
 }

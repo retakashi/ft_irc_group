@@ -40,7 +40,7 @@ void Server::authenticatedNewClient(ClientData& client) {
   else
     cmd_with_p.push_back(casted_msg);
   for (size_t i = 0; i < cmd_with_p.size(); i++) {
-    splitCmdAndParam(cmd_with_p[i], cmd, param); 
+    splitCmdAndParam(cmd_with_p[i], cmd, param);
      if (cmd == "PASS")
       handlePass(param, client);
     else if (client.getAuth() == true && cmd == "NICK")
@@ -51,10 +51,7 @@ void Server::authenticatedNewClient(ClientData& client) {
       sendCmdResponce(ERR_NOTREGISTERED,cmd, client);
   }
   if (client.isCompleteAuthParams() == true)
-  {
     sendWelcomeToIrc(client);
-    return ;
-  }
 }
 
 void Server::sendWelcomeToIrc(ClientData client) {

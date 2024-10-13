@@ -21,7 +21,7 @@ void Server::startServer() {
 
   // listenできるところまでsocketを設定
   initServerSocket(data.sockaddr);
-  data.timeout.tv_sec = 500;
+  data.timeout.tv_sec = 20000;
   data.timeout.tv_usec = 0;
   while (true) {
     setSelectArgs(data.read_fds, data.max_sock);

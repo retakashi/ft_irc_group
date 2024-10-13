@@ -2,11 +2,6 @@
 
 void Server::handlePrivateMessage(const std::string param, ClientData &client) 
 {
-    // チャンネルへの送信か個人への送信かの場合わけをする
-    // handle_channel_pmsg()
-    // handle_personel_pmsg()
-    // これ以降に,区切りで複数の対象に送れれるようにする
-
     std::string targets, message;
     size_t spacePos = param.find(' ');
 
@@ -19,13 +14,15 @@ void Server::handlePrivateMessage(const std::string param, ClientData &client)
             message = param.substr(colonPos + 1);
         else 
         {
-            sendCmdResponce(ERR_NOTEXTTOSEND, client);
+            std::string errorMsg = ":" + servername_ + " 412 " + client.getNickname() + ": No text to send";
+            ft_send(errorMsg, client);
             return;
         }
     }
     else 
     {
-        sendCmdResponce(ERR_NOTEXTTOSEND, client);
+        std::string errorMsg = ":" + servername_ + " 412 " + client.getNickname() + ": No text to send";
+        ft_send(errorMsg, client);
         return;
     }
     std::cout << "message : " << message << std::endl;
@@ -43,18 +40,25 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
 {
     std::istringstream iss(targets);
     std::string target;
+    std::string errorMsg = ":";
 
-    while (getline(iss, target, ','))
+    while (getline(iss, target, '.'))
     {
         Channel* channel = getChannelByName(target);
-        if (target[0] != '#' || !channel || !(channel->isMember(&client))) 
+        if (target[0] != '#') 
+            errorMsg = ":" + servername_ + " 401 " + channel->getChannelname() + " :No such nick/channel";
+        else if (!(channel->isMember(&client)))
+            errorMsg = ":" + servername_ + " 404 " + channel->getChannelname() + " :Cannot send to channel";
+        else if (!channel) 
+            errorMsg = ":" + servername_ + " 411 " + channel->getChannelname() + " :No recipient given (PRIVMSG)";
+        if (errorMsg != ":")
         {
-            sendCmdResponce(ERR_NORECIPIENT, client);
+            ft_send(errorMsg, client);
             return;
         }
 
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
-        std::string message_ch = ":" + (&client)->getNickname() + "!" + (&client)->getUsername() + "@" + "localhost" + " PRIVMSG " + target + " :" + message + "\r\n";
+        std::string message_ch = ":PRIVMSG " + target + " :" + message + "\r\n";
         (channel)->broadcastMessage(message_ch, &client);
     }
     return ;
@@ -63,22 +67,25 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
 
 void  Server::handle_privmsg_personal(std::string targets, std::string message, ClientData &client)
 {
-    // ここにtargetを格納したリストを使って保持する。
-     // while文で見つけたら、
     std::istringstream iss(targets);
     std::string target;
+    std::string errorMsg = ":";
 
-    while (getline(iss, target, ','))
+    while (getline(iss, target, '.'))
     {
         ClientData* recipient = getClientByNickname(target);
-        if (target.empty() || !recipient || (recipient == &client)) 
+        if (recipient == &client)
+            errorMsg = ":" + servername_ + " 411 " + client.getNickname() + " :No recipient given (PRIVMSG)\r\n";
+        else if (!recipient) 
+            errorMsg = ":" + servername_ + " 401 " + client.getNickname() + " :No such nick/channel";
+        if (errorMsg != ":")
         {
-            sendCmdResponce(ERR_NORECIPIENT, client);
+            ft_send(errorMsg, client);
             return;
         }
 
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
-        std::string recipientMessage = ":" + (&client)->getNickname() + "!" + (&client)->getUsername() + "@" + "localhost" + " PRIVMSG " + target + " :" + message + "\r\n";
+        std::string recipientMessage = ":PRIVMSG " + target + " :" + message + "\r\n";
         ft_send(recipientMessage, *recipient);
     }
     return ;

@@ -5,25 +5,29 @@
 
 // KICK　<channel> *( "," <channel> ) <user> *( "," <user> )
 
-void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) {
-  removeMember(target);
-  broadcastMessage(client->getNickname() + " has left the channel.",
-                   client);  // removeMemberから移動
-  std::string message = ":" + client->getNickname() + " KICK " + ch_name_ + " " +
-                        target->getNickname() + " :" + reason + "\r\n";
-  Server::ft_send(message, *target);
-  broadcastMessage(message, client);
+void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) 
+{
+  // 除外されるユーザーの処理
+  if (this->isOperator(target))
+    removeOperator(target);
+  else  
+    removeMember(target);
+  std::string partMessage = ":" + target->getNickname() + " PART " + this->getChannelname() + " :Kicked by " + client->getNickname() + "\r\n";
+  Server::ft_send(partMessage, *target);
+
+  // その他のユーザの処理
+  std::string message = ":" + client->getNickname() + " KICK " + this->getChannelname() + " " + target->getNickname() + " :" + reason + "\r\n";
+  sendAll(message);
+  // broadcastMessage(message, client);
 }
 
 void Server::handleKick(const std::string& params, ClientData& client) {
   std::istringstream iss(params);
   std::string channelName, targetNickname, reason;
-  iss >> channelName >> targetNickname;
-  if (iss.str().find(':'))
-    reason = iss.str().substr(1);
-  else
-    reason = "No reason provided";  // Remove leading space
-
+  reason = "";
+  iss >> channelName >> targetNickname >> reason;
+  if (reason == ":")
+    reason = "No reason provided";
   // ターゲットユーザーの存在確認
   ClientData* target = getClientByNickname(targetNickname);
   if (!target) {
@@ -38,14 +42,8 @@ void Server::handleKick(const std::string& params, ClientData& client) {
     return;
   }
 
-  // チャンネルメンバーの確認
-  if (!channel->isMember(&client)) {
-    sendCmdResponce(ERR_NOTONCHANNEL, channelName, client);
-    return;
-  }
-
-  // 招待の権限確認
-  if (channel->getInviteOnly() && !channel->isOperator(&client)) {
+  // オペレーター確認
+  if (!(channel->isOperator(&client))) {
     sendCmdResponce(ERR_CHANOPRIVSNEEDED, channelName, client);
     return;
   }

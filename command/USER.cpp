@@ -37,10 +37,10 @@ bool Server::isValidUSERparams(std::string& params, struct user_data& user_data,
 }
 
 // usernameの格納も行う。
-bool Server::isValidUsername(const std::string& params, std::string& username,
+bool Server::isValidUsername(const std::string& param, std::string& username,
                              std::string::size_type pos) {
-  std::string nospcrlfcl("\0\r\n @", 6);
-  username = params.substr(0, pos);
+  std::string nospcrlfcl("\0\r\n @", 5);
+  username = param.substr(0, pos);
   username[pos] = '\0';
   if (nospcrlfcl.find(username[0]) != std::string::npos || username[0] == ':') return false;
   for (size_t i = 0; i < username.size(); i++) {
@@ -50,11 +50,11 @@ bool Server::isValidUsername(const std::string& params, std::string& username,
 }
 
 // mode or unusedの格納も行う。
-bool Server::isValidMiddle(const std::string& params, char& mode, std::string& unused,
+bool Server::isValidMiddle(const std::string& param, char& mode, std::string& unused,
                            std::string::size_type pos) {
-  std::string nospcrlfcl("\0\r\n ", 5);
+  std::string nospcrlfcl("\0\r\n ", 4);
   std::string middle;
-  middle = params.substr(0, pos);
+  middle = param.substr(0, pos);
   middle[pos] = '\0';
   if (middle.size() == 0) return false;
   for (size_t i = 0; i < middle.size(); i++) {
@@ -71,18 +71,23 @@ bool Server::isValidMiddle(const std::string& params, char& mode, std::string& u
 }
 
 // realnameの格納も行う。
-bool Server::isValidRealname(const std::string& params, std::string& realname) {
-  std::string nocrlfcl("\0\r\n", 4);
-  std::string nospcrlfcl("\0\r\n ", 5);
-  if (params.size() == 0) return false;
-  bool is_trailing = false;
-  if (params[0] == ':') is_trailing = true;
-  for (size_t i = 0; i < params.size(); i++) {
-    if (is_trailing == true && nocrlfcl.find(params[i]) != std::string::npos)
+bool Server::isValidRealname(const std::string& param, std::string& realname) {
+  bool has_trailing = false;
+  std::string nospcrlfcl("\0\r\n", 3);
+  if (param.size() == 0) return false;
+  if (param[0] == ':') has_trailing = true;
+  if (has_trailing == true) {
+    if (param.size() == 1)
       return false;
-    else if (is_trailing == false && nospcrlfcl.find(params[i]) != std::string::npos)
-      return false;
+    for (size_t i = 1; i < param.size(); i++) {
+      if (nospcrlfcl.find(param[i]) != std::string::npos) return false;
+    }
+  } else {
+    for (size_t i = 0; i < param.size(); i++) {
+      if (nospcrlfcl.find(param[i]) != std::string::npos || param[i] == ':' || isspace(param[i]))
+        return false;
+    }
   }
-  realname = params;
+  realname = param;
   return true;
 }

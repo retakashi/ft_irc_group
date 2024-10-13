@@ -11,6 +11,8 @@ enum cmd_resp
     RPL_NOTOPIC = 331,
     RPL_TOPIC = 332,
     RPL_INVITING = 341,
+    RPL_NAMREPLY = 353,
+    RPL_ENDOFNAMES = 366,
     ERR_NOSUCHNICK = 401,
     ERR_NOSUCHSERVER = 402,
     ERR_NOSUCHCHANNEL = 403,
@@ -33,10 +35,11 @@ enum cmd_resp
     ERR_PASSWDMISMATCH = 464,
     ERR_KEYSET = 467,
     ERR_CHANNELISFULL = 471,
+    ERR_BADCHANNELKEY = 475,
     ERR_NOCHANMODES = 477,
     ERR_CHANOPRIVSNEEDED = 482
 };
-std::string createCmdRespMsg(const std::string& servername, int code);
-std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str);
-std::string createCmdRespMsg(const std::string& servername, int code, const std::string &str1, const std::string& str2);
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code);
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code, const std::string &str);
+std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code, const std::string &str1, const std::string& str2);
 #endif

@@ -15,21 +15,21 @@ bool Server::isValidUSERparams(std::string& params, struct user_data& user_data,
                                const ClientData& client) {
   size_t i = 0;
   std::string::size_type pos = 0;
-  if (params.size() == 0) return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,client.getNickname(), "USER1", client);
+  if (params.size() == 0) return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,"USER", client);
   while (user_data.realname.empty()) {
     pos = params.find(' ');
     if ((user_data.username.empty() || user_data.mode == '\0' || user_data.unused.empty()) &&
         pos == std::string::npos)
-      return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,client.getNickname(), "USER2", client);
+      return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,"USER", client);
     if (user_data.username.empty()) {
       if (isValidUsername(params, user_data.username, pos) == false)
-        return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,client.getNickname(), "USER3", client);
+        return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "USER", client);
     } else if (user_data.mode == '\0' || user_data.unused.empty()) {
       if (isValidMiddle(params, user_data.mode, user_data.unused, pos) == false)
-        return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, client.getNickname(),"USER4", client);
+        return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,"USER", client);
     } else if (user_data.realname.empty()) {
       if (isValidRealname(params, user_data.realname) == false)
-        return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, client.getNickname(),"USER5", client);
+        return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,"USER", client);
     }
     if (pos != std::string::npos) params = params.substr(pos + 1);
   }

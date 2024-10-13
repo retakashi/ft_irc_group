@@ -14,5 +14,5 @@ ssize_t Server::ft_recv(int socket) {
     return -1;
   }
   msg_[recv_size - 1] = '\0';
-  return recv_size - 1;  // 改行文字分減らす
+  return recv_size - 2;  // 改行文字分減らす
 }

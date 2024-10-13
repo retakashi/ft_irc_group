@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
 void Server::ft_send(std::string msg, ClientData client) {
+  std::cout << "send: " << msg << std::endl;
   char casted_msg[MAX_BUFSIZE];
   ssize_t send_ret = 0;
   size_t send_size = msg.size();
@@ -11,7 +12,6 @@ void Server::ft_send(std::string msg, ClientData client) {
   casted_msg[send_size] = '\r';
   casted_msg[send_size + 1] = '\n';
   casted_msg[send_size + 2] = '\0';
-
   send_ret = send(client.getSocket(), casted_msg, send_size + 2, 0);
   if (send_ret == 0) {
     std::cout << "client send EOF..." << std::endl;

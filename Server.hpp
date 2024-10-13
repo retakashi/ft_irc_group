@@ -147,5 +147,6 @@ class Server {
   Channel *getChannelByName(const std::string &channelName);
   void addChannel(const std::string &channelName, Channel *channel);
   void handleJoin(const std::string &channelName, ClientData &client);
+  bool isValidChannelname(const std::string& channelName);
 };
 #endif

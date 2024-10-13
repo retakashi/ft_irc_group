@@ -10,7 +10,10 @@ void Server::handleUSER(std::string param, ClientData& client) {
   }
 }
 
-// sendCmdResponceの戻り値を0(false)にしている。
+/*
+sendCmdResponceの戻り値を0(false)にしている。
+USERの引数はそれぞれ50文字まで
+*/
 bool Server::isValidUSERparams(std::string& params, struct user_data& user_data,
                                const ClientData& client) {
   size_t i = 0;
@@ -42,6 +45,8 @@ bool Server::isValidUsername(const std::string& param, std::string& username,
   std::string nospcrlfcl("\0\r\n @", 5);
   username = param.substr(0, pos);
   username[pos] = '\0';
+  if (username.size() > 50)
+    return false;
   if (nospcrlfcl.find(username[0]) != std::string::npos || username[0] == ':') return false;
   for (size_t i = 0; i < username.size(); i++) {
     if (nospcrlfcl.find(username[i]) != std::string::npos) return false;
@@ -56,6 +61,8 @@ bool Server::isValidMiddle(const std::string& param, char& mode, std::string& un
   std::string middle;
   middle = param.substr(0, pos);
   middle[pos] = '\0';
+  if (middle.size() > 50)
+    return false;
   if (middle.size() == 0) return false;
   for (size_t i = 0; i < middle.size(); i++) {
     if (nospcrlfcl.find(middle[i]) != std::string::npos) return false;
@@ -76,9 +83,9 @@ bool Server::isValidRealname(const std::string& param, std::string& realname) {
   std::string nospcrlfcl("\0\r\n", 3);
   if (param.size() == 0) return false;
   if (param[0] == ':') has_trailing = true;
+  if (param.size() > 50 || (has_trailing == true && param.size() == 1))
+    return false;
   if (has_trailing == true) {
-    if (param.size() == 1)
-      return false;
     for (size_t i = 1; i < param.size(); i++) {
       if (nospcrlfcl.find(param[i]) != std::string::npos) return false;
     }

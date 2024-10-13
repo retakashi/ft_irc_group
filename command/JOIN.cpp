@@ -5,7 +5,10 @@
 #include "../ClientData.hpp"
 #include "../Server.hpp"
 
-// JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
+/*
+ JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
+  チャンネル名は100文字まで。それ以上はリサイズする。
+*/
 
 class Server;
 
@@ -79,9 +82,10 @@ std::string Channel::getMembersList() const {
   return members_list;
 }
 
-bool Server::isValidChannelname(const std::string& channelName) {
+bool Server::isValidChannelname(std::string& channelName) {
   std::string except("\0\a\r\n ,:", 7);
-  if (channelName.size() > 100) return false;
+  if (channelName.size() > 100)
+    channelName.resize(100);
   if (channelName[0] != '#') return false;
   for (size_t i = 1; i < channelName.size(); i++) {
     if (except.find(channelName[i]) != std::string::npos) return false;

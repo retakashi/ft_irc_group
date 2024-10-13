@@ -93,11 +93,11 @@ class Server {
   void handleUSER(std::string param, ClientData &client);
   bool isValidUSERparams(std::string &params, struct user_data &user_data,
                          const ClientData &client);
-  bool isValidUsername(const std::string &param, std::string &username,
+  bool isValidUsername(std::string &param, std::string &username,
                        std::string::size_type pos);
-  bool isValidMiddle(const std::string &param, char &mode, std::string &unused,
+  bool isValidMiddle(std::string &param, char &mode, std::string &unused,
                      std::string::size_type pos);
-  bool isValidRealname(const std::string &param, std::string &realname);
+  bool isValidRealname(std::string &param, std::string &realname);
   // NICK.cpp
   void handleNICK(std::string param, ClientData &client);
   bool isValidNickname(std::string &param, const ClientData &client);
@@ -147,6 +147,6 @@ class Server {
   Channel *getChannelByName(const std::string &channelName);
   void addChannel(const std::string &channelName, Channel *channel);
   void handleJoin(const std::string &channelName, ClientData &client);
-  bool isValidChannelname(const std::string& channelName);
+  bool isValidChannelname(std::string& channelName);
 };
 #endif

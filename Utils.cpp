@@ -33,7 +33,6 @@ void Server::splitCmds(std::string casted_msg, std::vector<std::string> &cmd_wit
   if (!casted_msg.empty()) cmd_with_p.push_back(casted_msg);
 }
 
-
 // eraseしたイテレーターを参照しないか確認する！！！member,operator確認
 void Server::disconnectClient(ClientData client) {
   int socket = client.getSocket();
@@ -59,6 +58,11 @@ std::list<ClientData>::iterator Server::eraseClient(std::list<ClientData>::itera
          it++) {
       if (it->second->isMember(erase_c) == true) it->second->removeMember(erase_c);
       if (it->second->isOperator(erase_c) == true) it->second->removeOperator(erase_c);
+      if (it->second->CountMember() == 0) {
+        std::map<std::string, Channel *>::iterator erase_it = it;
+        delete it->second;
+        channels_.erase(erase_it);
+      }
     }
   }
   return Server::clients_.erase(erase_it);  // 最後にクライアントを削除

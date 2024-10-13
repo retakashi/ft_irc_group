@@ -42,10 +42,10 @@ void Server::startServer() {
         } else if (it != Server::clients_.end() && FD_ISSET(it->getSocket(), &data.read_fds))
         {
           handleClientCommunication(*it);
-          ++it;
+          it++;
         }
         else
-          ++it;
+          it++;
       }
     }
   }

@@ -17,9 +17,7 @@ bool Server::isValidNickname(std::string& param, const ClientData& client) {
   if (client.getNickname().empty() && param.size() == 0)
     return Server::sendCmdResponce(ERR_NONICKNAMEGIVEN, client);
   if (param.size() == 0) {
-    std::stringstream ss;
-    ss << "Your nickname is " << client.getNickname();
-    Server::ft_send(ss.str(), client);
+    Server::ft_send("Your nickname is " + client.getNickname(), client);
     return false;
   }
   if (param.size() > 20) return Server::sendCmdResponce(ERR_ERRONEUSNICKNAME, param, client);

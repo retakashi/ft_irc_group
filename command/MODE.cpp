@@ -17,13 +17,13 @@ int Server::handleMODE(std::string param, ClientData& client) {
   std::string send_mode;
 
   if (setAndSearchChannel(param, data) == false) return 0;
-  if (Server::channels_[data.mode_data[0]]->isOperator(&client)== false)
-    return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
-  if (param.empty())
+  if (param.empty()) //MODE #chの場合
   {
     ft_send(":ft_irc 324 reira #ch",client.getSocket());
     return 0;
   }
+  if (Server::channels_[data.mode_data[0]]->isOperator(&client)== false)
+    return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0],data.client);
   splitModeParam(param, data.mode_data);
   ch = channels_[data.mode_data[0]];
   if (isValidModeData(data) == false) return 0;
@@ -63,7 +63,9 @@ int Server::handleMODE(std::string param, ClientData& client) {
       start = data.param_i + 1;
     data.param_i = start;
   }
-  return sendCmdResponce(RPL_CHANNELMODEIS,ch->getChannelname(),param,client);
+  std::string msg = ":" + client.getNickname() + "!" + client.getUsername() +"@" + getHostname() + " MODE " + ch->getChannelname() + " " + param;
+  ch->sendAll(msg);
+  return 0;
 }
 
 // paramからchannelnameを切り、mode,mode's paramのみにする
@@ -157,11 +159,12 @@ bool Server::isValidMode(struct handle_mode_data data, int start, int& total_cnt
 }
 
 bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
-  std::string target_nick = data.mode_data[data.param_i];
+  std::string target_nick;
   int is_ope = false;
   ClientData* target_client;
 
   data.param_i++;
+  target_nick = data.mode_data[data.param_i];
   if ((target_client = getMemberByNickname(target_nick)) == NULL && (target_client = getOperatorByNickname(target_nick)) == NULL)
     return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
   if (data.is_active == true && target_nick == data.client.getNickname())

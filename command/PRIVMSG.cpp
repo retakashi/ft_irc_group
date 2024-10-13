@@ -47,7 +47,7 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
         Channel* channel = getChannelByName(target);
         if (target[0] != '#') 
             errorMsg = ":" + servername_ + " 401 " + channel->getChannelname() + " :No such nick/channel";
-        else if (!(channel->isMember(&client)))
+        else if (!(channel->isMember(&client)) && !(channel->isOperator(&client)))
             errorMsg = ":" + servername_ + " 404 " + channel->getChannelname() + " :Cannot send to channel";
         else if (!channel) 
             errorMsg = ":" + servername_ + " 411 " + channel->getChannelname() + " :No recipient given (PRIVMSG)";
@@ -58,7 +58,7 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
         }
 
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
-        std::string message_ch = ":PRIVMSG " + target + " :" + message + "\r\n";
+        std::string message_ch = ":" + client.getNickname() + " PRIVMSG " + target + " :" + message;
         (channel)->broadcastMessage(message_ch, &client);
     }
     return ;

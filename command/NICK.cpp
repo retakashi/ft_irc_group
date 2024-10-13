@@ -4,7 +4,7 @@ void Server::handleNICK(std::string param, ClientData& client) {
   if (isValidNickname(param, client) == true) {
     std::string old_nick = client.getNickname();
     client.setNickname(param);
-    Server::ft_send(":reira NICK "+ client.getNickname(), client);
+    Server::ft_send(":" + old_nick + " NICK "+ client.getNickname(), client);
   }
 }
 

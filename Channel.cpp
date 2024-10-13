@@ -9,17 +9,9 @@ Channel::Channel(const std::string& name)
 
 Channel::~Channel() {}
 
-void Channel::broadcastMessage(const std::string& message, ClientData* sender) {
-  for (std::vector<ClientData*>::iterator it = members_.begin(); it != members_.end(); ++it) {
-    if (*it != sender) {
-      Server::ft_send(message, **it);
-    }
-  }
-}
-
 void Channel::addMember(ClientData* client) {
   members_.push_back(client);
-  broadcastMessage(client->getNickname() + " has joined the channel.", client);
+  // broadcastMessage(client->getNickname() + " has joined the channel.", client);
 }
 
 void Channel::addOperator(ClientData* client) {

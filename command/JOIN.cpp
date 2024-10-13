@@ -39,9 +39,12 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       return;
     }
     if (!channel) {
+      std::cout << "new!" << std::endl;
       channel = new Channel(channelName);
       addChannel(channelName, channel);
       channel->addOperator(&client);
+      ft_send(channel->createJoinMsg(getHostname(), client), client);
+      return ;
     }
     if (!channel->getKey().empty() && channel->getKey() != key) {
       std::string errorMsg =
@@ -53,12 +56,9 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       Server::sendCmdResponce(ERR_CHANNELISFULL, channel->getChannelname(), client);
       return;
     }
+    //既存のチャンネルに参加
     if (channel->isOperator(&client) == false) channel->addMember(&client);
-    // チャンネルにJOINメッセージを送信
-    ft_send(channel->createJoinMsg(getHostname(), client), client);
-    std::string msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() +
-                      " JOIN " + channel->getChannelname() + "\r\n";
-    channel->broadcastMessage(msg, &client);
+    channel->sendAll(channel->createJoinMsg(getHostname(),client));
     // あとで確認↓
   } catch (const std::bad_alloc& e) {
     std::cerr << "Exception in handleJoin: " << e.what() << std::endl;

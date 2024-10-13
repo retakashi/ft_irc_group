@@ -36,3 +36,26 @@ int Server::sendCmdResponce(int code, const std::string &str1, const std::string
   ft_send(createCmdRespMsg(servername_, client.getNickname(), code, str1, str2), client);
   return 0;
 }
+
+void Channel::broadcastMessage(const std::string& message, ClientData* sender) {
+  for (std::vector<ClientData*>::iterator it = members_.begin(); it != members_.end(); ++it) {
+    if (*it != sender) {
+      Server::ft_send(message, **it);
+    }
+  }
+  for (std::vector<ClientData*>::iterator it = operators_.begin(); it != operators_.end(); ++it) {
+    if (*it != sender) {
+      Server::ft_send(message, **it);
+    }
+  }
+}
+
+void Channel::sendAll(const std::string& message)
+{
+ for (std::vector<ClientData*>::iterator it = members_.begin(); it != members_.end(); ++it) {
+      Server::ft_send(message, **it);
+  }
+  for (std::vector<ClientData*>::iterator it = operators_.begin(); it != operators_.end(); ++it) {
+      Server::ft_send(message, **it);
+  } 
+}

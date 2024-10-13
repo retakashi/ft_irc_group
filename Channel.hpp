@@ -10,7 +10,6 @@ class Channel {
   ~Channel();
 
   // channel.cpp
-  void broadcastMessage(const std::string& message, ClientData* sender);
   void addMember(ClientData* client);
   void addOperator(ClientData* client);
   bool isMember(ClientData* client) const;
@@ -18,6 +17,9 @@ class Channel {
   void removeMember(ClientData* client);
   void removeOperator(ClientData* client);
   size_t CountMember() const;
+  //Send.cpp
+  void broadcastMessage(const std::string& message, ClientData* sender);
+  void sendAll(const std::string& message);
   // getter
   const std::vector<ClientData*>& getMembers() const;
   const std::string& getChannelname() const;

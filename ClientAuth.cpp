@@ -34,27 +34,21 @@ void Server::authenticatedNewClient(ClientData& client) {
   ssize_t recv_size = ft_recv(client.getSocket());
   if (recv_size <= 0) return;
   std::string casted_msg(msg_, recv_size);
+  std::cout << "auth recv: " << casted_msg << std::endl;
   if (casted_msg.find("\r\n") != std::string::npos)
     splitCmds(casted_msg, cmd_with_p);
   else
     cmd_with_p.push_back(casted_msg);
   for (size_t i = 0; i < cmd_with_p.size(); i++) {
     splitCmdAndParam(cmd_with_p[i], cmd, param);
-    if (cmd == "CAP") {
-      // std::string response = "CAP END";
-      // Server::ft_send(response, client);
-      std::string response = "CAP * LS :multi-prefix";
-      Server::ft_send(response, client);
-    } else if (cmd == "PASS")
+     if (cmd == "PASS")
       handlePass(param, client);
     else if (client.getAuth() == true && cmd == "NICK")
       handleNICK(param, client);
     else if (client.getAuth() == true && cmd == "USER")
       handleUSER(param, client);
-    else {
+    else
       sendCmdResponce(ERR_NOTREGISTERED,cmd, client);
-      return;
-    }
   }
   if (client.isCompleteAuthParams() == true)
     sendWelcomeToIrc(client);

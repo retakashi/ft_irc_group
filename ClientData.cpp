@@ -10,9 +10,6 @@ bool ClientData::isCompleteAuthParams() {
 
 void ClientData::setAuth(bool auth) { is_authenticated = auth; }
 void ClientData::setNickname(const std::string& nickname) {
-  std::stringstream ss;
-  ss << "You set nickname " << nickname;
-  Server::ft_send(ss.str(), *this);
   nickname_ = nickname;
 }
 void ClientData::setUsername(const std::string& username) { username_ = username; }

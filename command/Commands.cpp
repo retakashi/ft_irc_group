@@ -1,35 +1,45 @@
 #include "../Server.hpp"
 
 void Server::handleCommands(ClientData& client) {
-  std::string command;
-  std::string params;
+  std::vector<std::string> cmd_with_p;
+  std::string cmd;
+  std::string param;
+  
   ssize_t recv_size = ft_recv(client.getSocket());
   if (recv_size <= 0) return;
   std::string casted_msg(msg_, recv_size);
   std::cout << "recv: " << casted_msg << std::endl;
-  splitCmdAndParam(casted_msg, command, params);
-  if (command == "NICK")
-    handleNICK(params, client);
-  else if (command == "PRIVMSG")
-    handlePrivateMessage(params, client);
-  else if (command == "INVITE")
-    handleInvite(params, client);
-  else if (command == "MODE")
-    handleMODE(params, client);
-  else if (command == "JOIN")
-      handleJoin(params, client);
-  else if (command == "TOPIC")
-      handleTOPIC(params, client);
-  else if (command == "KICK")
-      handleKick(params, client);
-  // else if (command == "OPER")
-  //     handleOper(params, client);
-  // else if (command == "NOTICE")
-  //     handleNotice(params, client);
-  else if (command == "PART")
-      handlePart(params, client);
-  // else if (command == "QUIT")
-  //     handleQuit(params, client);
-  else  // 無効なコマンドが来た時
-    sendCmdResponce(ERR_UNKNOWNCOMMAND, command, client);
+  if (casted_msg.find("\r\n") != std::string::npos)
+    splitCmds(casted_msg, cmd_with_p);
+  else
+    cmd_with_p.push_back(casted_msg);
+  for (size_t i = 0; i < cmd_with_p.size(); i++) {
+    splitCmdAndParam(casted_msg, cmd, param);
+    if (client.getAuth() == true && (cmd == "PASS" || cmd == "USER"))
+      sendCmdResponce(ERR_ALREADYREGISTRED, client);
+    else if (cmd == "NICK")
+      handleNICK(param, client);
+    else if (cmd == "PRIVMSG")
+      handlePrivateMessage(param, client);
+    else if (cmd == "INVITE")
+      handleInvite(param, client);
+    else if (cmd == "MODE")
+      handleMODE(param, client);
+    else if (cmd == "JOIN")
+      handleJoin(param, client);
+    else if (cmd == "TOPIC")
+      handleTOPIC(param, client);
+    else if (cmd == "KICK")
+      handleKick(param, client);
+    // else if (cmd == "OPER")
+    //     handleOper(params, client);
+    // else if (cmd == "NOTICE")
+    //     handleNotice(params, client);
+    else if (cmd == "PART")
+      handlePart(param, client);
+    // else if (cmd == "QUIT")
+    //     handleQuit(params, client);
+    else  // 無効なコマンドが来た時
+      sendCmdResponce(ERR_UNKNOWNCOMMAND, cmd, client);
+  }
 }

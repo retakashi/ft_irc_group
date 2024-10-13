@@ -19,15 +19,13 @@ void Server::handlePrivateMessage(const std::string param, ClientData &client)
             message = param.substr(colonPos + 1);
         else 
         {
-            std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 412, ":No text to send");
-            ft_send(errorMsg, client);
+            sendCmdResponce(ERR_NOTEXTTOSEND, client);
             return;
         }
     }
     else 
     {
-        std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 412, ":No text to send");
-        ft_send(errorMsg, client);
+        sendCmdResponce(ERR_NOTEXTTOSEND, client);
         return;
     }
     std::cout << "message : " << message << std::endl;
@@ -51,9 +49,7 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
         Channel* channel = getChannelByName(target);
         if (target[0] != '#' || !channel || !(channel->isMember(&client))) 
         {
-            std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 411, ":No recipient given");
-            errorMsg += "(<PRIVMSG>)";
-            ft_send(errorMsg, client);
+            sendCmdResponce(ERR_NORECIPIENT, client);
             return;
         }
 
@@ -77,9 +73,7 @@ void  Server::handle_privmsg_personal(std::string targets, std::string message, 
         ClientData* recipient = getClientByNickname(target);
         if (target.empty() || !recipient || (recipient == &client)) 
         {
-            std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), 411, ":No recipient given");
-            errorMsg += "(<PRIVMSG>)";
-            ft_send(errorMsg, client);
+            sendCmdResponce(ERR_NORECIPIENT, client);
             return;
         }
 

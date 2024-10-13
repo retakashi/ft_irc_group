@@ -12,7 +12,6 @@ void Server::handlePass(std::string param, ClientData& client)
     Server::sendCmdResponce(ERR_NEEDMOREPARAMS,"PASS",client);
     return ;
   }
-  std::cout << "serverpass_: " << serverpass_ << ",   param: " << param << "!" << std::endl;
   if (this->serverpass_ != param)
   {
     Server::sendCmdResponce(ERR_PASSWDMISMATCH, client);

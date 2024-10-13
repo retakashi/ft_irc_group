@@ -157,46 +157,35 @@ bool Server::isValidMode(struct handle_mode_data data, int start, int& total_cnt
 }
 
 bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
-  std::stringstream ss;
-  std::string target_nick;
+  std::string target_nick = data.mode_data[data.param_i];
   int is_ope = false;
   ClientData* target_client;
 
   data.param_i++;
-  target_nick = data.mode_data[data.param_i];
-  // target_nickがメンバーかどうか
   if ((target_client = getMemberByNickname(target_nick)) == NULL && (target_client = getOperatorByNickname(target_nick)) == NULL)
     return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
-  if (target_nick == data.client.getNickname())
+  if (data.is_active == true && target_nick == data.client.getNickname())
       return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
-  // target_nickが既にオペレーターかどうか
   if (isOperator(target_client) == true) is_ope = true;
   if (data.is_active == true && is_ope == false) {
     operators_.push_back(target_client);
-    ss << data.client.getNickname() << " " << getChannelname() << " +o";  // target_nickのclientに送る
   } else if (data.is_active == false && is_ope == true) {
-    ss << data.client.getNickname() << " " << getChannelname() << " -o";
-    // あとでoperator erase作る
-    if (operators_.size() > 0) {
-      for (size_t i = 0; i < operators_.size(); i++) {
-        if (operators_[i] == target_client) operators_.erase(operators_.begin() + i);
-      }
-    }
+    removeOperator(target_client);
+    addMember(target_client);
   }
-  // Server::sendCmdResponce(RPL_CHANNELMODEIS, ss.str(), *target_client);
   return true;
 }
 
 void Channel::toggleInviteOnlyChannel(struct handle_mode_data data) {
-  std::stringstream ss;
+  std::string msg;
   if (data.is_active == true) {
     setInviteOnly(true);
-    ss << data.client.getNickname() << " " << getChannelname() << " +i";
+    msg = data.client.getNickname() + " " + getChannelname() + " +i";
   } else {
     setInviteOnly(false);
-    ss << data.client.getNickname() << " " << getChannelname() << " -1";
+    msg = data.client.getNickname() + " " + getChannelname() + " -i";
   }
-  broadcastMessage(createCmdRespMsg(Server::servername_, data.client.getNickname(), RPL_CHANNELMODEIS, ss.str()),
+  broadcastMessage(createCmdRespMsg(Server::servername_, data.client.getNickname(), RPL_CHANNELMODEIS, msg),
                    &data.client);
 }
 

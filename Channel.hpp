@@ -42,6 +42,7 @@ class Channel {
   std::string getMembersList() const;  // add
   std::string createJoinMsg(const std::string& hostname, const ClientData& client);
   // MODE.cpp
+  std::string getModeStatus();
   bool toggleOperatorPrivileges(struct handle_mode_data& data);
   void toggleInviteOnlyChannel(struct handle_mode_data data);
   bool toggleChannelKey(struct handle_mode_data& data);

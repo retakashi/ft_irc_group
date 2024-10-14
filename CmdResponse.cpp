@@ -96,7 +96,7 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
   pre = ":" + servername;
   switch (code) {
     case RPL_CHANNELMODEIS:
-      msg = pre + " 324 " + nick + " " + str1 + " " + str2;
+      msg = pre + " 324 " + nick + " " + str1 + str2;
       break;
     case RPL_TOPIC:
       msg = pre + " 332 " + nick + " " + str1 + " :" + str2;

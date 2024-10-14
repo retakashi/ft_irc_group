@@ -17,15 +17,15 @@ int Server::handleMODE(std::string param, ClientData& client) {
   std::string send_mode;
 
   if (setAndSearchChannel(param, data) == false) return 0;
+  ch = channels_[data.mode_data[0]];
   if (param.empty())  // MODE #chの場合
   {
-    ft_send(":ft_irc 324 reira #ch", client.getSocket());
-    return 0;
+    std::string mode_status = ch->getModeStatus();
+    return sendCmdResponce(RPL_CHANNELMODEIS,ch->getChannelname(),mode_status,client);
   }
-  if (Server::channels_[data.mode_data[0]]->isOperator(&client) == false)
+  if (ch->isOperator(&client) == false)
     return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0], data.client);
   splitModeParam(param, data.mode_data);
-  ch = channels_[data.mode_data[0]];
   if (isValidModeData(data) == false) return 0;
   data.param_i = start;
   while (start < data.mode_data.size()) {
@@ -88,6 +88,26 @@ bool Server::setAndSearchChannel(std::string& param, struct handle_mode_data& da
     return Server::sendCmdResponce(ERR_NOSUCHCHANNEL, ch_name, data.client);
   data.mode_data.push_back(ch_name);
   return true;
+}
+
+std::string Channel::getModeStatus() {
+  std::string mode_status;
+  if (operators_.size() > 0) {
+    mode_status += " +o ";
+    for (size_t i = 0; i < operators_.size(); i++) {
+      mode_status += operators_[i]->getNickname();
+      if (i != operators_.size() - 1) mode_status += " ";
+    }
+  }
+  if (getInviteOnly() == true)
+    mode_status += " +i";
+  if(getTopicRestricted() == true)
+    mode_status += " +t";
+  if (!getKey().empty())
+    mode_status += " +k " + getKey();
+  if (getUserLimit() > 0)
+    mode_status += "+l " + getUserLimit();
+  return mode_status;
 }
 
 // paramをsplitしてmode_dataに格納

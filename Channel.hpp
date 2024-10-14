@@ -14,8 +14,10 @@ class Channel {
   void addOperator(ClientData* client);
   bool isMember(ClientData* client) const;
   bool isOperator(ClientData* client) const;
+  bool isInvitee(ClientData* client) const;
   void removeMember(ClientData* client);
   void removeOperator(ClientData* client);
+  void removeInvitee(ClientData* client);
   size_t CountMember() const;
   //Send.cpp
   void broadcastMessage(const std::string& message, ClientData* sender);
@@ -61,6 +63,7 @@ class Channel {
   size_t user_limit_;
   std::vector<ClientData*> members_;
   std::vector<ClientData*> operators_;
+  std::vector<ClientData*> invitees_;
 };
 
 #endif

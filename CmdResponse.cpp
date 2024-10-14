@@ -73,6 +73,9 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
     case ERR_CHANNELISFULL:
       msg = pre + " 471 " + nick + " " + str + " :Cannot join channel (+l)";
       break;
+    case ERR_INVITEONLYCHAN:
+      msg = pre + " 473 " + nick + " " + str + " :Cannot join channel (+i)";
+      break;
     case ERR_BADCHANNELKEY:
       msg = pre + " 475 " + nick + " " + str + " :Cannot join channel (+k)";
       break;

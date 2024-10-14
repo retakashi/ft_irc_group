@@ -33,6 +33,10 @@ bool Channel::isOperator(ClientData* client) const {
   return std::find(operators_.begin(), operators_.end(), client) != operators_.end();
 }
 
+bool Channel::isInvitee(ClientData* client) const{
+  return std::find(invitees_.begin(), invitees_.end(), client) != invitees_.end();
+}
+
 void Channel::removeMember(ClientData* client) {
   if (client != NULL)
     members_.erase(std::remove(members_.begin(), members_.end(), client), members_.end());
@@ -41,6 +45,11 @@ void Channel::removeMember(ClientData* client) {
 void Channel::removeOperator(ClientData* client) {
   if (client != NULL)
     operators_.erase(std::remove(operators_.begin(), operators_.end(), client), operators_.end());
+}
+
+void Channel::removeInvitee(ClientData* client) {
+  if (client != NULL)
+    invitees_.erase(std::remove(invitees_.begin(), invitees_.end(), client), invitees_.end());
 }
 
 size_t Channel::CountMember() const { return members_.size() + operators_.size(); }

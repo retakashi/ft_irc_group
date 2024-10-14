@@ -4,7 +4,6 @@
 #include "../Channel.hpp"
 #include "../ClientData.hpp"
 #include "../Server.hpp"
-
 /*
  JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
   チャンネル名は100文字まで。それ以上はリサイズする。
@@ -30,10 +29,9 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
   std::string key;
   iss >> channelName >> key;
 
-  if (channelName.empty())
-  {
+  if (channelName.empty()) {
     sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
-    return ;
+    return;
   }
   if (isValidChannelname(channelName) == false) {
     sendCmdResponce(ERR_NOSUCHCHANNEL, channelName, client);
@@ -43,7 +41,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     Channel* channel = getChannelByName(channelName);
     if (channel != NULL &&
         (channel->isMember(&client) == true || channel->isOperator(&client) == true)) {
-      sendCmdResponce(ERR_USERONCHANNEL, channelName, client);
+      // sendCmdResponce(ERR_USERONCHANNEL, channelName, client);
       return;
     }
     if (!channel) {
@@ -51,6 +49,10 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       addChannel(channelName, channel);
       channel->addOperator(&client);
       ft_send(channel->createJoinMsg(getHostname(), client), client);
+      return;
+    }
+    if (channel->getInviteOnly() == true && channel->isInvitee(&client) == false) {
+      sendCmdResponce(ERR_INVITEONLYCHAN, channel->getChannelname(), client);
       return;
     }
     if (!channel->getKey().empty() && channel->getKey() != key) {
@@ -64,7 +66,8 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       return;
     }
     // 既存のチャンネルに参加
-    if (channel->isOperator(&client) == false) channel->addMember(&client);
+    channel->addMember(&client);
+    if (channel->isInvitee(&client) == true) channel->removeInvitee(&client);
     channel->sendAll(channel->createJoinMsg(getHostname(), client));
   } catch (const std::bad_alloc& e) {
     std::cerr << "Memory allocation failed: " << e.what() << std::endl;
@@ -89,9 +92,8 @@ std::string Channel::getMembersList() const {
 
 bool Server::isValidChannelname(std::string& channelName) {
   std::string except("\0\a\r\n ,:", 7);
-  if (channelName.size() > 100)
-    channelName.resize(100);
-  if (channelName[0] != '#'|| channelName == "#") return false;
+  if (channelName.size() > 100) channelName.resize(100);
+  if (channelName[0] != '#' || channelName == "#") return false;
   for (size_t i = 1; i < channelName.size(); i++) {
     if (except.find(channelName[i]) != std::string::npos) return false;
   }

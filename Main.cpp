@@ -32,6 +32,7 @@ int main(int argc, char **argv) {
   try {
     g_sig_flg = false;
     struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = sigHandler;
     if (sigaction(SIGINT, &sa, NULL) < 0) putSignalError();

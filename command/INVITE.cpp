@@ -1,11 +1,13 @@
 #include "../Channel.hpp"
 
 void Channel::inviteMember(ClientData* client, ClientData* target) {
-  this->addMember(target);
+  invitees_.push_back(target);
   std::string message =
       ":" + client->getNickname() + " INVITE " + target->getNickname() + " :" + ch_name_ + "\r\n";
-  Server::ft_send(message, *target);
-  broadcastMessage(message, client);
+  // Server::ft_send(message, *target);
+  sendAll(message);
+  Server::ft_send(message,*target);
+  // broadcastMessage(message, client);
   // Server::sendCmdResponce(RPL_INVITING, targetNickname + " " + channelName, client);
 }
 
@@ -18,14 +20,12 @@ void Server::handleInvite(const std::string& params, ClientData& client) {
     sendCmdResponce(ERR_NEEDMOREPARAMS, "INVITE", client);
     return;
   }
-
   // ターゲットユーザーの存在確認
   ClientData* target = getClientByNickname(targetNickname);
   if (!target) {
     sendCmdResponce(ERR_NOSUCHNICK, targetNickname, client);
     return;
   }
-
   // チャンネルの存在確認
   Channel* channel = getChannelByName(channelName);
   if (!channel) {
@@ -34,7 +34,7 @@ void Server::handleInvite(const std::string& params, ClientData& client) {
   }
 
   // チャンネルメンバーの確認
-  if (!channel->isMember(&client)) {
+  if (!channel->isMember(&client) && !channel->isOperator(&client)) {
     sendCmdResponce(ERR_NOTONCHANNEL, channelName, client);
     return;
   }
@@ -46,7 +46,7 @@ void Server::handleInvite(const std::string& params, ClientData& client) {
   }
 
   // ターゲットユーザーのチャンネル参加確認
-  if (channel->isMember(target)) {
+  if (channel->isMember(target) || channel->isOperator(target)) {
     sendCmdResponce(ERR_USERONCHANNEL, targetNickname, client);
     return;
   }
@@ -55,5 +55,5 @@ void Server::handleInvite(const std::string& params, ClientData& client) {
   // std::string message = ":" + client.getNickname() + " INVITE " + target->getNickname() + " :" +
   // channelName + "\r\n"; Server::ft_send(message, *target);
   channel->inviteMember(&client, target);
-  sendCmdResponce(RPL_INVITING, targetNickname + " " + channelName, client);
+  // sendCmdResponce(RPL_INVITING, targetNickname + " " + channelName, client);
 }

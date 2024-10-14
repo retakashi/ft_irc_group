@@ -15,6 +15,8 @@ void Channel::kickMember(ClientData* client, ClientData* target, const std::stri
                             " :Kicked by " + client->getNickname() + "\r\n";
   Server::ft_send(partMessage, *target);
 
+  if (this->CountMember() < 1)
+    return ;
   // その他のユーザの処理
   std::string message = ":" + client->getNickname() + " KICK " + this->getChannelname() + " " +
                         target->getNickname() + " " + reason + "\r\n";
@@ -50,4 +52,17 @@ void Server::handleKick(const std::string& params, ClientData& client) {
     return;
   }
   channel->kickMember(&client, target, reason);
+
+  // メンバーがいなくなった時の処理
+  if (channel->CountMember() == 0)
+  {
+    std::map<std::string, Channel*>::iterator it = channels_.find(channel->getChannelname());
+    if (it->second->CountMember() == 0) 
+    {
+      std::cout << "Channel " << channel->getChannelname() << " has been deleted." << std::endl;
+      std::map<std::string, Channel *>::iterator erase_it = it;
+      delete it->second;
+      channels_.erase(erase_it);
+    }
+  }
 }

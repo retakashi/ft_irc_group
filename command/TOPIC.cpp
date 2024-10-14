@@ -11,7 +11,7 @@ TOPIC <channel> [ <topic> ]
 int Server::handleTOPIC(std::string param, ClientData& client) {
   Channel* ch;
   std::string ch_name;
-  std::stringstream ss;
+  std::string msg;
   if (setAndSearchChannel(param, ch_name, client) == false) return 0;
   ch = channels_[ch_name];
 
@@ -28,15 +28,15 @@ int Server::handleTOPIC(std::string param, ClientData& client) {
     ch->setTopic("");
   else
     ch->setTopic(param);
-  ss << ":" << servername_ << "  " << client.getNickname() << "!" << client.getUsername() << "@"
-     << hostname_ << " TOPIC " << ch_name << ": " << ch->getTopic();
-  ch->broadcastMessage(ss.str(), &client);
+  msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + hostname_ + " TOPIC " + ch_name + " " +
+        ch->getTopic();
+  ch->sendAll(msg);
   return 0;
 }
 
 bool Server::setAndSearchChannel(std::string& param, std::string& ch_name, ClientData client) {
   if (param.empty())
-    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS,"MODE", client);  // false返す
+    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);  // false返す
   std::string::size_type pos = param.find(' ');
   if (pos == std::string::npos)
     ch_name = param;
@@ -55,14 +55,14 @@ bool Server::setAndSearchChannel(std::string& param, std::string& ch_name, Clien
 bool Server::isValidTopic(std::string& param) {
   std::string nocrlfcl("\0\r\n", 4);
   std::string nospcrlfcl("\0\r\n ", 5);
-  bool is_trailing = false;
-  if (param[0] == ':') is_trailing = true;
+  bool has_trailing = false;
+  if (param[0] == ':') has_trailing = true;
   for (size_t i = 0; i < param.size(); i++) {
-    if (is_trailing == true && nocrlfcl.find(param[i]) != std::string::npos)
+    if (has_trailing == true && nocrlfcl.find(param[i]) != std::string::npos)
       return false;
-    else if (is_trailing == false && nospcrlfcl.find(param[i]) != std::string::npos)
+    else if (has_trailing == false && nospcrlfcl.find(param[i]) != std::string::npos)
       return false;
   }
-  if (is_trailing == true) param = param.substr(1);
+  if (has_trailing == true) param = param.substr(1);
   return true;
 }

@@ -1,4 +1,4 @@
-#include "../Server.hpp"
+#include "Server.hpp"
 
 void Server::handlePass(std::string param, ClientData& client)
 {

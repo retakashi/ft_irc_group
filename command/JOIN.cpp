@@ -1,52 +1,34 @@
-#include <algorithm>
-#include <sstream>
+#include "Channel.hpp"
+#include "Server.hpp"
 
-#include "../Channel.hpp"
-#include "../ClientData.hpp"
-#include "../Server.hpp"
 /*
  JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
   チャンネル名は100文字まで。それ以上はリサイズする。
 */
-
-class Server;
-
-Channel* Server::getChannelByName(const std::string& channelName) {
-  std::map<std::string, Channel*>::iterator it = channels_.find(channelName);
-  if (it != channels_.end()) {
-    return it->second;
-  }
-  return NULL;
-}
-
-void Server::addChannel(const std::string& channelName, Channel* channel) {
-  channels_.insert(std::make_pair(channelName, channel));
-}
-
 void Server::handleJoin(const std::string& params, ClientData& client) {
   std::istringstream iss(params);
-  std::string channelName;
+  std::string ch_name;
   std::string key;
-  iss >> channelName >> key;
+  iss >> ch_name >> key;
 
-  if (channelName.empty()) {
+  if (ch_name.empty()) {
     sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
     return;
   }
-  if (isValidChannelname(channelName) == false) {
-    sendCmdResponce(ERR_NOSUCHCHANNEL, channelName, client);
+  if (isValidChannelname(ch_name) == false) {
+    sendCmdResponce(ERR_NOSUCHCHANNEL, ch_name, client);
     return;
   }
   try {
-    Channel* channel = getChannelByName(channelName);
+    Channel* channel = getChannelByName(ch_name);
     if (channel != NULL &&
         (channel->isMember(&client) == true || channel->isOperator(&client) == true)) {
       // sendCmdResponce(ERR_USERONCHANNEL, channelName, client);
       return;
     }
     if (!channel) {
-      channel = new Channel(channelName);
-      addChannel(channelName, channel);
+      channel = new Channel(ch_name);
+      addChannel(ch_name, channel);
       channel->addOperator(&client);
       ft_send(channel->createJoinMsg(getHostname(), client), client);
       return;
@@ -57,11 +39,11 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     }
     if (!channel->getKey().empty() && channel->getKey() != key) {
       std::string errorMsg =
-          createCmdRespMsg(servername_, client.getNickname(), ERR_BADCHANNELKEY, channelName);
+          createCmdRespMsg(servername_, client.getNickname(), ERR_BADCHANNELKEY, ch_name);
       ft_send(errorMsg, client);
       return;
     }
-    if (channel->getUserLimit() > 0 && channel->CountMember() >= channel->getUserLimit()) {
+    if (channel->getUserLimit() > 0 && channel->CountMembers() >= channel->getUserLimit()) {
       Server::sendCmdResponce(ERR_CHANNELISFULL, channel->getChannelname(), client);
       return;
     }
@@ -71,8 +53,23 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     channel->sendAll(channel->createJoinMsg(getHostname(), client));
   } catch (const std::bad_alloc& e) {
     std::cerr << "Memory allocation failed: " << e.what() << std::endl;
+    closeAllSocket();
     throw std::exception();
   }
+}
+
+bool Server::isValidChannelname(std::string& channelName) {
+  std::string except("\0\a\r\n ,:", 7);
+  if (channelName.size() > 100) channelName.resize(100);
+  if (channelName[0] != '#' || channelName == "#") return false;
+  for (size_t i = 1; i < channelName.size(); i++) {
+    if (except.find(channelName[i]) != std::string::npos) return false;
+  }
+  return true;
+}
+
+void Server::addChannel(const std::string& channelName, Channel* channel) {
+  channels_.insert(std::make_pair(channelName, channel));
 }
 
 std::string Channel::getMembersList() const {
@@ -88,16 +85,6 @@ std::string Channel::getMembersList() const {
     if (i != members_.size() - 1) members_list += " ";
   }
   return members_list;
-}
-
-bool Server::isValidChannelname(std::string& channelName) {
-  std::string except("\0\a\r\n ,:", 7);
-  if (channelName.size() > 100) channelName.resize(100);
-  if (channelName[0] != '#' || channelName == "#") return false;
-  for (size_t i = 1; i < channelName.size(); i++) {
-    if (except.find(channelName[i]) != std::string::npos) return false;
-  }
-  return true;
 }
 
 std::string Channel::createJoinMsg(const std::string& hostname, const ClientData& client) {

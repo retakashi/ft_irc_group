@@ -9,7 +9,6 @@ Server::Server() {}
 Server::Server(short port, std::string password)
     : port_(port), hostname_("localhost"), serverpass_(password) {}
 Server::~Server() {
-  // 仮
   for (std::map<std::string, Channel *>::iterator it = Server::channels_.begin();
        it != Server::channels_.end(); it++) {
     delete it->second;
@@ -78,12 +77,23 @@ void Server::setSelectArgs(fd_set &read_fds, int &socket_max) {
   }
 }
 
-void Server::closeAllSocket() {
-  for (std::list<ClientData>::iterator it = Server::clients_.begin(); it != Server::clients_.end();
-       it++) {
-    if (close(it->getSocket()) < 0) perror("close failed");
-  }
-  if (serversock_ != 0 && close(serversock_) < 0) perror("close failed");
+void Server::handleClientCommunication(ClientData &client) {
+  if (client.isCompleteAuthParams() == false)
+    authenticatedNewClient(client);
+  else  // チャンネルとか認証以外はここ
+    handleCommands(client);
+}
+
+void Server::putFunctionError(const char *errmsg) {
+  perror(errmsg);
+  closeAllSocket();
+  throw std::exception();
 }
 
 const std::string &Server::getHostname() const { return hostname_; }
+ClientData *Server::getClientByNickname(const std::string &nickname) {
+  for (std::list<ClientData>::iterator it = clients_.begin(); it != clients_.end(); ++it) {
+    if (it->getNickname() == nickname) return &(*it);
+  }
+  return NULL;
+}

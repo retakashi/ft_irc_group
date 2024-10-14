@@ -2,7 +2,6 @@
 
 ssize_t Server::ft_recv(int socket) {
   ssize_t recv_size = 0;
-
   recv_size = recv(socket, msg_, MAX_BUFSIZE, 0);
   if (recv_size == 0) {
     std::cout << "client send EOF(recv)..." << std::endl;

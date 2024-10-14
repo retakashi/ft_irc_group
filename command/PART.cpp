@@ -1,5 +1,5 @@
-#include "../Channel.hpp"
-#include "../Server.hpp"
+#include "Channel.hpp"
+#include "Server.hpp"
 
 void Server::handlePart(const std::string& params, ClientData& client) {
   std::istringstream iss(params);

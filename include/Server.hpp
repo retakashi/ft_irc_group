@@ -16,10 +16,11 @@
 #include <cstdio>
 #include <cstring>
 #include <iostream>
+#include <list>
 #include <map>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <list>
 
 #include "Channel.hpp"
 #include "ClientData.hpp"
@@ -86,15 +87,14 @@ class Server {
   // ->Commandディレクトリ
   // Commands.cpp
   void handleCommands(ClientData &client);
-  void handleInvite(const std::string& params, ClientData& client);
-  void handleKick(const std::string& params, ClientData& client);
-  void handlePart(const std::string& params, ClientData& client);
+  void handleInvite(const std::string &params, ClientData &client);
+  void handleKick(const std::string &params, ClientData &client);
+  void handlePart(const std::string &params, ClientData &client);
   // USER.cpp
-  void handleUSER(std::string param, ClientData &client);
-  bool isValidUSERparams(std::string &params, struct user_data &user_data,
+  void handleUser(std::string param, ClientData &client);
+  bool isValidUserParams(std::string &params, struct user_data &user_data,
                          const ClientData &client);
-  bool isValidUsername(std::string &param, std::string &username,
-                       std::string::size_type pos);
+  bool isValidUsername(std::string &param, std::string &username, std::string::size_type pos);
   bool isValidMiddle(std::string &param, char &mode, std::string &unused,
                      std::string::size_type pos);
   bool isValidRealname(std::string &param, std::string &realname);
@@ -108,17 +108,16 @@ class Server {
   void handle_privmsg_channel(std::string targets, std::string message, ClientData &client);
   void handle_privmsg_personal(std::string targets, std::string message, ClientData &client);
   // MODE.cpp
-  int handleMODE(std::string param, ClientData &client);
-  bool setAndSearchChannel(std::string &param, struct handle_mode_data &data);
+  int handleMode(std::string param, ClientData &client);
+  bool splitChannelNameAndMode(std::string &param, struct handle_mode_data &data);
   void splitModeParam(std::string param, std::vector<std::string> &mode_data);
   bool isValidModeData(struct handle_mode_data &data);
   bool isValidMode(struct handle_mode_data data, int start, int &total_cnt, int &need_cnt);
   // TOPIC.cpp
-  int handleTOPIC(std::string param, ClientData &client);
-  bool setAndSearchChannel(std::string &param, std::string &ch_name, ClientData client);
+  int handleTopic(std::string param, ClientData &client);
+  bool splitChannelNameAndTopic(std::string &param, std::string &ch_name, ClientData client);
   bool isValidTopic(std::string &params);
   // .cpp
-
 
   // ここから先は各自で追加していく。
 
@@ -147,6 +146,6 @@ class Server {
   Channel *getChannelByName(const std::string &channelName);
   void addChannel(const std::string &channelName, Channel *channel);
   void handleJoin(const std::string &channelName, ClientData &client);
-  bool isValidChannelname(std::string& channelName);
+  bool isValidChannelname(std::string &channelName);
 };
 #endif

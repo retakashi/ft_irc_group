@@ -1,5 +1,5 @@
-#include "../Channel.hpp"
-#include "../Server.hpp"
+#include "Channel.hpp"
+#include "Server.hpp"
 
 /*
 TOPIC <channel> [ <topic> ]
@@ -7,12 +7,11 @@ TOPIC <channel> [ <topic> ]
 <topic> パラメータが指定された場合、そのチャネルのトピックが変更される。
 <topic> パラメータが空文字列の場合、そのチャネルのトピックは削除される。-> "TOPIC #channel :"
 */
-
-int Server::handleTOPIC(std::string param, ClientData& client) {
+int Server::handleTopic(std::string param, ClientData& client) {
   Channel* ch;
   std::string ch_name;
   std::string msg;
-  if (setAndSearchChannel(param, ch_name, client) == false) return 0;
+  if (splitChannelNameAndTopic(param, ch_name, client) == false) return 0;
   ch = channels_[ch_name];
 
   if (param == ch_name) {
@@ -28,13 +27,13 @@ int Server::handleTOPIC(std::string param, ClientData& client) {
     ch->setTopic("");
   else
     ch->setTopic(param);
-  msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + hostname_ + " TOPIC " + ch_name + " " +
-        ch->getTopic();
+  msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + hostname_ + " TOPIC " +
+        ch_name + " " + ch->getTopic();
   ch->sendAll(msg);
   return 0;
 }
 
-bool Server::setAndSearchChannel(std::string& param, std::string& ch_name, ClientData client) {
+bool Server::splitChannelNameAndTopic(std::string& param, std::string& ch_name, ClientData client) {
   if (param.empty())
     return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", client);  // false返す
   std::string::size_type pos = param.find(' ');

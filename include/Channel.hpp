@@ -18,8 +18,8 @@ class Channel {
   void removeMember(ClientData* client);
   void removeOperator(ClientData* client);
   void removeInvitee(ClientData* client);
-  size_t CountMember() const;
-  //Send.cpp
+  size_t CountMembers() const;
+  // Send.cpp
   void broadcastMessage(const std::string& message, ClientData* sender);
   void sendAll(const std::string& message);
   // getter
@@ -68,3 +68,4 @@ class Channel {
 };
 
 #endif
+y

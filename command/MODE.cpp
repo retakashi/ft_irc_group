@@ -1,5 +1,5 @@
-#include "../Channel.hpp"
-#include "../Server.hpp"
+#include "Channel.hpp"
+#include "Server.hpp"
 
 /*
 MODE <channel> <option> <param>
@@ -9,19 +9,19 @@ MODE <channel> <option> <param>
 +/-t: TOPICコマンドの権限をオペレータのみ/解除.modeparam不要
 +/-l: ユーザー制限(チャンネルに参加できる人数)/解除
 */
-int Server::handleMODE(std::string param, ClientData& client) {
+int Server::handleMode(std::string param, ClientData& client) {
   handle_mode_data data(client);
   size_t start = 1;
   Channel* ch;
   char mode;
   std::string send_mode;
 
-  if (setAndSearchChannel(param, data) == false) return 0;
+  if (splitChannelNameAndMode(param, data) == false) return 0;
   ch = channels_[data.mode_data[0]];
   if (param.empty())  // MODE #chの場合
   {
     std::string mode_status = ch->getModeStatus();
-    return sendCmdResponce(RPL_CHANNELMODEIS,ch->getChannelname(),mode_status,client);
+    return sendCmdResponce(RPL_CHANNELMODEIS, ch->getChannelname(), mode_status, client);
   }
   if (ch->isOperator(&client) == false)
     return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0], data.client);
@@ -70,7 +70,7 @@ int Server::handleMODE(std::string param, ClientData& client) {
 }
 
 // paramからchannelnameを切り、mode,mode's paramのみにする
-bool Server::setAndSearchChannel(std::string& param, struct handle_mode_data& data) {
+bool Server::splitChannelNameAndMode(std::string& param, struct handle_mode_data& data) {
   std::string ch_name;
   if (param.empty())
     return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);  // false返す
@@ -99,14 +99,10 @@ std::string Channel::getModeStatus() {
       if (i != operators_.size() - 1) mode_status += " ";
     }
   }
-  if (getInviteOnly() == true)
-    mode_status += " +i";
-  if(getTopicRestricted() == true)
-    mode_status += " +t";
-  if (!getKey().empty())
-    mode_status += " +k " + getKey();
-  if (getUserLimit() > 0)
-    mode_status += "+l " + getUserLimit();
+  if (getInviteOnly() == true) mode_status += " +i";
+  if (getTopicRestricted() == true) mode_status += " +t";
+  if (!getKey().empty()) mode_status += " +k " + getKey();
+  if (getUserLimit() > 0) mode_status += "+l " + getUserLimit();
   return mode_status;
 }
 
@@ -250,11 +246,10 @@ bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
   return true;
 }
 
-// limit -> とりあえずINT_MAXまで
-#define INT_MAX_LEN 10
 size_t Channel::convertStringToUserLimit(const std::string& l_param) {
   size_t limit = 0;
   std::stringstream ss;
+  const int INT_MAX_LEN = 10;
   if (l_param.size() > INT_MAX_LEN) return 0;
   ss << l_param;
   ss >> limit;

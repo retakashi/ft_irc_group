@@ -30,8 +30,13 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
   std::string key;
   iss >> channelName >> key;
 
-  if (channelName.empty() || isValidChannelname(channelName) == false) {
+  if (channelName.empty())
+  {
     sendCmdResponce(ERR_NEEDMOREPARAMS, "JOIN", client);
+    return ;
+  }
+  if (isValidChannelname(channelName) == false) {
+    sendCmdResponce(ERR_NOSUCHCHANNEL, channelName, client);
     return;
   }
   try {
@@ -86,7 +91,7 @@ bool Server::isValidChannelname(std::string& channelName) {
   std::string except("\0\a\r\n ,:", 7);
   if (channelName.size() > 100)
     channelName.resize(100);
-  if (channelName[0] != '#') return false;
+  if (channelName[0] != '#'|| channelName == "#") return false;
   for (size_t i = 1; i < channelName.size(); i++) {
     if (except.find(channelName[i]) != std::string::npos) return false;
   }

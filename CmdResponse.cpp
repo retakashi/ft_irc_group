@@ -38,7 +38,7 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
       msg = pre + " 402 " + nick + " " + str + " :No such server";
       break;
     case ERR_NOSUCHCHANNEL:
-      msg = pre + " 403 " + str + " :No such channel";
+      msg = pre + " 403 " + nick + " " + str + " :No such channel";
       break;
     case ERR_CANNOTSENDTOCHAN:
       msg = pre + " 404 " + nick + " " + str + " :Cannot send to channel";

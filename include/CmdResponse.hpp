@@ -38,6 +38,7 @@ enum cmd_resp
     ERR_INVITEONLYCHAN = 473,
     ERR_BADCHANNELKEY = 475,
     ERR_NOCHANMODES = 477,
+    ERR_NOPRIVILEGES = 481,
     ERR_CHANOPRIVSNEEDED = 482
 };
 std::string createCmdRespMsg(const std::string& servername, const std::string& nick, int code);

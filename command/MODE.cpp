@@ -182,7 +182,7 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
       (target_client = getOperatorByNickname(target_nick)) == NULL)
     return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
   if (data.is_active == true && target_nick == data.client.getNickname())
-    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
+    return Server::sendCmdResponce(ERR_NOPRIVILEGES, data.client);
   if (isOperator(target_client) == true) is_ope = true;
   if (data.is_active == true && is_ope == false) {
     removeMember(target_client);

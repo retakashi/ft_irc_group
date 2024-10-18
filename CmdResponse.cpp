@@ -15,6 +15,9 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
     case ERR_PASSWDMISMATCH:
       msg = pre + " 464 " + nick + " :Password incorrect";
       break;
+    case ERR_NOPRIVILEGES:
+      msg = pre + " 481 " + nick + " :Permission Denied - You're not an IRC operator";
+      break;
   }
   return msg;
 }

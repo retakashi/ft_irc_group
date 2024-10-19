@@ -1,5 +1,11 @@
-#include "../Server.hpp"
+#include "Server.hpp"
 
+/*
+nicknameは最大20字まで。
+Command: NICK
+Parameters: <nickname>
+sendCmdResponceの戻り値を0(false)にしている。
+*/
 void Server::handleNICK(std::string param, ClientData& client) {
   if (isValidNickname(param, client) == true) {
     std::string old_nick = client.getNickname();
@@ -8,12 +14,6 @@ void Server::handleNICK(std::string param, ClientData& client) {
   }
 }
 
-/*
-nicknameは最大20字まで。
-Command: NICK
-Parameters: <nickname>
-sendCmdResponceの戻り値を0(false)にしている。
-*/
 bool Server::isValidNickname(std::string& param, const ClientData& client) {
   if (client.getNickname().empty() && param.size() == 0)
     return Server::sendCmdResponce(ERR_NONICKNAMEGIVEN, client);

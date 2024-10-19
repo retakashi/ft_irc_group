@@ -16,17 +16,6 @@ int Server::acceptNewClient() {
   return (new_client_sock);
 }
 
-/*
-最初にクライアントから送られてくるメッセージ
-CAP LS 302
-JOIN :
-その後
-CAP
-CAP END
-PASS pass
-NICK reira
-USER reira reira 127.0.0.1 :Takashima Reira
-*/
 void Server::authenticatedNewClient(ClientData& client) {
   std::vector<std::string> cmd_with_p;
   std::string cmd;
@@ -41,20 +30,20 @@ void Server::authenticatedNewClient(ClientData& client) {
     cmd_with_p.push_back(casted_msg);
   for (size_t i = 0; i < cmd_with_p.size(); i++) {
     splitCmdAndParam(cmd_with_p[i], cmd, param);
-     if (cmd == "PASS")
+    if (cmd == "PASS")
       handlePass(param, client);
     else if (client.getAuth() == true && cmd == "NICK")
       handleNICK(param, client);
     else if (client.getAuth() == true && cmd == "USER")
-      handleUSER(param, client);
+      handleUser(param, client);
     else
-      sendCmdResponce(ERR_NOTREGISTERED,cmd, client);
+      sendCmdResponce(ERR_NOTREGISTERED, cmd, client);
   }
-  if (client.isCompleteAuthParams() == true)
-    sendWelcomeToIrc(client);
+  if (client.isCompleteAuthParams() == true) sendWelcomeToIrc(client);
 }
 
 void Server::sendWelcomeToIrc(ClientData client) {
-  std::string welcomemsg = ":" + servername_ + " 001 " + client.getNickname() + " :Welcome to the IRC Network, " + client.getNickname() + "!";
+  std::string welcomemsg = ":" + servername_ + " 001 " + client.getNickname() +
+                           " :Welcome to the IRC Network, " + client.getNickname() + "!";
   ft_send(welcomemsg, client);
 }

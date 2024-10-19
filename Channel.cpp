@@ -9,28 +9,20 @@ Channel::Channel(const std::string& name)
 
 Channel::~Channel() {}
 
-void Channel::addMember(ClientData* client) {
-  members_.push_back(client);
-  // broadcastMessage(client->getNickname() + " has joined the channel.", client);
-}
+void Channel::addMember(ClientData* client) { members_.push_back(client); }
 
-void Channel::addOperator(ClientData* client) {
-  operators_.push_back(client);
-  // broadcastMessage(client->getNickname() + " has joined the channel.",client);
-}
+void Channel::addOperator(ClientData* client) { operators_.push_back(client); }
 
 bool Channel::isMember(ClientData* client) const {
-  // Loop through the member list to check if the client is in the channel
-  for (std::vector<ClientData*>::const_iterator it = members_.begin(); it != members_.end(); ++it) {
-    if (*it == client) {
-      return true;
-    }
-  }
-  return false;  // Client is not a mesmber of the channel
+  return std::find(members_.begin(), members_.end(), client) != members_.end();
 }
 
 bool Channel::isOperator(ClientData* client) const {
   return std::find(operators_.begin(), operators_.end(), client) != operators_.end();
+}
+
+bool Channel::isInvitee(ClientData* client) const {
+  return std::find(invitees_.begin(), invitees_.end(), client) != invitees_.end();
 }
 
 void Channel::removeMember(ClientData* client) {
@@ -43,7 +35,12 @@ void Channel::removeOperator(ClientData* client) {
     operators_.erase(std::remove(operators_.begin(), operators_.end(), client), operators_.end());
 }
 
-size_t Channel::CountMember() const { return members_.size() + operators_.size(); }
+void Channel::removeInvitee(ClientData* client) {
+  if (client != NULL)
+    invitees_.erase(std::remove(invitees_.begin(), invitees_.end(), client), invitees_.end());
+}
+
+size_t Channel::CountMembers() const { return members_.size() + operators_.size(); }
 
 // gettter
 const std::vector<ClientData*>& Channel::getMembers() const { return members_; }
@@ -63,8 +60,14 @@ ClientData* Channel::getOperatorByNickname(const std::string& nickname) {
     if (operators_[i]->getNickname() == nickname) return operators_[i];
   return NULL;
 }
-
-// ↓rtakashi追加 MODEでしか使わないものはMODE.cppに移します
+Channel* Server::getChannelByName(const std::string& channelName) {
+  std::map<std::string, Channel*>::iterator it = channels_.find(channelName);
+  if (it != channels_.end()) {
+    return it->second;
+  }
+  return NULL;
+}
+//setter
 void Channel::setInviteOnly(bool value) { invite_only_ = value; }
 void Channel::setKey(const std::string& newkey) { key_ = newkey; }
 void Channel::setTopicRestricted(bool value) { topic_restricted_ = value; }

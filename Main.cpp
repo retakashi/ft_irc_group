@@ -3,7 +3,6 @@
 void sigHandler(int sig) {
   g_sig_flg = true;
   std::cout << "signal received" << std::endl;
-  throw std::exception();
 }
 
 void putSignalError() {
@@ -22,7 +21,7 @@ int check_port(char *port) {
 
 int main(int argc, char **argv) {
   if (argc != 3) {
-    std::cout << "Usage: " << argv[0] << " <port number> <password>" << std::endl;
+    std::cout << "Usage: " << argv[0] << " <portr> <password>" << std::endl;
     return 1;
   }
   if (check_port(argv[1])) {
@@ -32,6 +31,7 @@ int main(int argc, char **argv) {
   try {
     g_sig_flg = false;
     struct sigaction sa;
+    memset(&sa, 0, sizeof(sa));
     sa.sa_flags = SA_RESTART;
     sa.sa_handler = sigHandler;
     if (sigaction(SIGINT, &sa, NULL) < 0) putSignalError();
@@ -42,7 +42,6 @@ int main(int argc, char **argv) {
     Server serv(port, password);
     serv.startServer();
   } catch (const std::exception &e) {
-    std::cerr << "Exception: " << e.what() << std::endl;
   }
   return 0;
 }

@@ -1,4 +1,4 @@
-#include "../Server.hpp"
+#include "Server.hpp"
 
 void Server::handlePrivateMessage(const std::string param, ClientData &client) 
 {
@@ -35,7 +35,6 @@ void Server::handlePrivateMessage(const std::string param, ClientData &client)
     return ;
 }
 
-
 void  Server::handle_privmsg_channel(std::string targets, std::string message, ClientData &client)
 {
     std::istringstream iss(targets);
@@ -56,7 +55,6 @@ void  Server::handle_privmsg_channel(std::string targets, std::string message, C
             ft_send(errorMsg, client);
             return;
         }
-
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
         std::string message_ch = ":" + client.getNickname() + " PRIVMSG " + target + " :" + message;
         (channel)->broadcastMessage(message_ch, &client);

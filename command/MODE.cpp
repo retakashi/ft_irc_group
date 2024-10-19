@@ -1,5 +1,5 @@
-#include "../Channel.hpp"
-#include "../Server.hpp"
+#include "Channel.hpp"
+#include "Server.hpp"
 
 /*
 MODE <channel> <option> <param>
@@ -9,23 +9,23 @@ MODE <channel> <option> <param>
 +/-t: TOPICコマンドの権限をオペレータのみ/解除.modeparam不要
 +/-l: ユーザー制限(チャンネルに参加できる人数)/解除
 */
-int Server::handleMODE(std::string param, ClientData& client) {
+int Server::handleMode(std::string param, ClientData& client) {
   handle_mode_data data(client);
   size_t start = 1;
   Channel* ch;
   char mode;
   std::string send_mode;
 
-  if (setAndSearchChannel(param, data) == false) return 0;
+  if (splitChannelNameAndMode(param, data) == false) return 0;
+  ch = channels_[data.mode_data[0]];
   if (param.empty())  // MODE #chの場合
   {
-    ft_send(":ft_irc 324 reira #ch", client.getSocket());
-    return 0;
+    std::string mode_status = ch->getModeStatus();
+    return sendCmdResponce(RPL_CHANNELMODEIS, ch->getChannelname(), mode_status, client);
   }
-  if (Server::channels_[data.mode_data[0]]->isOperator(&client) == false)
+  if (ch->isOperator(&client) == false)
     return Server::sendCmdResponce(ERR_CHANOPRIVSNEEDED, data.mode_data[0], data.client);
   splitModeParam(param, data.mode_data);
-  ch = channels_[data.mode_data[0]];
   if (isValidModeData(data) == false) return 0;
   data.param_i = start;
   while (start < data.mode_data.size()) {
@@ -70,7 +70,7 @@ int Server::handleMODE(std::string param, ClientData& client) {
 }
 
 // paramからchannelnameを切り、mode,mode's paramのみにする
-bool Server::setAndSearchChannel(std::string& param, struct handle_mode_data& data) {
+bool Server::splitChannelNameAndMode(std::string& param, struct handle_mode_data& data) {
   std::string ch_name;
   if (param.empty())
     return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);  // false返す
@@ -88,6 +88,22 @@ bool Server::setAndSearchChannel(std::string& param, struct handle_mode_data& da
     return Server::sendCmdResponce(ERR_NOSUCHCHANNEL, ch_name, data.client);
   data.mode_data.push_back(ch_name);
   return true;
+}
+
+std::string Channel::getModeStatus() {
+  std::string mode_status;
+  if (operators_.size() > 0) {
+    mode_status += " +o ";
+    for (size_t i = 0; i < operators_.size(); i++) {
+      mode_status += operators_[i]->getNickname();
+      if (i != operators_.size() - 1) mode_status += " ";
+    }
+  }
+  if (getInviteOnly() == true) mode_status += " +i";
+  if (getTopicRestricted() == true) mode_status += " +t";
+  if (!getKey().empty()) mode_status += " +k " + getKey();
+  if (getUserLimit() > 0) mode_status += "+l " + getUserLimit();
+  return mode_status;
 }
 
 // paramをsplitしてmode_dataに格納
@@ -166,7 +182,7 @@ bool Channel::toggleOperatorPrivileges(struct handle_mode_data& data) {
       (target_client = getOperatorByNickname(target_nick)) == NULL)
     return Server::sendCmdResponce(ERR_USERNOTINCHANNEL, target_nick, "MODE", data.client);
   if (data.is_active == true && target_nick == data.client.getNickname())
-    return Server::sendCmdResponce(ERR_NEEDMOREPARAMS, "MODE", data.client);
+    return Server::sendCmdResponce(ERR_NOPRIVILEGES, data.client);
   if (isOperator(target_client) == true) is_ope = true;
   if (data.is_active == true && is_ope == false) {
     removeMember(target_client);
@@ -230,11 +246,10 @@ bool Channel::toggleChannelLimit(struct handle_mode_data& data) {
   return true;
 }
 
-// limit -> とりあえずINT_MAXまで
-#define INT_MAX_LEN 10
 size_t Channel::convertStringToUserLimit(const std::string& l_param) {
   size_t limit = 0;
   std::stringstream ss;
+  const int INT_MAX_LEN = 10;
   if (l_param.size() > INT_MAX_LEN) return 0;
   ss << l_param;
   ss >> limit;

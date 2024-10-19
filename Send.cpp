@@ -6,7 +6,6 @@ void Server::ft_send(std::string msg, ClientData client) {
   ssize_t send_ret = 0;
   size_t send_size = 0;
   memset(casted_msg, 0, sizeof(casted_msg));
-  // msgをsendに使用できる形にする
   if (msg.size() > MAX_BUFSIZE - 2)
     msg.resize(MAX_BUFSIZE - 2);
   msg += "\r\n";

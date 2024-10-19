@@ -22,7 +22,7 @@ void Server::startServer() {
   initServerSocket(data.sockaddr);
   data.timeout.tv_sec = 500;
   data.timeout.tv_usec = 0;
-  while (true) {
+  while (g_sig_flg == false) {
     setSelectArgs(data.read_fds, data.max_sock);
     data.sel_ret = select(data.max_sock + 1, &data.read_fds, NULL, NULL, &data.timeout);
     if (data.sel_ret < 0) putFunctionError("select failed");

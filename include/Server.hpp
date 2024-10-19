@@ -62,7 +62,8 @@ struct handle_mode_data {
 
 class Server {
  private:
-  static const int MAX_BUFSIZE = 510;
+  static const int MAX_BUFSIZE = 512;
+  static const int CH_MAXLEN = 200;
   short port_;
   std::string serverpass_;
   std::string hostname_;
@@ -78,7 +79,7 @@ class Server {
   // このclientsのgetterは後で別に移動させても良いかもしれません。
   ClientData *getClientByNickname(const std::string &nickname);
   // Receive.cpp
-  ssize_t ft_recv(int socket);
+  std::string ft_recv(int socket);
   // ClientAuth.cpp USERは認証のみ使用のためこっち
   int acceptNewClient();
   void authenticatedNewClient(ClientData &client);

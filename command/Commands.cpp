@@ -5,15 +5,15 @@ void Server::handleCommands(ClientData& client) {
   std::string cmd;
   std::string param;
 
-  ssize_t recv_size = ft_recv(client.getSocket());
-  if (recv_size <= 0) return;
-  std::string casted_msg(msg_, recv_size);
-  if (casted_msg.find("\r\n") != std::string::npos)
-    splitCmds(casted_msg, cmd_with_p);
+  std::string msg = ft_recv(client.getSocket());
+  if (msg.empty()) return;
+  std::cout << "recv: " << msg << std::endl;
+  if (msg.find("\r\n") != std::string::npos)
+    splitCmds(msg, cmd_with_p);
   else
-    cmd_with_p.push_back(casted_msg);
+    cmd_with_p.push_back(msg);
   for (size_t i = 0; i < cmd_with_p.size(); i++) {
-    splitCmdAndParam(casted_msg, cmd, param);
+    splitCmdAndParam(msg, cmd, param);
     if (client.getAuth() == true && (cmd == "PASS" || cmd == "USER"))
       sendCmdResponce(ERR_ALREADYREGISTRED, client);
     else if (cmd == "NICK")

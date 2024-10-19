@@ -3,7 +3,7 @@
 
 /*
  JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
-  チャンネル名は100文字まで。それ以上はリサイズする。
+  チャンネル名は200文字まで。それ以上はリサイズする。
 */
 void Server::handleJoin(const std::string& params, ClientData& client) {
   std::istringstream iss(params);
@@ -60,7 +60,7 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
 
 bool Server::isValidChannelname(std::string& channelName) {
   std::string except("\0\a\r\n ,:", 7);
-  if (channelName.size() > 100) channelName.resize(100);
+  if (channelName.size() > CH_MAXLEN) channelName.resize(CH_MAXLEN);
   if (channelName[0] != '#' || channelName == "#") return false;
   for (size_t i = 1; i < channelName.size(); i++) {
     if (except.find(channelName[i]) != std::string::npos) return false;

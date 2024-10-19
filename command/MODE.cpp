@@ -91,19 +91,19 @@ bool Server::splitChannelNameAndMode(std::string& param, struct handle_mode_data
 }
 
 std::string Channel::getModeStatus() {
-  std::string mode_status;
+  std::stringstream mode_status;
   if (operators_.size() > 0) {
-    mode_status += " +o ";
+    mode_status << " +o ";
     for (size_t i = 0; i < operators_.size(); i++) {
-      mode_status += operators_[i]->getNickname();
-      if (i != operators_.size() - 1) mode_status += " ";
+      mode_status << operators_[i]->getNickname();
+      if (i != operators_.size() - 1) mode_status << " ";
     }
   }
-  if (getInviteOnly() == true) mode_status += " +i";
-  if (getTopicRestricted() == true) mode_status += " +t";
-  if (!getKey().empty()) mode_status += " +k " + getKey();
-  if (getUserLimit() > 0) mode_status += "+l " + getUserLimit();
-  return mode_status;
+  if (getInviteOnly() == true) mode_status << " +i";
+  if (getTopicRestricted() == true) mode_status << " +t";
+  if (!getKey().empty()) mode_status << " +k " << getKey();
+  if (getUserLimit() > 0) mode_status << "+l " << getUserLimit();
+  return mode_status.str();
 }
 
 // paramをsplitしてmode_dataに格納

@@ -90,6 +90,7 @@ class Server {
   void handleInvite(const std::string &params, ClientData &client);
   void handleKick(const std::string &params, ClientData &client);
   void handlePart(const std::string &params, ClientData &client);
+  void handleList(const std::string &params, ClientData &client);
   // USER.cpp
   void handleUser(std::string param, ClientData &client);
   bool isValidUserParams(std::string &params, struct user_data &user_data,

@@ -18,7 +18,6 @@ std::string Server::ft_recv(int socket) {
       return "";
     }
     connect_msg_ += std::string(msg_, recv_size);
-    std::cout << "result: " << connect_msg_ << std::endl;
     if (connect_msg_.size() >= 2 && connect_msg_.substr(connect_msg_.size() - 2) == "\r\n") {
       connect_msg_.erase(connect_msg_.size() - 2);
       std::cout << "recv CRLF: " << recv_size << " " << connect_msg_ << std::endl;

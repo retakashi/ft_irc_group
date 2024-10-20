@@ -1,7 +1,7 @@
-NAME = Server
+NAME = ircserv 
 CXX = c++
-CXXFLAGS = -std=c++98 -MMD -MP -pedantic
-SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp CmdResponse.cpp Send.cpp Receive.cpp Utils.cpp \
+CXXFLAGS = -std=c++98 -MMD -MP -pedantic -I include 
+SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp CmdResponse.cpp Send.cpp Receive.cpp CleanupUtils.cpp ParseCmd.cpp \
 	   Commands.cpp NICK.cpp USER.cpp PASS.cpp MODE.cpp Channel.cpp JOIN.cpp TOPIC.cpp PRIVMSG.cpp KICK.cpp INVITE.cpp PART.cpp
 VPATH = ./command
 DEPFILES = $(OBJS:%.o=%.d)

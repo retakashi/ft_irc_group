@@ -15,6 +15,9 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
     case ERR_PASSWDMISMATCH:
       msg = pre + " 464 " + nick + " :Password incorrect";
       break;
+    case ERR_NOPRIVILEGES:
+      msg = pre + " 481 " + nick + " :Permission Denied - You're not an IRC operator";
+      break;
   }
   return msg;
 }
@@ -38,7 +41,7 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
       msg = pre + " 402 " + nick + " " + str + " :No such server";
       break;
     case ERR_NOSUCHCHANNEL:
-      msg = pre + " 403 " + str + " :No such channel";
+      msg = pre + " 403 " + nick + " " + str + " :No such channel";
       break;
     case ERR_CANNOTSENDTOCHAN:
       msg = pre + " 404 " + nick + " " + str + " :Cannot send to channel";
@@ -73,6 +76,9 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
     case ERR_CHANNELISFULL:
       msg = pre + " 471 " + nick + " " + str + " :Cannot join channel (+l)";
       break;
+    case ERR_INVITEONLYCHAN:
+      msg = pre + " 473 " + nick + " " + str + " :Cannot join channel (+i)";
+      break;
     case ERR_BADCHANNELKEY:
       msg = pre + " 475 " + nick + " " + str + " :Cannot join channel (+k)";
       break;
@@ -93,7 +99,7 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
   pre = ":" + servername;
   switch (code) {
     case RPL_CHANNELMODEIS:
-      msg = pre + " 324 " + nick + " " + str1 + " " + str2;
+      msg = pre + " 324 " + nick + " " + str1 + str2;
       break;
     case RPL_TOPIC:
       msg = pre + " 332 " + nick + " " + str1 + " :" + str2;

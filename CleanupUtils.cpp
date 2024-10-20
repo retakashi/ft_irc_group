@@ -25,8 +25,9 @@ std::list<ClientData>::iterator Server::eraseClient(std::list<ClientData>::itera
       if (it->second->isOperator(erase_c) == true) it->second->removeOperator(erase_c);
       if (it->second->CountMembers() == 0) {
         std::map<std::string, Channel *>::iterator erase_it = it;
+        it++;
         delete erase_it->second;
-        it = channels_.erase(erase_it);
+        channels_.erase(erase_it);
       }
       else
         it++;

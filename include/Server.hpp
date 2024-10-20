@@ -68,6 +68,7 @@ class Server {
   std::string serverpass_;
   std::string hostname_;
   char msg_[MAX_BUFSIZE];
+  std::string connect_msg_;
   // Server.cpp
   Server();
   void initServerSocket(struct sockaddr_in &sockaddr);

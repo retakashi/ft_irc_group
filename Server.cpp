@@ -36,13 +36,11 @@ void Server::startServer() {
       std::list<ClientData>::iterator it = Server::clients_.begin();
       while(it != Server::clients_.end())
       {
+        if (it != Server::clients_.end() && FD_ISSET(it->getSocket(), &data.read_fds))
+          handleClientCommunication(*it);
         if (it->getSocket() == -1) {
           it = eraseClient(it);
-        } else if (it != Server::clients_.end() && FD_ISSET(it->getSocket(), &data.read_fds))
-        {
-          handleClientCommunication(*it);
-          it++;
-        }
+        } 
         else
           it++;
       }

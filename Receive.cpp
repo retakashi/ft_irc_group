@@ -14,6 +14,7 @@ std::string Server::ft_recv(int socket) {
     if (recv_size == 0) {
       std::cout << "client send EOF(recv)..." << std::endl;
       Server::disconnectClient(socket);
+      connect_msg_.clear();
       return "";
     }
     connect_msg_ += std::string(msg_, recv_size);

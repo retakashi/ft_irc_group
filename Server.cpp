@@ -78,7 +78,7 @@ void Server::setSelectArgs(fd_set &read_fds, int &socket_max) {
 void Server::handleClientCommunication(ClientData &client) {
   if (client.isCompleteAuthParams() == false)
     authenticatedNewClient(client);
-  else  // チャンネルとか認証以外はここ
+  else
     handleCommands(client);
 }
 

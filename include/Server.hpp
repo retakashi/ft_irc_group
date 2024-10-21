@@ -30,7 +30,6 @@ class ClientData;
 class Channel;
 /* ircのメッセージの長さは、最大で512文字（CR-LFを含む）
 （つまり、コマンドとそのパラメータに許される最大文字数は510文字。）文字列の後に"\r\n"がつく
-->それ以上はぶった斬る
 */
 
 // メンバー変数は最後に_を付けてます
@@ -77,7 +76,6 @@ class Server {
   void handleClientCommunication(ClientData &client);
   void splitCmdAndParam(std::string casted_msg, std::string &command, std::string &param);
   void splitCmds(std::string casted_msg, std::vector<std::string> &cmd_with_p);
-  // このclientsのgetterは後で別に移動させても良いかもしれません。
   ClientData *getClientByNickname(const std::string &nickname);
   // Receive.cpp
   std::string ft_recv(int socket);
@@ -86,19 +84,17 @@ class Server {
   void authenticatedNewClient(ClientData &client);
   void sendWelcomeToIrc(ClientData client);
 
-  // ->Commandディレクトリ
   // Commands.cpp
   void handleCommands(ClientData &client);
   void handleInvite(const std::string &params, ClientData &client);
   void handleKick(const std::string &params, ClientData &client);
   void handlePart(const std::string &params, ClientData &client);
+  void handleList(const std::string &params, ClientData &client);
   // USER.cpp
   void handleUser(std::string param, ClientData &client);
-  bool isValidUserParams(std::string &params, struct user_data &user_data,
-                         const ClientData &client);
+  bool isValidUserParams(std::string &params, struct user_data &user_data, const ClientData &client);
   bool isValidUsername(std::string &param, std::string &username, std::string::size_type pos);
-  bool isValidMiddle(std::string &param, char &mode, std::string &unused,
-                     std::string::size_type pos);
+  bool isValidMiddle(std::string &param, char &mode, std::string &unused, std::string::size_type pos);
   bool isValidRealname(std::string &param, std::string &realname);
   // NICK.cpp
   void handleNICK(std::string param, ClientData &client);
@@ -116,12 +112,9 @@ class Server {
   bool isValidModeData(struct handle_mode_data &data);
   bool isValidMode(struct handle_mode_data data, int start, int &total_cnt, int &need_cnt);
   // TOPIC.cpp
-  int handleTopic(std::string param, ClientData &client);
+  int  handleTopic(std::string param, ClientData &client);
   bool splitChannelNameAndTopic(std::string &param, std::string &ch_name, ClientData client);
   bool isValidTopic(std::string &params);
-  // .cpp
-
-  // ここから先は各自で追加していく。
 
  public:
   static int serversock_;
@@ -142,8 +135,7 @@ class Server {
   static void ft_send(std::string msg, ClientData client);
   static int sendCmdResponce(int code, ClientData client);
   static int sendCmdResponce(int code, const std::string &str, ClientData client);
-  static int sendCmdResponce(int code, const std::string &str1, const std::string &str2,
-                             ClientData client);
+  static int sendCmdResponce(int code, const std::string &str1, const std::string &str2, ClientData client);
   // JOIN.cpp
   Channel *getChannelByName(const std::string &channelName);
   void addChannel(const std::string &channelName, Channel *channel);

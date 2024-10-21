@@ -45,18 +45,18 @@ void Server::handleKick(const std::string& params, ClientData& client) {
 }
 
 void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) {
-  // 除外されるユーザーの処理
-  if (isMember(target))
-    removeMember(target);
-  else if (isOperator(target))
-    removeOperator(target);
   std::string partMessage = ":" + target->getNickname() + " PART " + this->getChannelname() +
-                            " :Kicked by " + client->getNickname() + "\r\n";
+                            " :Kicked by " + client->getNickname();
   Server::ft_send(partMessage, *target);
 
   if (this->CountMembers() < 1) return;
   // その他のユーザの処理
   std::string message = ":" + client->getNickname() + " KICK " + this->getChannelname() + " " +
-                        target->getNickname() + " " + reason + "\r\n";
+                        target->getNickname() + " " + reason;
   sendAll(message);
+  // 除外されるユーザーの処理
+  if (isMember(target))
+    removeMember(target);
+  else if (isOperator(target))
+    removeOperator(target);
 }

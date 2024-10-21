@@ -14,6 +14,8 @@ int Server::handleTopic(std::string param, ClientData& client) {
   if (splitChannelNameAndTopic(param, ch_name, client) == false) return 0;
   ch = channels_[ch_name];
 
+  if (!ch->isMember(&client) && !ch->isOperator(&client)) 
+    return sendCmdResponce(ERR_NOTONCHANNEL, ch_name, client);
   if (param == ch_name) {
     if (ch->getTopic().empty())
       return sendCmdResponce(RPL_NOTOPIC, ch_name, client);

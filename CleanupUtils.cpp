@@ -1,6 +1,5 @@
 #include "Server.hpp"
 
-// eraseしたイテレーターを参照しないか確認する！！！member,operator確認
 void Server::disconnectClient(ClientData client) {
   int socket = client.getSocket();
   if (Server::clients_.size() == 0) {
@@ -33,7 +32,7 @@ std::list<ClientData>::iterator Server::eraseClient(std::list<ClientData>::itera
         it++;
     }
   }
-  return Server::clients_.erase(erase_it);  // 最後にクライアントを削除
+  return Server::clients_.erase(erase_it);
 }
 
 void Server::closeAllSocket() {

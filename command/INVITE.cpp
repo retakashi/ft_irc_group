@@ -1,5 +1,6 @@
 #include "Channel.hpp"
 
+// INVITE <nickname> <channel>
 void Server::handleInvite(const std::string& params, ClientData& client) {
   // パラメータの解析
   std::istringstream iss(params);
@@ -45,7 +46,7 @@ void Server::handleInvite(const std::string& params, ClientData& client) {
 void Channel::inviteMember(ClientData* client, ClientData* target) {
   invitees_.push_back(target);
   std::string message =
-      ":" + client->getNickname() + " INVITE " + target->getNickname() + " :" + ch_name_ + "\r\n";
+      ":" + client->getNickname() + " INVITE " + target->getNickname() + " :" + ch_name_;
   sendAll(message);
   Server::ft_send(message, *target);
 }

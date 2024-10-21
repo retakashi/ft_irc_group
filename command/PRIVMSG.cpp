@@ -25,8 +25,6 @@ void Server::handlePrivateMessage(const std::string param, ClientData &client)
         ft_send(errorMsg, client);
         return;
     }
-    std::cout << "message : " << message << std::endl;
-    
     if (targets[0] == '#')
         handle_privmsg_channel(targets, message, client);
     else 
@@ -83,7 +81,7 @@ void  Server::handle_privmsg_personal(std::string targets, std::string message, 
         }
 
         // 対象者へメッセージを送信する。messageについて RFC(1459, 2.3.1 BNF)
-        std::string recipientMessage = ":PRIVMSG " + target + " :" + message + "\r\n";
+        std::string recipientMessage = ":PRIVMSG " + client.getNickname() + " :" + message;
         ft_send(recipientMessage, *recipient);
     }
     return ;

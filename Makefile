@@ -1,4 +1,4 @@
-NAME = ircserv
+NAME = ircserv 
 CXX = c++
 CXXFLAGS = -std=c++98 -MMD -MP -pedantic -I include 
 SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp CmdResponse.cpp Send.cpp Receive.cpp CleanupUtils.cpp ParseCmd.cpp \

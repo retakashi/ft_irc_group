@@ -20,9 +20,9 @@ void Server::startServer() {
 
   // listenできるところまでsocketを設定
   initServerSocket(data.sockaddr);
-  data.timeout.tv_sec = 500;
+  data.timeout.tv_sec = 50000;
   data.timeout.tv_usec = 0;
-  while (true) {
+  while (g_sig_flg == false) {
     setSelectArgs(data.read_fds, data.max_sock);
     data.sel_ret = select(data.max_sock + 1, &data.read_fds, NULL, NULL, &data.timeout);
     if (data.sel_ret < 0) putFunctionError("select failed");
@@ -36,13 +36,11 @@ void Server::startServer() {
       std::list<ClientData>::iterator it = Server::clients_.begin();
       while(it != Server::clients_.end())
       {
+        if (it != Server::clients_.end() && FD_ISSET(it->getSocket(), &data.read_fds))
+          handleClientCommunication(*it);
         if (it->getSocket() == -1) {
           it = eraseClient(it);
-        } else if (it != Server::clients_.end() && FD_ISSET(it->getSocket(), &data.read_fds))
-        {
-          handleClientCommunication(*it);
-          it++;
-        }
+        } 
         else
           it++;
       }

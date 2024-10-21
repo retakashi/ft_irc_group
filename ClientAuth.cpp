@@ -20,14 +20,13 @@ void Server::authenticatedNewClient(ClientData& client) {
   std::vector<std::string> cmd_with_p;
   std::string cmd;
   std::string param;
-  ssize_t recv_size = ft_recv(client.getSocket());
-  if (recv_size <= 0) return;
-  std::string casted_msg(msg_, recv_size);
-  std::cout << "auth recv: " << casted_msg << std::endl;
-  if (casted_msg.find("\r\n") != std::string::npos)
-    splitCmds(casted_msg, cmd_with_p);
+  std::string msg = ft_recv(client.getSocket());
+  if (msg.empty()) return;
+  std::cout << "auth recv: " << msg << std::endl;
+  if (msg.find("\r\n") != std::string::npos)
+    splitCmds(msg, cmd_with_p);
   else
-    cmd_with_p.push_back(casted_msg);
+    cmd_with_p.push_back(msg);
   for (size_t i = 0; i < cmd_with_p.size(); i++) {
     splitCmdAndParam(cmd_with_p[i], cmd, param);
     if (cmd == "PASS")

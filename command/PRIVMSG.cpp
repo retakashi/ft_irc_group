@@ -15,7 +15,7 @@ void Server::handlePrivateMessage(const std::string param, ClientData &client) {
       return;
     }
   } else {
-    sendCmdResponce(ERR_NOTEXTTOSEND, client);
+    sendCmdResponce(ERR_NORECIPIENT, "PRIVMSG",client);
     return;
   }
   if (targets[0] == '#')
@@ -42,6 +42,7 @@ void Server::handle_privmsg_channel(std::string targets, std::string message, Cl
       std::string message_ch = ":" + client.getNickname() + " PRIVMSG " + target + " :" + message;
       channel->broadcastMessage(message_ch, &client);
     }
+    errorMsg = ":";
   }
 }
 
@@ -63,5 +64,6 @@ void Server::handle_privmsg_personal(std::string targets, std::string message, C
       std::string recipientMessage = ":PRIVMSG " + client.getNickname() + " :" + message;
       ft_send(recipientMessage, *recipient);
     }
+    errorMsg = ":";
   }
 }

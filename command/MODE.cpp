@@ -64,7 +64,7 @@ int Server::handleMode(std::string param, ClientData& client) {
     data.param_i = start;
   }
   std::string msg = ":" + client.getNickname() + "!" + client.getUsername() + " MODE " +
-                    ch->getChannelname() + " " + param;
+                    ch->getChannelname() + " :" + param;
   ch->sendAll(msg);
   return 0;
 }

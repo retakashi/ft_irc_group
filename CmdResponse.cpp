@@ -6,6 +6,9 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
   std::string msg;
   pre = ":" + servername;
   switch (code) {
+    case ERR_NOTEXTTOSEND:
+      msg = pre + " 412 " + nick + " :No text to send";
+      break;
     case ERR_NONICKNAMEGIVEN:
       msg = pre + " 431 " + nick + " :No nickname given";
       break;
@@ -48,6 +51,9 @@ std::string createCmdRespMsg(const std::string& servername, const std::string& n
       break;
     case ERR_TOOMANYCHANNELS:
       msg = pre + " 405 " + nick + " " + str + " :You have joined too many channels";
+      break;
+    case ERR_NORECIPIENT:
+      msg = pre + " 411 " + nick + " :No recipient given (" + str + ")";
       break;
     case ERR_UNKNOWNCOMMAND:
       msg = pre + " 421 " + nick + " " + str + " :Unknown command";

@@ -45,13 +45,13 @@ void Server::handleKick(const std::string& params, ClientData& client) {
 }
 
 void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) {
-  std::string partMessage = ":" + target->getNickname() + " PART " + this->getChannelname() +
+  std::string partMessage = ":" + target->getNickname() + "!" + target->getUsername() + "@127.0.0.1" + " PART " + this->getChannelname() +
                             " :Kicked by " + client->getNickname();
   Server::ft_send(partMessage, *target);
 
   if (this->CountMembers() < 1) return;
   // その他のユーザの処理
-  std::string message = ":" + client->getNickname() + " KICK " + this->getChannelname() + " " +
+  std::string message = ":" + client->getNickname() + "!" + client->getUsername() + "@127.0.0.1" + " KICK " + this->getChannelname() + " " +
                         target->getNickname() + " " + reason;
   sendAll(message);
   // 除外されるユーザーの処理
@@ -60,3 +60,23 @@ void Channel::kickMember(ClientData* client, ClientData* target, const std::stri
   else if (isOperator(target))
     removeOperator(target);
 }
+
+// void Channel::kickMember(ClientData* client, ClientData* target, const std::string& reason) {
+//   // キックされるクライアントにKICKメッセージを送信
+//   std::string kickMessage = ":" + client->getNickname() + "!" + client->getUsername() + "@localhost" +
+//                             " KICK " + this->getChannelname() + " " + target->getNickname() + " :" + reason;
+//   Server::ft_send(kickMessage, *target);
+  
+//   // 除外されるユーザーの処理
+//   if (isMember(target))
+//     removeMember(target);
+//   else if (isOperator(target))
+//     removeOperator(target);
+
+//   // KICKされたユーザーを全クライアントに通知
+//   sendAll(kickMessage);
+
+//   // メンバーが1人以下の時でもKICKメッセージは送信されているので、ここで処理を終える
+//   if (this->CountMembers() < 1) return;
+
+// }

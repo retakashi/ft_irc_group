@@ -9,28 +9,33 @@ void Server::handleList(const std::string& params, ClientData& client) {
     std::string channelName;
     iss >> channelName;
 
-    // std::string listStart = ":" + servername_ + " 321 " + client.getNickname() + " Channel :Users";
-    // ft_send(listStart, client);
-
     if (channelName.empty()) {
         for (std::map<std::string, Channel*>::iterator it = channels_.begin(); it != channels_.end(); ++it) {
             Channel* channel = it->second;
-            std::string channelInfo =  ":server 322 " + client.getNickname() + " " + channel->getChannelname() + " " + std::to_string(channel->CountMembers()) + " :" + channel->getTopic();
-            // std::string channelInfo = ":" + servername_ + " 322 " + client.getNickname() + " " + channel->getChannelname() + " " + std::to_string(channel->getMembers().size()+ 1) + " :" + channel->getTopic() + "\r\n";
+
+            // チャンネルメンバー数を文字列に変換
+            std::stringstream ss;
+            ss << channel->CountMembers();  // チャンネルのメンバー数をストリームに出力
+
+            // チャンネル情報の作成
+            std::string channelInfo = ":server 322 " + client.getNickname() + " " + channel->getChannelname() + " " + ss.str() + " :" + channel->getTopic();
             ft_send(channelInfo, client);
         }
     } else {
         Channel* channel = getChannelByName(channelName);
         if (channel) {
-            std::string channelInfo =  ":server 322 " + client.getNickname() + " " + channel->getChannelname() + " " + std::to_string(channel->CountMembers()) + " :" + channel->getTopic();
-            // std::string channelInfo = ":" + servername_ + " 322 " + client.getNickname() + " " + channel->getChannelname() + " " + std::to_string(channel->getMembers().size() + 1) + " :" + channel->getTopic() + "\r\n";
+            std::stringstream ss;
+            ss << channel->CountMembers();  // チャンネルのメンバー数をストリームに出力
+
+            std::string channelInfo = ":server 322 " + client.getNickname() + " " + channel->getChannelname() + " " + ss.str() + " :" + channel->getTopic();
             ft_send(channelInfo, client);
         } else {
-            std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), ERR_NOSUCHCHANNEL,  channelName + " :No such channel");
+            std::string errorMsg = createCmdRespMsg(servername_, client.getNickname(), ERR_NOSUCHCHANNEL, channelName + " :No such channel");
             ft_send(errorMsg, client);
         }
     }
 
+    // リストの終わりメッセージを送信
     std::string listEnd = ":" + servername_ + " 323 " + client.getNickname() + " :End of /LIST";
     ft_send(listEnd, client);
 }

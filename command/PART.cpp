@@ -17,14 +17,25 @@ void Server::handlePart(const std::string& params, ClientData& client) {
     return;
   }
 
-  if (!channel->isMember(&client)) {
+  if (!channel->isMember(&client) && !channel->isOperator(&client)) {
     sendCmdResponce(ERR_NOTONCHANNEL, channelName, client);
     return;
   }
+  std::string partMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + getHostname() + " PART " + channelName;
+  channel->sendAll(partMsg);
+  if (channel->isMember(&client))
+    channel->removeMember(&client);
+  if (channel->isOperator(&client))
+    channel->removeOperator(&client);
 
-  std::string partMsg = ":" + client.getNickname() + "!" + client.getUsername() + "@" +
-                        getHostname() + " PART :" + channelName;
-  channel->broadcastMessage(partMsg, &client);
-  channel->removeMember(&client);
-  channel->broadcastMessage(client.getNickname() + " has left the channel.", &client);
+    // メンバーがいなくなった時の処理
+  if (channel->CountMembers() == 0) {
+    std::map<std::string, Channel*>::iterator it = channels_.find(channel->getChannelname());
+    if (it->second->CountMembers() == 0) {
+      std::cout << "Channel " << channel->getChannelname() << " has been deleted." << std::endl;
+      std::map<std::string, Channel*>::iterator erase_it = it;
+      delete it->second;
+      channels_.erase(erase_it);
+    }
+  }
 }

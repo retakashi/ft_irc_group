@@ -6,7 +6,6 @@ std::string Server::ft_recv(int socket) {
   while (true) {
     memset(msg_, 0, MAX_BUFSIZE);
     recv_size = recv(socket, msg_, MAX_BUFSIZE, 0);
-    std::cout << "recv ret: " << recv_size << std::endl;
     if (recv_size < 0) {
       perror("recv failed");
       return "";
@@ -20,7 +19,6 @@ std::string Server::ft_recv(int socket) {
     connect_msg_ += std::string(msg_, recv_size);
     if (connect_msg_.size() >= 2 && connect_msg_.substr(connect_msg_.size() - 2) == "\r\n") {
       connect_msg_.erase(connect_msg_.size() - 2);
-      std::cout << "recv CRLF: " << recv_size << " " << connect_msg_ << std::endl;
       recv_msg = connect_msg_;
       connect_msg_.clear();
       return recv_msg;

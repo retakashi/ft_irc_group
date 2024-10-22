@@ -7,7 +7,6 @@ void Server::handleCommands(ClientData& client) {
 
   std::string msg = ft_recv(client.getSocket());
   if (msg.empty()) return;
-  std::cout << "recv: " << msg << std::endl;
   if (msg.find("\r\n") != std::string::npos)
     splitCmds(msg, cmd_with_p);
   else
@@ -30,6 +29,10 @@ void Server::handleCommands(ClientData& client) {
       handleTopic(param, client);
     else if (cmd == "KICK")
       handleKick(param, client);
+    else if (cmd == "PART")
+      handlePart(param, client);
+    else if (cmd == "LIST")
+      handleList(param, client);
     else
       sendCmdResponce(ERR_UNKNOWNCOMMAND, cmd, client);
   }

@@ -32,14 +32,14 @@ class Channel {
   size_t getUserLimit() const;
   ClientData* getMemberByNickname(const std::string& nickname);
   ClientData* getOperatorByNickname(const std::string& nickname);
-  // Channel.cpp 他で使用なければMODE.cppに移すかも?
+  // setter
   void setInviteOnly(bool value);
   void setKey(const std::string& newkey);
   void setTopicRestricted(bool value);
   void setUserLimit(size_t limit);
   void setTopic(const std::string& topic);
   // JOIN.cpp
-  std::string getMembersList() const;  // add
+  std::string getMembersList() const;
   std::string createJoinMsg(const std::string& hostname, const ClientData& client);
   // MODE.cpp
   std::string getModeStatus();

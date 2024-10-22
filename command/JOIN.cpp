@@ -2,7 +2,7 @@
 #include "Server.hpp"
 
 /*
- JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ] / "0"
+ JOIN <channel> *( "," <channel> ) [ <key> *( "," <key> ) ]
   チャンネル名は200文字まで。それ以上はリサイズする。
 */
 void Server::handleJoin(const std::string& params, ClientData& client) {
@@ -23,7 +23,6 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
     Channel* channel = getChannelByName(ch_name);
     if (channel != NULL &&
         (channel->isMember(&client) == true || channel->isOperator(&client) == true)) {
-      // sendCmdResponce(ERR_USERONCHANNEL, channelName, client);
       return;
     }
     if (!channel) {

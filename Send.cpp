@@ -1,7 +1,6 @@
 #include "Server.hpp"
 
 void Server::ft_send(std::string msg, ClientData client) {
-  std::cout << "send: " << msg << std::endl;
   char casted_msg[MAX_BUFSIZE];
   ssize_t send_ret = 0;
   size_t send_size = 0;

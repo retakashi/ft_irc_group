@@ -22,7 +22,6 @@ void Server::authenticatedNewClient(ClientData& client) {
   std::string param;
   std::string msg = ft_recv(client.getSocket());
   if (msg.empty()) return;
-  std::cout << "auth recv: " << msg << std::endl;
   if (msg.find("\r\n") != std::string::npos)
     splitCmds(msg, cmd_with_p);
   else

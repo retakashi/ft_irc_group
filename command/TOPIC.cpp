@@ -30,7 +30,7 @@ int Server::handleTopic(std::string param, ClientData& client) {
   else
     ch->setTopic(param);
   msg = ":" + client.getNickname() + "!" + client.getUsername() + "@" + hostname_ + " TOPIC " +
-        ch_name + " " + ch->getTopic();
+        ch_name + " :" + ch->getTopic();
   ch->sendAll(msg);
   return 0;
 }

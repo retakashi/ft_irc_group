@@ -33,7 +33,7 @@ This project is about creating our own IRC server. We used an actual IRC client 
 - Sets the client's user information. Usually sent with the `NICK` command when connecting to a server.
 
 ### JOIN
-`JOIN <channel>`
+`JOIN <channel> [<key>]`
 - Joins the specified channel. Use the channel name in the format `#channel`.
 
 ### PRIVMSG

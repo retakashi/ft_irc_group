@@ -29,6 +29,8 @@ void Server::handleJoin(const std::string& params, ClientData& client) {
       channel = new Channel(ch_name);
       addChannel(ch_name, channel);
       channel->addOperator(&client);
+      if (key.empty() == false)
+        channel->setKey(key);
       ft_send(channel->createJoinMsg(getHostname(), client), client);
       return;
     }

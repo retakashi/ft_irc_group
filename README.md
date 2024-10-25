@@ -3,20 +3,14 @@
 <img width="1020" alt="ft_IRC_image" src="https://github.com/user-attachments/assets/458ed8cc-b41f-4ef6-b9cb-9ce3fb18cc45">
 
 ## Overview
+A simple reimplementation of IRC.
 
-This project is about creating our own IRC server. We used an actual IRC client to connect to our server and test it. IRC (Internet Relay Chat) is a protocol for real-time text messaging between internet-connected computers created in 1988. It is mainly used for group discussion in chat rooms called “channels” although it supports private messages between two users, data transfer, and various client-side commands.
-
-## Requirement
-- We have to develop an IRC server in C++ 98.
-- The server must be capable of handling multiple clients at the same time and never hang.
-- Only 1 poll() (or equivalent) can be used for handling all these operations (read, write, but also listen, and so forth).
-- An IRC client must be able to connect to your server without encountering any error.
-- Communication between client and server has to be done via TCP/IP (v4).
-- Using the IRC client with our server must be similar to using it with any official IRC server. However, we only have to implement the following features:
-　　- We must be able to authenticate, set a nickname, a username, join a channel, send and receive private messages using the IRC client.
-    - All the messages sent from one client to a channel have to be forwarded to every other client that joined the channel.
-    - We must have operators and regular users.
-    - Then, we have to implement the commands that are specific to operators.
+## Implementation Environment
+- **Programming Language**: C++98
+- **Operating Systems**: macOS, Ubuntu 22.04.4(Jammy)
+- **Compiler**:
+  - **macOS**: Apple Clang 15.0.0 (clang-1500.3.9.4), Target: arm64-apple-darwin23.6.0
+  - **Ubuntu**: GCC 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04)
 
 ## Command Usage
 
@@ -29,20 +23,20 @@ This project is about creating our own IRC server. We used an actual IRC client 
 - Sets or changes the client's nickname. The nickname is the user's identifier in IRC.
 
 ### USER
-`USER <username> <hostname> <servername> <realname>`
+`USER <username> <mode> <unused> <realname>`
 - Sets the client's user information. Usually sent with the `NICK` command when connecting to a server.
 
 ### JOIN
 `JOIN <channel> [<key>]`
 - Joins the specified channel. Use the channel name in the format `#channel`.
+- You can set a key when joining the channel.
 
 ### PRIVMSG
 `PRIVMSG <recipient> <message>`
-- Sends a message to the specified user or channel.
-
+- Sends a message to the specified user or channel. To specify multiple recipients, separate them with a period ('.').
 ### TOPIC
 `TOPIC <channel> [<topic>]`
-- Displays or sets the topic of the channel. To set the topic, specify `<topic>`. You must be a channel administrator to change the topic.
+- Displays or sets the topic of the channel. To set the topic, specify `<topic>`.
 
 ### INVITE
 `INVITE <nickname> <channel>`
@@ -53,8 +47,19 @@ This project is about creating our own IRC server. We used an actual IRC client 
 - Kick the specified user from the specified channel. Optionally, provide a reason with `<comment>`.
 
 ### MODE
-`MODE <channel|nickname> <flags>`
+`MODE <channel> <flags> [<flag's param>]`
 - Set the mode for the channel or user. Used to set administrative permissions and restrictions for the channel.
+ - o (Operator): Grants or removes operator status for a user, allowing them to manage the channel. This requires specifying a user as a parameter.
+
+ - t (Topic Protection): Allows only channel operators to change the channel topic. No additional parameters are required.
+
+ - k (Key): Sets a password for the channel, restricting access to users who know the key. The key (password) is required as a parameter.
+
+ - l (Limit): Sets a limit on the number of users who can join the channel. The maximum number of users is required as a parameter.
+
+ - i (Invite Only): Restricts the channel to an invite-only mode, allowing only invited users to join. No additional parameters are required.
+
+These flags are used to control access and moderation within an IRC channel.
 
 ### PART
 `PART <channel> [<message>]`
@@ -74,14 +79,19 @@ To start the Server, use:
 - port: The port number on which your IRC server will be listening to for incoming IRC connections.
 - password: The connection password. It will be needed by any IRC client that tries to connect to your server. 
 
-To connect to the server, you can use:
-`nc -c <IP ADDRESS> <PORT>`
+## ⚙️Connect IRC Client 
+To start chatting using the nc command, you can do the following:
+macOS:
+`nc -c <ip address> <port>`
+Ubuntu:
+`nc -C <ip address> <port>`
 - IP ADDRESS: Host IP address.
 - PORT: The PORT that the server listening on.
 
-To start irc cliet, you can use:
-`irssi -c 127.0.0.1 -n <nickname> -w <password>`
-You can also use an IRC Client e.g irssi, LimeChat...
+To connect to the Irssi client, you can do the following:
+`irssi`
+`/connect ft_irc <port> -n <nickname> -w <password>`
+
 
 ## Reference
 [Internet Relay Chat Protocol](https://datatracker.ietf.org/doc/html/rfc1459)

@@ -86,10 +86,10 @@ To start the Server, use:
 ## ⚙️Connect IRC Client 
 To start chatting using the nc command, you can do the following:
 macOS:
-`nc -c <ip address> <port>`
+`nc -c <IP ADDRESS> <PORT>`
 Ubuntu:
-`nc -C <ip address> <port>`
-- IP ADDRESS: Host IP address.
+`nc -C <IP ADDRESS> <PORT>`
+- IP ADDRESS : Host IP address.
 - PORT: The PORT that the server listening on.
 
 To connect to the Irssi client, you can do the following:

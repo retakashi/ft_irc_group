@@ -96,11 +96,13 @@ To start the Server, use:
 
 - To connect to the Irssi client, you can do the following:
 
-Modify the Irssi configuration file to conform to ft_irc specifications: `cp ft_irc_conf ~/.irssi/config`
+Modify the Irssi configuration file to conform to ft_irc specifications: 
+
+`cp ft_irc_conf ~/.irssi/config`
 
 Start Irssi: `irssi`
 
-in Irssi: `/connect ft_irc 4242 pass [<nickname>]`
+In Irssi: `/connect ft_irc 4242 pass [<nickname>]`
 
 
 ## Reference

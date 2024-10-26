@@ -77,7 +77,8 @@ To start the Server, use:
 `./ircserv <port> <password>`
 
 - port: The port number on which your IRC server will be listening to for incoming IRC connections.
-- password: The connection password. It will be needed by any IRC client that tries to connect to your server. 
+- password: The connection password. It will be needed by any IRC client that tries to connect to your server.
+- To connect to the Irssi client, set the port number to 4242 and the password to "pass." 
 
 ## ⚙️Connect IRC Client 
 To start chatting using the nc command, you can do the following:
@@ -89,9 +90,9 @@ Ubuntu:
 - PORT: The PORT that the server listening on.
 
 To connect to the Irssi client, you can do the following:
+`cp ft_irc_conf ~/.irssi/config`
 `irssi`
-`/connect ft_irc <port> -n <nickname> -w <password>`
-
+`/connect ft_irc 4242 pass [<nickname>]`
 
 ## Reference
 [Internet Relay Chat Protocol](https://datatracker.ietf.org/doc/html/rfc1459)
@@ -104,5 +105,3 @@ To connect to the Irssi client, you can do the following:
 [irssi](https://irssi.org/search/?q=user_name&check_keywords=yes&area=default#)
 
 [https://qiita.com/gu-chi/items/4ba1da7628603c2099e1#322-part-message](https://medium.com/@afatir.ahmedfatir/small-irc-server-ft-irc-42-network-7cee848de6f9)
-
-

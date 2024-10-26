@@ -84,7 +84,7 @@ To start the Server, use:
 - To connect to the Irssi client, set the port number to 4242 and the password to "pass." 
 
 ## ⚙️Connect IRC Client 
-To start chatting using the nc command, you can do the following:
+- To start chatting using the nc command, you can do the following:
 
 macOS:
 `nc -c <IP ADDRESS> <PORT>`
@@ -94,9 +94,12 @@ Ubuntu:
 - IP ADDRESS : Host IP address.
 - PORT: The PORT that the server listening on.
 
-To connect to the Irssi client, you can do the following:
+- To connect to the Irssi client, you can do the following:
+
 `cp ft_irc_conf ~/.irssi/config`
+
 `irssi`
+
 `/connect ft_irc 4242 pass [<nickname>]`
 
 ## Reference

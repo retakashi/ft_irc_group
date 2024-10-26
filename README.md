@@ -91,16 +91,17 @@ macOS:
 
 Ubuntu:
 `nc -C <IP ADDRESS> <PORT>`
-- IP ADDRESS : Host IP address.
-- PORT: The PORT that the server listening on.
+  - IP ADDRESS : Host IP address.
+  - PORT: The PORT that the server listening on.
 
 - To connect to the Irssi client, you can do the following:
+```
+cp ft_irc_conf ~/.irssi/config
 
-`cp ft_irc_conf ~/.irssi/config`
+irssi
 
-`irssi`
-
-`/connect ft_irc 4242 pass [<nickname>]`
+/connect ft_irc 4242 pass [<nickname>]
+```
 
 ## Reference
 [Internet Relay Chat Protocol](https://datatracker.ietf.org/doc/html/rfc1459)

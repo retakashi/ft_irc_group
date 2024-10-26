@@ -50,7 +50,7 @@ A simple reimplementation of IRC.
 `MODE <channel> <flags> [<flag's param>]`
 - Set the mode for the channel or user. Used to set administrative permissions and restrictions for the channel.
 - Flag Descriptions
-  - + and -:
+  - '+' and '-':
   Many flags use + to enable and - to disable a permission or restriction. For example, +o grants operator status, while -o removes it.
 
   - o (Operator): Grants or removes operator status for a user, allowing them to manage the channel. This requires specifying a user as a parameter.

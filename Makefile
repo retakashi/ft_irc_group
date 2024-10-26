@@ -4,7 +4,7 @@ CXXFLAGS = -std=c++98 -MMD -MP -pedantic -I include
 SRCS = Server.cpp Main.cpp ClientData.cpp ClientAuth.cpp CmdResponse.cpp Send.cpp Receive.cpp CleanupUtils.cpp ParseCmd.cpp \
 	   Commands.cpp NICK.cpp USER.cpp PASS.cpp MODE.cpp Channel.cpp JOIN.cpp TOPIC.cpp PRIVMSG.cpp KICK.cpp INVITE.cpp \
 	   LIST.cpp PART.cpp
-VPATH = ./command
+VPATH = ./sources ./sources/command
 DEPFILES = $(OBJS:%.o=%.d)
 OBJS = ${addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o)}
 OBJS_DIR = objs

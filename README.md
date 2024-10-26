@@ -95,13 +95,13 @@ To start the Server, use:
     - PORT: The PORT that the server listening on.
 
 - To connect to the Irssi client, you can do the following:
-``` bash
-cp ft_irc_conf ~/.irssi/config
 
-irssi
+Modify the Irssi configuration file to conform to ft_irc specifications: `cp ft_irc_conf ~/.irssi/config`
 
-/connect ft_irc 4242 pass [<nickname>]
-```
+Start Irssi: `irssi`
+
+in Irssi: `/connect ft_irc 4242 pass [<nickname>]`
+
 
 ## Reference
 [Internet Relay Chat Protocol](https://datatracker.ietf.org/doc/html/rfc1459)

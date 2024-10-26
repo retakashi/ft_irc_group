@@ -50,18 +50,18 @@ A simple reimplementation of IRC.
 `MODE <channel> <flags> [<flag's param>]`
 - Set the mode for the channel or user. Used to set administrative permissions and restrictions for the channel.
 - Flag Descriptions
- - + and -:
+  - + and -:
   Many flags use + to enable and - to disable a permission or restriction. For example, +o grants operator status, while -o removes it.
 
- - o (Operator): Grants or removes operator status for a user, allowing them to manage the channel. This requires specifying a user as a parameter.
+  - o (Operator): Grants or removes operator status for a user, allowing them to manage the channel. This requires specifying a user as a parameter.
 
- - t (Topic Protection): Allows only channel operators to change the channel topic. No additional parameters are required.
+  - t (Topic Protection): Allows only channel operators to change the channel topic. No additional parameters are required.
 
- - k (Key): Sets a password for the channel, restricting access to users who know the key. The key (password) is required as a parameter.
+  - k (Key): Sets a password for the channel, restricting access to users who know the key. The key (password) is required as a parameter.
 
- - l (Limit): Sets a limit on the number of users who can join the channel. The maximum number of users is required as a parameter.
+  - l (Limit): Sets a limit on the number of users who can join the channel. The maximum number of users is required as a parameter.
 
- - i (Invite Only): Restricts the channel to an invite-only mode, allowing only invited users to join. No additional parameters are required.
+  - i (Invite Only): Restricts the channel to an invite-only mode, allowing only invited users to join. No additional parameters are required.
 
 
 ### PART
